@@ -31,6 +31,7 @@ public class FirstPersonController : MonoBehaviour
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
+        characterController.enableOverlapRecovery = true; 
 
         // Setup azioni di input
         moveAction = InputSystem.actions.FindAction("Move");
@@ -85,6 +86,9 @@ public class FirstPersonController : MonoBehaviour
 
         // Muove il personaggio
         characterController.Move(movement * Time.deltaTime);
+        
+        // if (!characterController.isGrounded) 
+        //     hitNormal = Vector3.up; // Reset delle normali in aria
     }
 
     private void HandleLook()
@@ -101,8 +105,8 @@ public class FirstPersonController : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        // Salva la normale per calcolare la pendenza
-        hitNormal = hit.normal;
+        if (hitNormal.y > 0.1f)
+            hitNormal = hit.normal; // Ignora pareti verticali
 
         // Spinta oggetti fisici
         Rigidbody body = hit.collider.attachedRigidbody;

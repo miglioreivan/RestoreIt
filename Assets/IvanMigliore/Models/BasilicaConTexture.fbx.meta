@@ -1,0 +1,635 @@
+fileFormatVersion: 2
+guid: d9fe60bae5d0c214ab5aaf09d4d17f2b
+ModelImporter:
+  serializedVersion: 24200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Affresco1.001
+    second: {fileID: 2100000, guid: ec9c86ea44a977d488c098ae8623c8af, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Affresco5
+    second: {fileID: 2100000, guid: 6f00680b87c7b7c43a46004bb70f26ac, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Affresco5.002
+    second: {fileID: 2100000, guid: e61d47befee1b0f4c980675dae3ad197, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Affresco5.003
+    second: {fileID: 2100000, guid: 802c3c707b4127a40a469b121cab26b4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Affresco5.004
+    second: {fileID: 2100000, guid: 73c26d3aeb3b20b48bfdf588ddf5d821, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Affresco6
+    second: {fileID: 2100000, guid: b8aae47f7e59b1b40ade7b7115454550, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Affresco6.001
+    second: {fileID: 2100000, guid: 3b5f13b8c76820147a627546cdc71347, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Affresco6.002
+    second: {fileID: 2100000, guid: 1a181d53cd16e3f48a96a0051addfc5e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Affresco7
+    second: {fileID: 2100000, guid: d17081b6f1bfd9145b72cf00475c853a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Ancient golden tiles
+    second: {fileID: 2100000, guid: 413ca9bb36930b44fb42425ff7a46e7e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Colonna
+    second: {fileID: 2100000, guid: 20b3f8d39eccfcd4f8d3817278499620, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cornice
+    second: {fileID: 2100000, guid: d2e1dfc872d96ff47bdacaca4f4b7a24, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cornice.001
+    second: {fileID: 2100000, guid: 38ec525257064a44392cc0555309b4ca, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cornice.004
+    second: {fileID: 2100000, guid: e751f8b28c2672c4d900336c56e7c7ac, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cornice.005
+    second: {fileID: 2100000, guid: e3596c01403c49d4babdddd14021dbc7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cornice.006
+    second: {fileID: 2100000, guid: 809bc138b8ee8594b85621dc24c8ea51, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cornice.007
+    second: {fileID: 2100000, guid: 47d79f4ec1e746142996815ea652e55b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cornice.008
+    second: {fileID: 2100000, guid: 1fadcf11314fcac4091e47a13020d165, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cornice.010
+    second: {fileID: 2100000, guid: 53c3613cc0fd3af43af80799ab0850bd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Infisso
+    second: {fileID: 2100000, guid: 8aa99b699e551564abad62b07d621299, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: MiniTravi
+    second: {fileID: 2100000, guid: 673e24b3401555c4bbd649180cc380a3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Mura
+    second: {fileID: 2100000, guid: e568bdf2c97501948ab27d9871c7335c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: PavimentoPrimo
+    second: {fileID: 2100000, guid: 726dde8adbcf9fb428cb468de81a7d14, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: PavimentoTotale
+    second: {fileID: 2100000, guid: f845ff33d60e6ae4ea265db4585447be, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Purple marble - Calacatta Viola
+    second: {fileID: 2100000, guid: 8bd650b685b94e24c9eb198ee1421fc3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Ringhiera
+    second: {fileID: 2100000, guid: fe7f36a2bd7bad84aba1eb42c22558e0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Scala
+    second: {fileID: 2100000, guid: 54be3eada7902164b8847f68758b2043, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Supporti
+    second: {fileID: 2100000, guid: a7cedd496bea34f45be458654d74be2f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: SupportoCubo
+    second: {fileID: 2100000, guid: 52d1b59390555ac4cbb7d09244ece92a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: SupportoSotto
+    second: {fileID: 2100000, guid: 1c60de1c984074f4a95217c5ed837e87, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: SupportoTetti
+    second: {fileID: 2100000, guid: a12ed727106135a46832acdc4ecb6ca0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: SupportoTetto
+    second: {fileID: 2100000, guid: 32322a92e97470842b56aaf94620eb60, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Tetto
+    second: {fileID: 2100000, guid: 8cff3835cbf668e4589672758aeee9e6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Travi
+    second: {fileID: 2100000, guid: 7996e35c5b701eb48ba42139e3b8afbf, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Affresco1
+    second: {fileID: 2800000, guid: 647e5baa9eb577d4580e3a1aa6f8d831, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Affresco2
+    second: {fileID: 2800000, guid: 81d413a136fdfc140a34138517ace401, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Affresco3
+    second: {fileID: 2800000, guid: d7d629a1c21de434b94852db023ed650, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Affresco5
+    second: {fileID: 2800000, guid: e51d272023a8f3140baffc8a82070584, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: AffrescoNozze
+    second: {fileID: 2800000, guid: 2d8e5f2078aa8e9479c4d843cf934a60, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Colonna_BaseColor
+    second: {fileID: 2800000, guid: c7e6690a57ce2f44d80fce352b428f26, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Colonna_Metallic
+    second: {fileID: 2800000, guid: 627f23d2549337346b8f496528291550, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Colonna_Normal
+    second: {fileID: 2800000, guid: 3995844b7310a56458c77b393920523c, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Colonna_Roughness
+    second: {fileID: 2800000, guid: be3e14a3a03f3f24fa188bee2b17150b, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Infisso_BaseColor
+    second: {fileID: 2800000, guid: e3b388bfa80d5e54c88f3cb86ed475f9, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Infisso_Metallic
+    second: {fileID: 2800000, guid: 5fc2fd41b69f1af4ba908ee425a40814, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Infisso_Normal
+    second: {fileID: 2800000, guid: 498c52712dc42a84da93d2ca718efa81, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Infisso_Roughness
+    second: {fileID: 2800000, guid: 6f6dc7eca6b71bf49962348cad26a653, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: MB22-CalacattaViola-Minimale copia 21k
+    second: {fileID: 2800000, guid: 8d445518fe680d14c81582e1fbe6fe51, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Marble009_2K-PNG_Color1k
+    second: {fileID: 2800000, guid: 81969e72a12b41843b67402e44aa42b7, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: MiniTravi_BaseColor
+    second: {fileID: 2800000, guid: e66bf06f2e660ae468ba3856c8520e75, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: MiniTravi_Metallic
+    second: {fileID: 2800000, guid: 87afd9486e0d46843980b451d4f2d8a1, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: MiniTravi_Normal
+    second: {fileID: 2800000, guid: d67e3e95926db094cb3b8dcfbb33096c, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: MiniTravi_Roughness
+    second: {fileID: 2800000, guid: c25024a0f16868d4c98e7a6b37b5a185, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Mura_BaseColor
+    second: {fileID: 2800000, guid: 79916729b09b0944b8414e7c5a22d7c1, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Mura_Metallic
+    second: {fileID: 2800000, guid: 2ec3e1dff4d17fe43b8747709e8bae89, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Mura_Normal
+    second: {fileID: 2800000, guid: 14ba867e1fdb76b4e9e6c19a6de7cceb, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Mura_Roughness
+    second: {fileID: 2800000, guid: 94e5514acc64bab46804300594af8077, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Onyx010_2K-PNG_Color1k
+    second: {fileID: 2800000, guid: 135e3d3acf38fdc4eb5be2af95e99ff3, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PaesaggiOdissea
+    second: {fileID: 2800000, guid: 789076211509c974dad29bc2ffecf529, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PavimentoPrimo_BaseColor
+    second: {fileID: 2800000, guid: f77c7edd076737f4096091ad03babdb4, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PavimentoPrimo_Metallic
+    second: {fileID: 2800000, guid: 2a401b472c74ecb4082d200a6b4690ac, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PavimentoPrimo_Normal
+    second: {fileID: 2800000, guid: 527fa536a4b903d4e959f7a0f974ea18, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PavimentoPrimo_Roughness
+    second: {fileID: 2800000, guid: 1b98370dc47f3b7488a6d7dae6dbd7e6, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PavimentoTotale_BaseColor
+    second: {fileID: 2800000, guid: 6f73cc08a77c8ba4984bed396747d0e2, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PavimentoTotale_Metallic
+    second: {fileID: 2800000, guid: 258a0a1e49c518e419e4ee3921b39281, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PavimentoTotale_Normal
+    second: {fileID: 2800000, guid: 3460a36b26152384d907f6fdc001c0b2, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PavimentoTotale_Roughness
+    second: {fileID: 2800000, guid: c706aa02bb4fc51479118484ea4e673e, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Ringhiera_BaseColor
+    second: {fileID: 2800000, guid: 39470b5094d47354fb979e965b45ffbf, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Ringhiera_Metallic
+    second: {fileID: 2800000, guid: d19562d0b630d3e4ca645e6ee5aedc10, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Ringhiera_Normal
+    second: {fileID: 2800000, guid: 4aa74c908c97149478b3af17aee6c7d4, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Ringhiera_Roughness
+    second: {fileID: 2800000, guid: 4ffd7bae1dea28c418f045bed0736851, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Scala_BaseColor
+    second: {fileID: 2800000, guid: 0d9a31f705879524197636415b75419d, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Scala_Metallic
+    second: {fileID: 2800000, guid: 112b26659aed6f14b914c62fdefccdc4, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Scala_Normal
+    second: {fileID: 2800000, guid: e23642dce93f33c4b99adb43a8d2b303, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Scala_Roughness
+    second: {fileID: 2800000, guid: 1c40dc86eb3128c458a830d0c78f5c9d, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Supporti_BaseColor
+    second: {fileID: 2800000, guid: f1ed1e82a3e350a44a75b970b85bb692, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Supporti_Metallic
+    second: {fileID: 2800000, guid: 1c2b8d7fe8f96704c885038e2df7c81b, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Supporti_Normal
+    second: {fileID: 2800000, guid: 52e35e69b07b073478bd3cfebe332af9, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Supporti_Roughness
+    second: {fileID: 2800000, guid: 46f991ddff56e434c8180c14bc38a1bb, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoCubo_BaseColor
+    second: {fileID: 2800000, guid: 053389b7d5bcd7448a83a6aacf7334ee, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoCubo_Metallic
+    second: {fileID: 2800000, guid: 9f2669abdb5ff8947817af2d40a0e7f2, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoCubo_Normal
+    second: {fileID: 2800000, guid: 03fbc536273864743b361aa456d4434e, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoCubo_Roughness
+    second: {fileID: 2800000, guid: 3cc0160ca229b7644b4a3665124e66f5, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoSotto_BaseColor
+    second: {fileID: 2800000, guid: 75bd5b6f044879d428785f483f389f28, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoSotto_Metallic
+    second: {fileID: 2800000, guid: 7fbc9823d3964224a8d0e42cb5237e98, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoSotto_Normal
+    second: {fileID: 2800000, guid: ce4d9a70eab4da64abc87835371d770d, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoSotto_Roughness
+    second: {fileID: 2800000, guid: 948b0c7ff054d87418eb64d261d89ca6, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoTetti_BaseColor
+    second: {fileID: 2800000, guid: 5e194945ddda05745ab2d85df190ff49, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoTetti_Metallic
+    second: {fileID: 2800000, guid: ede30105cf5a7374f8f83c333da85467, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoTetti_Normal
+    second: {fileID: 2800000, guid: 25fff287c03dc1c429b751225ccbf830, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoTetti_Roughness
+    second: {fileID: 2800000, guid: 63db8d3bee8fdf24292e24b6d84ee63d, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoTetto_BaseColor
+    second: {fileID: 2800000, guid: f3a241261d8b1584390ec605b188a42a, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoTetto_Metallic
+    second: {fileID: 2800000, guid: 69cb1ce8376ad974e9e2f54efb237024, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoTetto_Normal
+    second: {fileID: 2800000, guid: 3feb4f3c24e198d45965aa8932c7b28c, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SupportoTetto_Roughness
+    second: {fileID: 2800000, guid: 611df43915158a444986efae618a6567, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Tetto_BaseColor
+    second: {fileID: 2800000, guid: 9a73f407c5001e44495dfda450862630, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Tetto_Metallic
+    second: {fileID: 2800000, guid: 62e4e2dc9862ec64caa7282ab8172ca3, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Tetto_Normal
+    second: {fileID: 2800000, guid: 37c0f408a6264f840b13d5b2a180ce0c, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Tetto_Roughness
+    second: {fileID: 2800000, guid: fdeb3b80b7f7d3843970c6399cc27da1, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Travi_BaseColor
+    second: {fileID: 2800000, guid: c3ddd63e2d745c64aa18b8f2d9e91f1b, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Travi_Metallic
+    second: {fileID: 2800000, guid: 386276d0a23520f42af47bfa5341ecd9, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Travi_Normal
+    second: {fileID: 2800000, guid: 56ae2852a3fc60a4184a5734a7fc91fe, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Travi_Roughness
+    second: {fileID: 2800000, guid: 61cee153a1171fa428f12dbfc54aa4a8, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ancient golden tiles diff1k
+    second: {fileID: 2800000, guid: 65d5c38a39c489b42843165a1e346443, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ancient golden tiles spec1k
+    second: {fileID: 2800000, guid: f10577f376aa1094fa029b20f4337cf9, type: 3}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.65
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 1
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 0.0064999997
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
