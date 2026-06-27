@@ -6,6 +6,7 @@ public class FirstPersonController : MonoBehaviour
     private InputAction moveAction;
     private InputAction lookAction;
     private InputAction sprintAction;
+    private InputAction interactAction;
 
     [Header("Impostazioni Movimento")]
     [SerializeField] private float walkSpeed = 3.0f;
@@ -22,11 +23,16 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float mouseSensitivity = 0.1f;
     [SerializeField] private float upDownRange = 80f;
     
+    [Header("Impostazioni Interazione")]
+    [SerializeField] private TMPro.TextMeshProUGUI interactionText;
+    [SerializeField] private float interactionRange = 3.0f;
+    [SerializeField] private LayerMask interactableLayer;
+    
     private CharacterController characterController;
     private float verticalRotation = 0f;
-
     private Vector3 hitNormal;
     private bool isSliding;
+    private GameObject currentInteractable;
     
     private void Start()
     {
@@ -37,6 +43,7 @@ public class FirstPersonController : MonoBehaviour
         moveAction = InputSystem.actions.FindAction("Move");
         lookAction = InputSystem.actions.FindAction("Look");
         sprintAction = InputSystem.actions.FindAction("Sprint");
+        interactAction = InputSystem.actions.FindAction("Interact");
         
         // Setup cursore
         Cursor.lockState = CursorLockMode.Locked;
@@ -47,8 +54,30 @@ public class FirstPersonController : MonoBehaviour
     {
         HandleMovement();
         HandleLook();
-    }
+        CheckForInteractable();
 
+        if (currentInteractable != null && interactAction.WasPressedThisFrame())
+        {
+            if (currentInteractable.TryGetComponent(out IInteractable interactableObject)) 
+                interactableObject.StartInteraction();
+        }
+    }
+    
+    private void CheckForInteractable()
+    {
+        Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, interactionRange, interactableLayer))
+        {
+            currentInteractable = hit.collider.gameObject;
+            interactionText.gameObject.SetActive(true);
+        } else
+        {
+            currentInteractable = null;
+            interactionText.gameObject.SetActive(false);
+        }
+    }
+    
     private void HandleMovement()
     {
         // Movimento orizzontale
