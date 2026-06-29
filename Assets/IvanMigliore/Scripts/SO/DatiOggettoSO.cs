@@ -13,6 +13,6 @@ public class DatiOggettoSO : ScriptableObject
     public virtual void EseguiInterazione()
     {
         Debug.Log($"Hai raccolto {nomeOggetto}!");
-        if(raccogliOggetto != null) raccogliOggetto.RaiseEvent();
+        if(raccogliOggetto) raccogliOggetto.RaiseEvent();
     }
 }

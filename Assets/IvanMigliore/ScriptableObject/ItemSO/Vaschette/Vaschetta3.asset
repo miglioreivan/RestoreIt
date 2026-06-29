@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c89389ad2ae1a7d4591fb88d26596178, type: 3}
-  m_Name: Cubo
+  m_Name: Vaschetta3
   m_EditorClassIdentifier: Assembly-CSharp::DatiOggettoSO
-  nomeOggetto: Cubo
+  nomeOggetto: 
   raccogliOggetto: {fileID: 11400000, guid: 704f7a5dd2bbf2d4386b4d40f8fa1883, type: 2}

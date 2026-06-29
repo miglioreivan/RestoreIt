@@ -1,0 +1,14 @@
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "NuovaMano", menuName = "ScriptableObjects/InventarioMano")]
+public class InventarioManoSO : ScriptableObject
+{
+    [Tooltip("L'oggetto raccolto dal giocatore")]
+    public DatiOggettoSO oggettoCorrente;
+    
+    [Tooltip("Il modello 3D fisico da spostare")]
+    public GameObject currentGO;
+    
+    [Tooltip("Il Transform della mano dove posizionare il modello")]
+    public Transform puntoMano; 
+}

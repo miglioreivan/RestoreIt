@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -28,12 +29,24 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float interactionRange = 3.0f;
     [SerializeField] private LayerMask interactableLayer;
     
+    [Header("Inventario")]
+    [SerializeField] private InventarioManoSO inventario;
+    [SerializeField] private Transform handTransform;
+    
     private CharacterController characterController;
     private float verticalRotation = 0f;
     private Vector3 hitNormal;
     private bool isSliding;
     private GameObject currentInteractable;
-    
+    private IInteractable currentInteractableScript;
+
+    private void Awake()
+    {
+        if(handTransform == null)
+            Debug.LogError("Hand Transform not found");
+        inventario.puntoMano = handTransform;
+    }
+
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
@@ -56,10 +69,10 @@ public class FirstPersonController : MonoBehaviour
         HandleLook();
         CheckForInteractable();
 
-        if (currentInteractable != null && interactAction.WasPressedThisFrame())
+        if (currentInteractable && interactAction.WasPressedThisFrame())
         {
-            if (currentInteractable.TryGetComponent(out IInteractable interactableObject)) 
-                interactableObject.StartInteraction();
+            if (currentInteractableScript != null &&  currentInteractableScript.canInteract()) 
+                currentInteractableScript.StartInteraction();
         }
     }
     
@@ -70,7 +83,13 @@ public class FirstPersonController : MonoBehaviour
         if (Physics.Raycast(ray, out hit, interactionRange, interactableLayer))
         {
             currentInteractable = hit.collider.gameObject;
-            interactionText.gameObject.SetActive(true);
+            
+            if (currentInteractable.TryGetComponent(out currentInteractableScript))
+            {
+                interactionText.SetText(currentInteractableScript.GetInteractionText());
+                interactionText.gameObject.SetActive(true);
+            }
+            
         } else
         {
             currentInteractable = null;
