@@ -15,11 +15,11 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
     {
         if (canInteract())
         {
-            return "[E] Raccogli" + datiOggetto.nomeOggetto;
+            return "[E] Raccogli " + datiOggetto.nomeOggetto;
         }
         else
         {
-            return "Hai già un oggetto in mnao!";
+            return "Hai già un oggetto in mano!";
         }
     }
     

@@ -32,7 +32,9 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
     public void StartInteraction()
     {
         if (manoGiocatore.oggettoCorrente == null) return;
-        if (onReleaseEvent == null) return;
+        
+        if (onReleaseEvent == null)
+            Debug.LogWarning($"[DropZone_Interaction] '{gameObject.name}': onReleaseEvent non assegnato nell'Inspector.");
         
         lastReleasedItem = manoGiocatore.currentGO;
         GameObject go = manoGiocatore.currentGO;
@@ -42,10 +44,15 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         go.transform.SetParent(puntoRelease, false);
         go.transform.localPosition = Vector3.zero;
         
-        onReleaseEvent.RaiseEvent();
+        if (go.TryGetComponent(out Collider objCollider))
+            objCollider.enabled = false;
         
-        if(eventsOnRelease != null)
+        if (TryGetComponent(out Collider dropZoneCollider))
+            dropZoneCollider.enabled = false;
+        
+        onReleaseEvent?.RaiseEvent();
+        
+        if (eventsOnRelease != null)
             eventsOnRelease.Invoke(lastReleasedItem);
-        enabled = false;
     }
 }

@@ -71,8 +71,11 @@ public class FirstPersonController : MonoBehaviour
 
         if (currentInteractable && interactAction.WasPressedThisFrame())
         {
-            if (currentInteractableScript != null &&  currentInteractableScript.canInteract()) 
+            if (currentInteractableScript != null && currentInteractableScript.canInteract())
+            {
                 currentInteractableScript.StartInteraction();
+                interactionText.gameObject.SetActive(false);
+            }
         }
     }
     
@@ -88,6 +91,13 @@ public class FirstPersonController : MonoBehaviour
             {
                 interactionText.SetText(currentInteractableScript.GetInteractionText());
                 interactionText.gameObject.SetActive(true);
+            }
+            else
+            {
+                // Safety: l'oggetto è sul layer interactable ma non implementa IInteractable.
+                // Evita che il testo rimanga bloccato a schermo con futuri cambi di scena.
+                currentInteractableScript = null;
+                interactionText.gameObject.SetActive(false);
             }
             
         } else
