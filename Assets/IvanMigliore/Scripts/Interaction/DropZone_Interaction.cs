@@ -9,11 +9,12 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
     [Header("Dati")]
     [SerializeField] private InventarioManoSO manoGiocatore;
     [SerializeField] private Transform puntoRelease;
-    
+    [SerializeField] private TavoloSO tavoloCorrente;
+
     [Header("Eventi")]
     [SerializeField] private VoidEventChannelSO onReleaseEvent;
     [SerializeField] private UnityEventDatiOggetto eventsOnRelease;
-    
+
     private GameObject lastReleasedItem;
 
     public bool canInteract()
@@ -23,35 +24,42 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
 
     public string GetInteractionText()
     {
-        if (canInteract()) 
+        if (canInteract())
             return "[E] Rilascia";
-        else 
+        else
             return "Non hai un oggetto da rilasciare.";
     }
-    
+
     public void StartInteraction()
     {
         if (manoGiocatore.oggettoCorrente == null) return;
-        
+
         if (onReleaseEvent == null)
             Debug.LogWarning($"[DropZone_Interaction] '{gameObject.name}': onReleaseEvent non assegnato nell'Inspector.");
-        
+
         lastReleasedItem = manoGiocatore.currentGO;
         GameObject go = manoGiocatore.currentGO;
+
+        if (tavoloCorrente != null && manoGiocatore.oggettoCorrente is VaschettaSO vaschetta)
+        {
+            tavoloCorrente.vaschettaGameObject = go;
+            tavoloCorrente.PosaVaschetta(vaschetta);
+        }
+
         manoGiocatore.oggettoCorrente = null;
         manoGiocatore.currentGO = null;
-        
+
         go.transform.SetParent(puntoRelease, false);
         go.transform.localPosition = Vector3.zero;
-        
+
         if (go.TryGetComponent(out Collider objCollider))
             objCollider.enabled = false;
-        
+
         if (TryGetComponent(out Collider dropZoneCollider))
             dropZoneCollider.enabled = false;
-        
+
         onReleaseEvent?.RaiseEvent();
-        
+
         if (eventsOnRelease != null)
             eventsOnRelease.Invoke(lastReleasedItem);
     }

@@ -7,12 +7,11 @@ public class DatiOggettoSO : ScriptableObject
 
     [Header("Comunicazione")]
     [Tooltip("Inserisci qui il Canale Eventi per notificare altri sistemi (es. UI)")]
-    [SerializeField]  private VoidEventChannelSO raccogliOggetto;
+    [SerializeField] private VoidEventChannelSO raccogliOggetto;
 
-    // La logica viene eseguita qui, mantenendo pulito l'oggetto fisico
     public virtual void EseguiInterazione()
     {
         Debug.Log($"Hai raccolto {nomeOggetto}!");
-        if(raccogliOggetto) raccogliOggetto.RaiseEvent();
+        if (raccogliOggetto) raccogliOggetto.RaiseEvent();
     }
 }

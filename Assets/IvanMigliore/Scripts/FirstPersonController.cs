@@ -12,7 +12,7 @@ public class FirstPersonController : MonoBehaviour
     [Header("Impostazioni Movimento")]
     [SerializeField] private float walkSpeed = 3.0f;
     [SerializeField] private float sprintSpeed = 10.0f;
-    [SerializeField] private float pushForce = 2.0f; 
+    [SerializeField] private float pushForce = 2.0f;
     [SerializeField] private float slideSpeed = 8.0f;
 
     [Header("Impostazioni Fisica")]
@@ -23,16 +23,16 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private float mouseSensitivity = 0.1f;
     [SerializeField] private float upDownRange = 80f;
-    
+
     [Header("Impostazioni Interazione")]
     [SerializeField] private TMPro.TextMeshProUGUI interactionText;
     [SerializeField] private float interactionRange = 3.0f;
     [SerializeField] private LayerMask interactableLayer;
-    
+
     [Header("Inventario")]
     [SerializeField] private InventarioManoSO inventario;
     [SerializeField] private Transform handTransform;
-    
+
     private CharacterController characterController;
     private float verticalRotation = 0f;
     private Vector3 hitNormal;
@@ -42,7 +42,7 @@ public class FirstPersonController : MonoBehaviour
 
     private void Awake()
     {
-        if(handTransform == null)
+        if (handTransform == null)
             Debug.LogError("Hand Transform not found");
         inventario.puntoMano = handTransform;
     }
@@ -50,15 +50,13 @@ public class FirstPersonController : MonoBehaviour
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
-        characterController.enableOverlapRecovery = true; 
+        characterController.enableOverlapRecovery = true;
 
-        // Setup azioni di input
         moveAction = InputSystem.actions.FindAction("Move");
         lookAction = InputSystem.actions.FindAction("Look");
         sprintAction = InputSystem.actions.FindAction("Sprint");
         interactAction = InputSystem.actions.FindAction("Interact");
-        
-        // Setup cursore
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -78,7 +76,7 @@ public class FirstPersonController : MonoBehaviour
             }
         }
     }
-    
+
     private void CheckForInteractable()
     {
         Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
@@ -86,7 +84,7 @@ public class FirstPersonController : MonoBehaviour
         if (Physics.Raycast(ray, out hit, interactionRange, interactableLayer))
         {
             currentInteractable = hit.collider.gameObject;
-            
+
             if (currentInteractable.TryGetComponent(out currentInteractableScript))
             {
                 interactionText.SetText(currentInteractableScript.GetInteractionText());
@@ -94,29 +92,25 @@ public class FirstPersonController : MonoBehaviour
             }
             else
             {
-                // Safety: l'oggetto è sul layer interactable ma non implementa IInteractable.
-                // Evita che il testo rimanga bloccato a schermo con futuri cambi di scena.
                 currentInteractableScript = null;
                 interactionText.gameObject.SetActive(false);
             }
-            
-        } else
+        }
+        else
         {
             currentInteractable = null;
             interactionText.gameObject.SetActive(false);
         }
     }
-    
+
     private void HandleMovement()
     {
-        // Movimento orizzontale
         Vector2 moveValue = moveAction.ReadValue<Vector2>();
         float currentSpeed = sprintAction.IsPressed() ? sprintSpeed : walkSpeed;
-        
+
         Vector3 movement = (transform.forward * moveValue.y) + (transform.right * moveValue.x);
         movement *= currentSpeed;
 
-        // Gestione pendenze e gravità
         if (characterController.isGrounded)
         {
             float slopeAngle = Vector3.Angle(Vector3.up, hitNormal);
@@ -124,38 +118,30 @@ public class FirstPersonController : MonoBehaviour
 
             if (isSliding)
             {
-                // Calcolo del vettore tangente alla discesa
                 Vector3 slopeHorizontalAxis = Vector3.Cross(Vector3.up, hitNormal);
                 Vector3 slideDirection = Vector3.Cross(slopeHorizontalAxis, hitNormal).normalized;
 
-                // Forza il movimento lungo la discesa
                 movement.x = slideDirection.x * slideSpeed;
                 movement.z = slideDirection.z * slideSpeed;
             }
             else if (verticalVelocity < 0)
             {
-                verticalVelocity = -2f; 
+                verticalVelocity = -2f;
             }
         }
 
-        // Applica gravità continua
         verticalVelocity += gravity * Time.deltaTime;
         movement.y = verticalVelocity;
 
-        // Muove il personaggio
         characterController.Move(movement * Time.deltaTime);
-        
-        // if (!characterController.isGrounded) 
-        //     hitNormal = Vector3.up; // Reset delle normali in aria
     }
 
     private void HandleLook()
     {
-        // Rotazione visuale
-        Vector2 lookValue = lookAction.ReadValue<Vector2>(); 
-        
+        Vector2 lookValue = lookAction.ReadValue<Vector2>();
+
         transform.Rotate(Vector3.up * (lookValue.x * mouseSensitivity));
-        
+
         verticalRotation -= lookValue.y * mouseSensitivity;
         verticalRotation = Mathf.Clamp(verticalRotation, -upDownRange, upDownRange);
         cameraTransform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
@@ -164,9 +150,8 @@ public class FirstPersonController : MonoBehaviour
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (hitNormal.y > 0.1f)
-            hitNormal = hit.normal; // Ignora pareti verticali
+            hitNormal = hit.normal;
 
-        // Spinta oggetti fisici
         Rigidbody body = hit.collider.attachedRigidbody;
         if (body != null && !body.isKinematic)
         {

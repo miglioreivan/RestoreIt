@@ -4,10 +4,14 @@ using System.Collections;
 public class RestoreManager : MonoBehaviour, IInteractable
 {
     [Header("Close-Up 3D")]
-    [SerializeField] private MonoBehaviour player; 
+    [SerializeField] private MonoBehaviour player;
     [SerializeField] private Transform target;
-    [SerializeField] private float transitionDuration = 1.5f;
+    [SerializeField] private float transitionDuration = 1.0f;
     [SerializeField] private GameObject canvas;
+
+    [SerializeField] private TavoloSO tavoloCorrente;
+    [SerializeField] private Transform targetAssemblaggio;
+    [SerializeField] private FaseRestauroSO faseAssemblaggio;
 
     private Camera playerCamera;
     private Vector3 startCameraPosition;
@@ -17,12 +21,47 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
     private void Awake()
     {
-        playerCamera = Camera.main; 
+        playerCamera = Camera.main;
+    }
+
+    private void Start()
+    {
+        if (TryGetComponent<Collider>(out var col))
+            col.enabled = (tavoloCorrente != null && tavoloCorrente.vaschettaCorrente != null);
+
+        if (tavoloCorrente != null)
+        {
+            tavoloCorrente.OnVaschettaPosata += OnVaschettaPosata;
+            tavoloCorrente.OnFaseCambiata += OnFaseCambiata;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (tavoloCorrente != null)
+        {
+            tavoloCorrente.OnVaschettaPosata -= OnVaschettaPosata;
+            tavoloCorrente.OnFaseCambiata -= OnFaseCambiata;
+        }
+    }
+
+    private void OnVaschettaPosata(VaschettaSO vaschetta)
+    {
+        if (TryGetComponent<Collider>(out var col))
+            col.enabled = (vaschetta != null);
+    }
+
+    private void OnFaseCambiata(FaseRestauroSO fase)
+    {
+        if (fase == faseAssemblaggio && targetAssemblaggio != null)
+        {
+            StartCoroutine(MoveCamera(targetAssemblaggio.position, targetAssemblaggio.rotation));
+        }
     }
 
     public bool canInteract()
     {
-        return !isRestoring; 
+        return !isRestoring;
     }
 
     public string GetInteractionText()
@@ -35,13 +74,9 @@ public class RestoreManager : MonoBehaviour, IInteractable
         if (!canInteract()) return;
 
         isRestoring = true;
-        
+
         if (player != null) player.enabled = false;
-        
-        TryGetComponent<Collider>(out var col);
-        col.enabled = false;
-        
-        
+        if (TryGetComponent<Collider>(out var col)) col.enabled = false;
 
         startCameraParent = playerCamera.transform.parent;
         startCameraPosition = playerCamera.transform.position;
@@ -67,13 +102,19 @@ public class RestoreManager : MonoBehaviour, IInteractable
         {
             playerCamera.transform.position = Vector3.Lerp(startPos, targetPos, elapsedTime / transitionDuration);
             playerCamera.transform.rotation = Quaternion.Lerp(startRot, targetRot, elapsedTime / transitionDuration);
-            
             elapsedTime += Time.deltaTime;
-            yield return null; 
+            yield return null;
         }
 
         playerCamera.transform.position = targetPos;
         playerCamera.transform.rotation = targetRot;
+
+        if (this.gameObject.TryGetComponent<StrumentoPulizia>(out var sp))
+        {
+            sp.CountVisiblePixel();
+            sp.SetMouseCursor();
+            sp.IniziaMinigame();
+        }
     }
 
     public void StopInteraction()
@@ -81,7 +122,13 @@ public class RestoreManager : MonoBehaviour, IInteractable
         canvas.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        
+
+        if (this.gameObject.TryGetComponent<StrumentoPulizia>(out var sp))
+        {
+            sp.TerminaMinigame();
+            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+        }
+
         StartCoroutine(MoveCameraBack());
     }
 
@@ -95,17 +142,18 @@ public class RestoreManager : MonoBehaviour, IInteractable
         {
             playerCamera.transform.position = Vector3.Lerp(currentPos, startCameraPosition, elapsedTime / transitionDuration);
             playerCamera.transform.rotation = Quaternion.Lerp(currentRot, startCameraRotation, elapsedTime / transitionDuration);
-            
             elapsedTime += Time.deltaTime;
-            yield return null; 
+            yield return null;
         }
 
         playerCamera.transform.SetParent(startCameraParent, true);
-        
+
         playerCamera.transform.position = startCameraPosition;
         playerCamera.transform.rotation = startCameraRotation;
 
         if (player != null) player.enabled = true;
+        if (TryGetComponent<Collider>(out var col)) col.enabled = true;
+
         isRestoring = false;
     }
 }

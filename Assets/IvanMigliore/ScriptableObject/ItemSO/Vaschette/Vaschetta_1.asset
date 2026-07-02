@@ -9,8 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c89389ad2ae1a7d4591fb88d26596178, type: 3}
-  m_Name: Vaschetta1
-  m_EditorClassIdentifier: Assembly-CSharp::DatiOggettoSO
-  nomeOggetto: 
+  m_Script: {fileID: 11500000, guid: 636b0b4935d6462478ab0578c88c806e, type: 3}
+  m_Name: Vaschetta_1
+  m_EditorClassIdentifier: Assembly-CSharp::VaschettaSO
+  nomeOggetto: Anfora2
   raccogliOggetto: {fileID: 11400000, guid: 704f7a5dd2bbf2d4386b4d40f8fa1883, type: 2}
+  prefabAnfora: {fileID: 8021613997145106471, guid: da0aa7f27e11f9746914835f031af774, type: 3}
