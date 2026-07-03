@@ -18,7 +18,7 @@ public class GestoreAssemblaggio : MonoBehaviour
 
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
-    [SerializeField] private FaseRestauroSO faseCheTriggeraAssemblaggio;
+    [SerializeField] private FaseRestauroSO triggerAssemblaggio;
     [SerializeField] private Camera cameraRestauro;
 
     [Header("Spawn Anfora Centrale")]
@@ -29,20 +29,24 @@ public class GestoreAssemblaggio : MonoBehaviour
     [SerializeField] private float snapAngle = 25f;
     [SerializeField] private float velocitaRotazione = 100f;
 
-    [Header("Impostazioni Pennello Colla")]
-    [SerializeField] private int rangePennelloColla = 10;
-    [SerializeField] private string nomeProprietaMascheraColla = "_MascheraColla";
-    [SerializeField] private string nomeProprietaCollaDipingibile = "_CollaDipingibile";
-    [SerializeField] private Color32 coloreGuidaColla = new Color32(255, 255, 255, 45);
-    [SerializeField] private Color32 coloreCollaApplicata = new Color32(245, 210, 60, 220);
-
     [Header("Eventi")]
     public UnityEvent onAssemblaggioCompletato;
+    
+    private int rangePennelloColla = 10;
+    private string nomeProprietaMascheraColla = "_mascheraColla";
+    private string nomeProprietaCollaDipingibile = "_Colla";
+
+    private enum StatoAssemblaggio
+    {
+        PosizionamentoPezzi,
+        IncollaggioBordi,
+        Completato
+    }
+    private StatoAssemblaggio statoCorrente = StatoAssemblaggio.PosizionamentoPezzi;
 
     private GameObject ghostAnfora;
     private List<PezzoInfo> listaPezzi = new List<PezzoInfo>();
     private bool isAssemblaggioActive = false;
-    private int currentPezzoIndex = 0;
 
     // Stato di Drag & Drop
     private PezzoInfo pezzoTrascinato;
@@ -57,21 +61,35 @@ public class GestoreAssemblaggio : MonoBehaviour
     private int totPixelCollaNecessari;
     private int pixelCollaDipinti;
     private float progressioneColla = 0f;
-    private bool isAreaGlued = false;
     private Texture2D mascheraCollaUnica;
     private int idProprietaMascheraColla;
     private int idProprietaCollaDipingibile;
+    private int idMostraTerra;
+    private int idMostraColla;
+    private int idMostraPittura;
 
     private void Awake()
     {
         idProprietaMascheraColla = Shader.PropertyToID(nomeProprietaMascheraColla);
         idProprietaCollaDipingibile = Shader.PropertyToID(nomeProprietaCollaDipingibile);
+        idMostraTerra = Shader.PropertyToID("_mostraTerra");
+        idMostraColla = Shader.PropertyToID("_mostraColla");
+        idMostraPittura = Shader.PropertyToID("_mostraPittura");
     }
 
     private void OnEnable()
     {
         if (tavoloCorrente != null)
+        {
             tavoloCorrente.OnFaseCambiata += OnFaseCambiata;
+
+            // Cattura immediatamente la fase se è già quella corretta all'abilitazione del GameObject
+            if (tavoloCorrente.faseCorrente == triggerAssemblaggio)
+            {
+                Debug.Log($"[GestoreAssemblaggio] Rilevata fase corretta '{triggerAssemblaggio.name}' all'abilitazione!");
+                IniziaAssemblaggio();
+            }
+        }
     }
 
     private void OnDisable()
@@ -82,7 +100,8 @@ public class GestoreAssemblaggio : MonoBehaviour
 
     private void OnFaseCambiata(FaseRestauroSO fase)
     {
-        if (fase != faseCheTriggeraAssemblaggio)
+        Debug.Log($"[GestoreAssemblaggio] OnFaseCambiata: fase cambiata a = {(fase != null ? fase.name : "null")}, fase attesa = {(triggerAssemblaggio != null ? triggerAssemblaggio.name : "null")}");
+        if (fase != triggerAssemblaggio)
         {
             TerminaAssemblaggio();
             return;
@@ -93,7 +112,14 @@ public class GestoreAssemblaggio : MonoBehaviour
 
     private void IniziaAssemblaggio()
     {
+        Debug.Log($"[GestoreAssemblaggio] IniziaAssemblaggio - vaschettaCorrente: {(tavoloCorrente.vaschettaCorrente != null ? tavoloCorrente.vaschettaCorrente.name : "null")}, vaschettaGameObject: {(tavoloCorrente.vaschettaGameObject != null ? tavoloCorrente.vaschettaGameObject.name : "null")}");
         if (tavoloCorrente.vaschettaCorrente == null || tavoloCorrente.vaschettaGameObject == null) return;
+
+        if (puntoSpawnAnfora == null)
+        {
+            Debug.LogError("[GestoreAssemblaggio] puntoSpawnAnfora non assegnato nell'Inspector!");
+            return;
+        }
 
         TerminaAssemblaggio();
 
@@ -125,6 +151,11 @@ public class GestoreAssemblaggio : MonoBehaviour
 
         // 2. Raccogli e configura i pezzi presenti nella vaschetta fisica
         GameObject prefabPezzi = tavoloCorrente.vaschettaCorrente.prefabPezzi;
+        if (prefabPezzi == null)
+        {
+            prefabPezzi = tavoloCorrente.vaschettaCorrente.prefabAnfora;
+            Debug.Log($"[GestoreAssemblaggio] prefabPezzi era NULL su '{tavoloCorrente.vaschettaCorrente.name}'. Uso come fallback prefabAnfora: '{(prefabPezzi != null ? prefabPezzi.name : "null")}'");
+        }
         GameObject vaschettaGO = tavoloCorrente.vaschettaGameObject;
 
         if (prefabPezzi != null && vaschettaGO != null)
@@ -136,11 +167,12 @@ public class GestoreAssemblaggio : MonoBehaviour
                 return;
             }
 
-            mascheraCollaUnica = config.mascheraCollaUnica;
-            if (mascheraCollaUnica != null)
-            {
-                ImpostaMascheraCollaSuMateriali(mascheraCollaUnica);
-            }
+            Debug.Log($"[GestoreAssemblaggio] ConfigurazioneVaschetta trovata. Pezzi ordinati nella vaschetta da posizionare: {config.pezziOrdinati.Count}");
+
+            mascheraCollaUnica = tavoloCorrente.vaschettaCorrente.mascheraCollaUnica != null 
+                ? tavoloCorrente.vaschettaCorrente.mascheraCollaUnica 
+                : config.mascheraCollaUnica;
+            ConfiguraMaterialiAnfora();
 
             foreach (var goPezzo in config.pezziOrdinati)
             {
@@ -162,27 +194,45 @@ public class GestoreAssemblaggio : MonoBehaviour
                     if (col == null)
                     {
                         col = goPezzo.AddComponent<MeshCollider>();
+                        Debug.Log($"[GestoreAssemblaggio] Aggiunto MeshCollider a '{goPezzo.name}'");
                     }
                     pezzo.collider = col;
 
                     listaPezzi.Add(pezzo);
+                    Debug.Log($"[GestoreAssemblaggio] Pezzo '{goPezzo.name}' caricato con successo. Posizione target locale: {pezzo.originalLocalPos}");
                 }
                 else
                 {
-                    Debug.LogWarning($"[GestoreAssemblaggio] Non è stato possibile trovare il pezzo '{goPezzo.name}' nel prefabPezzi.");
+                    Debug.LogWarning($"[GestoreAssemblaggio] Non è stato possibile trovare il pezzo '{goPezzo.name}' nel prefabPezzi/prefabAnfora '{prefabPezzi.name}'.");
                 }
             }
         }
+        else
+        {
+            Debug.LogError($"[GestoreAssemblaggio] Impossibile configurare i pezzi: prefabPezzi/prefabAnfora o vaschettaGO è NULL! prefabPezzi: {(prefabPezzi != null ? prefabPezzi.name : "null")}, vaschettaGO: {(vaschettaGO != null ? vaschettaGO.name : "null")}");
+        }
 
-        currentPezzoIndex = 0;
         isAssemblaggioActive = true;
+        statoCorrente = StatoAssemblaggio.PosizionamentoPezzi;
 
         if (mascheraCollaUnica != null)
         {
-            InizializzaMappaCollaUnica(mascheraCollaUnica);
-        }
+            int w = mascheraCollaUnica.width;
+            int h = mascheraCollaUnica.height;
 
-        AggiornaPezzoAttivo();
+            collaTextureInstance = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            coloreTextureColla = new Color32[w * h];
+
+            for (int i = 0; i < coloreTextureColla.Length; i++)
+            {
+                coloreTextureColla[i] = new Color32(0, 0, 0, 0);
+            }
+
+            collaTextureInstance.SetPixels32(coloreTextureColla);
+            collaTextureInstance.Apply();
+
+            SincronizzaTextureColla(collaTextureInstance);
+        }
     }
 
     private void TerminaAssemblaggio()
@@ -198,6 +248,7 @@ public class GestoreAssemblaggio : MonoBehaviour
         }
 
         listaPezzi.Clear();
+        statoCorrente = StatoAssemblaggio.PosizionamentoPezzi;
     }
 
     private void Update()
@@ -234,55 +285,64 @@ public class GestoreAssemblaggio : MonoBehaviour
         bool isLeftPressed = Mouse.current.leftButton.isPressed;
         Vector2 mousePos = Mouse.current.position.ReadValue();
 
-        if (currentPezzoIndex >= listaPezzi.Count) return;
-        PezzoInfo activePezzo = listaPezzi[currentPezzoIndex];
-
-        if (isLeftPressed)
+        if (statoCorrente == StatoAssemblaggio.PosizionamentoPezzi)
         {
-            if (pezzoTrascinato == null)
+            if (isLeftPressed)
             {
-                Ray ray = cameraRestauro.ScreenPointToRay(mousePos);
-                if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
+                if (pezzoTrascinato == null)
                 {
-                    if (hit.collider.gameObject == activePezzo.gameObject)
+                    Ray ray = cameraRestauro.ScreenPointToRay(mousePos);
+                    if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
                     {
-                        if (currentPezzoIndex == 0 || isAreaGlued)
+                        Debug.Log($"[GestoreAssemblaggio] Click rilevato su '{hit.collider.gameObject.name}' (Parent: '{hit.collider.transform.parent?.name ?? "Nessuno"}')");
+                        bool trovato = false;
+                        foreach (var pezzo in listaPezzi)
                         {
-                            pezzoTrascinato = activePezzo;
-                            dragPlane = new Plane(-cameraRestauro.transform.forward, hit.point);
-                            dragOffset = pezzoTrascinato.gameObject.transform.position - hit.point;
+                            if (!pezzo.isSnapped && (hit.collider.gameObject == pezzo.gameObject || hit.collider.transform.IsChildOf(pezzo.gameObject.transform)))
+                            {
+                                pezzoTrascinato = pezzo;
+                                dragPlane = new Plane(-cameraRestauro.transform.forward, hit.point);
+                                dragOffset = pezzoTrascinato.gameObject.transform.position - hit.point;
+                                Debug.Log($"[GestoreAssemblaggio] Inizio drag del pezzo '{pezzoTrascinato.gameObject.name}'");
+                                trovato = true;
+                                break;
+                            }
                         }
-                        else
+                        if (!trovato)
                         {
-                            Debug.Log("[GestoreAssemblaggio] Devi prima applicare la colla sull'anfora!");
+                            Debug.LogWarning($"[GestoreAssemblaggio] Il collider colpito '{hit.collider.gameObject.name}' non corrisponde a nessun pezzo da assemblare (pezzi attesi: {listaPezzi.Count}).");
                         }
                     }
-                    else if (ghostAnfora != null && hit.collider.transform.IsChildOf(ghostAnfora.transform))
+                }
+                else
+                {
+                    Ray ray = cameraRestauro.ScreenPointToRay(mousePos);
+                    if (dragPlane.Raycast(ray, out float enter))
                     {
-                        if (currentPezzoIndex > 0 && !isAreaGlued)
-                        {
-                            PitturaColla(hit.textureCoord);
-                        }
+                        Vector3 targetPos = ray.GetPoint(enter) + dragOffset;
+                        pezzoTrascinato.gameObject.transform.position = targetPos;
+
+                        VerificaSnap(pezzoTrascinato);
                     }
                 }
             }
             else
             {
-                Ray ray = cameraRestauro.ScreenPointToRay(mousePos);
-                if (dragPlane.Raycast(ray, out float enter))
-                {
-                    Vector3 targetPos = ray.GetPoint(enter) + dragOffset;
-                    pezzoTrascinato.gameObject.transform.position = targetPos;
-
-                    VerificaSnap(pezzoTrascinato);
-                }
+                pezzoTrascinato = null;
             }
         }
-        else
+        else if (statoCorrente == StatoAssemblaggio.IncollaggioBordi)
         {
-            if (pezzoTrascinato != null)
+            if (isLeftPressed)
             {
-                pezzoTrascinato = null;
+                Ray ray = cameraRestauro.ScreenPointToRay(mousePos);
+                if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
+                {
+                    if (ghostAnfora != null && hit.collider.transform.IsChildOf(ghostAnfora.transform))
+                    {
+                        PitturaColla(hit.textureCoord);
+                    }
+                }
             }
         }
     }
@@ -317,7 +377,7 @@ public class GestoreAssemblaggio : MonoBehaviour
                             pixelCollaMappati[indice] = true;
                             pixelCollaDipinti++;
                             textureModificata = true;
-                            coloreTextureColla[indice] = coloreCollaApplicata;
+                            coloreTextureColla[indice] = new Color32(255, 255, 255, 255);
                         }
                     }
                 }
@@ -335,102 +395,53 @@ public class GestoreAssemblaggio : MonoBehaviour
                 float rapporto = (float)pixelCollaDipinti / totPixelCollaNecessari;
                 progressioneColla = Mathf.Clamp01(rapporto);
 
-                if (progressioneColla >= 0.90f && !isAreaGlued)
+                if (progressioneColla >= 0.90f)
                 {
-                    isAreaGlued = true;
-                    Debug.Log("[GestoreAssemblaggio] Area incollata! Ora puoi posizionare il pezzo.");
+                    ControllaCompletamento();
                 }
             }
         }
     }
 
-    private void InizializzaMappaCollaUnica(Texture2D maschera)
+
+    private void IniziaFaseIncollaggioFinale()
     {
-        int width = maschera.width;
-        int height = maschera.height;
-
-        collaTextureInstance = new Texture2D(width, height, TextureFormat.RGBA32, false);
-        coloreTextureColla = new Color32[width * height];
-
-        for (int i = 0; i < coloreTextureColla.Length; i++)
+        if (mascheraCollaUnica == null)
         {
-            coloreTextureColla[i] = new Color32(0, 0, 0, 0);
-        }
-
-        collaTextureInstance.SetPixels32(coloreTextureColla);
-        collaTextureInstance.Apply();
-
-        SincronizzaTextureColla(collaTextureInstance);
-    }
-
-    private void AttivaGuidaCollaPerPezzo(PezzoInfo pezzo)
-    {
-        if (mascheraCollaUnica == null || collaTextureInstance == null) return;
-
-        MeshFilter mf = pezzo.gameObject.GetComponent<MeshFilter>();
-        if (mf == null || mf.sharedMesh == null)
-        {
-            isAreaGlued = true;
-            progressioneColla = 1f;
+            Debug.LogError("[GestoreAssemblaggio] Maschera colla unica non assegnata!");
+            ControllaCompletamento();
             return;
         }
 
-        Mesh mesh = mf.sharedMesh;
-        Vector2[] uvs = mesh.uv;
-        int[] triangles = mesh.triangles;
+        statoCorrente = StatoAssemblaggio.IncollaggioBordi;
+        Debug.Log("[GestoreAssemblaggio] Tutti i pezzi sono stati posizionati! Inizia la fase di incollaggio dei bordi.");
+
+        Texture2D mascheraLeggibile = CopiaTextureCompatibile(mascheraCollaUnica);
+        if (mascheraLeggibile == null)
+        {
+            Debug.LogError("[GestoreAssemblaggio] Impossibile creare una copia leggibile di mascheraCollaUnica!");
+            ControllaCompletamento();
+            return;
+        }
+
         int width = collaTextureInstance.width;
         int height = collaTextureInstance.height;
-
-        Color32[] pixelMaschera = mascheraCollaUnica.GetPixels32();
 
         pixelCollaNecessari = new bool[width * height];
         pixelCollaMappati = new bool[width * height];
         totPixelCollaNecessari = 0;
         pixelCollaDipinti = 0;
-        isAreaGlued = false;
         progressioneColla = 0f;
 
-        HashSet<int> pixelRilevati = new HashSet<int>();
+        Color32[] pixelMaschera = mascheraLeggibile.GetPixels32();
 
-        for (int i = 0; i < triangles.Length; i += 3)
+        for (int i = 0; i < pixelMaschera.Length; i++)
         {
-            Vector2 uvA = uvs[triangles[i]];
-            Vector2 uvB = uvs[triangles[i + 1]];
-            Vector2 uvC = uvs[triangles[i + 2]];
-
-            int minX = Mathf.FloorToInt(Mathf.Min(uvA.x, Mathf.Min(uvB.x, uvC.x)) * width);
-            int maxX = Mathf.CeilToInt(Mathf.Max(uvA.x, Mathf.Max(uvB.x, uvC.x)) * width);
-            int minY = Mathf.FloorToInt(Mathf.Min(uvA.y, Mathf.Min(uvB.y, uvC.y)) * height);
-            int maxY = Mathf.CeilToInt(Mathf.Max(uvA.y, Mathf.Max(uvB.y, uvC.y)) * height);
-
-            minX = Mathf.Clamp(minX, 0, width - 1);
-            maxX = Mathf.Clamp(maxX, 0, width - 1);
-            minY = Mathf.Clamp(minY, 0, height - 1);
-            maxY = Mathf.Clamp(maxY, 0, height - 1);
-
-            for (int x = minX; x <= maxX; x++)
+            coloreTextureColla[i] = new Color32(0, 0, 0, 0);
+            if (pixelMaschera[i].r > 128)
             {
-                for (int y = minY; y <= maxY; y++)
-                {
-                    int index = y * width + x;
-                    if (pixelRilevati.Contains(index)) continue;
-
-                    Vector2 p = new Vector2((float)x / width, (float)y / height);
-                    if (IsPointInTriangle(p, uvA, uvB, uvC))
-                    {
-                        pixelRilevati.Add(index);
-                        if (pixelMaschera[index].r > 128)
-                        {
-                            pixelCollaNecessari[index] = true;
-                            totPixelCollaNecessari++;
-
-                            if (coloreTextureColla[index].a == 0)
-                            {
-                                coloreTextureColla[index] = coloreGuidaColla;
-                            }
-                        }
-                    }
-                }
+                pixelCollaNecessari[i] = true;
+                totPixelCollaNecessari++;
             }
         }
 
@@ -438,27 +449,7 @@ public class GestoreAssemblaggio : MonoBehaviour
         collaTextureInstance.Apply();
         SincronizzaTextureColla(collaTextureInstance);
 
-        Debug.Log($"[GestoreAssemblaggio] Guida colla attivata per '{pezzo.gameObject.name}'. Pixel necessari: {totPixelCollaNecessari}");
-    }
-
-    private void PulisciGuidaDopoSnap()
-    {
-        if (collaTextureInstance == null) return;
-
-        for (int i = 0; i < coloreTextureColla.Length; i++)
-        {
-            if (coloreTextureColla[i].r == coloreGuidaColla.r &&
-                coloreTextureColla[i].g == coloreGuidaColla.g &&
-                coloreTextureColla[i].b == coloreGuidaColla.b &&
-                coloreTextureColla[i].a == coloreGuidaColla.a)
-            {
-                coloreTextureColla[i] = new Color32(0, 0, 0, 0);
-            }
-        }
-
-        collaTextureInstance.SetPixels32(coloreTextureColla);
-        collaTextureInstance.Apply();
-        SincronizzaTextureColla(collaTextureInstance);
+        Destroy(mascheraLeggibile);
     }
 
     private void RimuoviMappaColla()
@@ -494,9 +485,20 @@ public class GestoreAssemblaggio : MonoBehaviour
         }
     }
 
-    private void ImpostaMascheraCollaSuMateriali(Texture2D maskTexture)
+    private void ConfiguraMaterialiAnfora()
     {
         if (ghostAnfora == null) return;
+
+        Debug.Log("[GestoreAssemblaggio] ConfiguraMaterialiAnfora — SetGlobalFloat: _mostraTerra=0, _mostraColla=1, _mostraPittura=1");
+        Shader.SetGlobalFloat(idMostraTerra,   0f);
+        Shader.SetGlobalFloat(idMostraColla,   1f);
+        Shader.SetGlobalFloat(idMostraPittura, 1f);
+
+        if (mascheraCollaUnica == null)
+        {
+            Debug.LogWarning("[GestoreAssemblaggio] ConfiguraMaterialiAnfora — mascheraCollaUnica è NULL, skip SetTexture _mascheraColla");
+            return;
+        }
 
         foreach (var r in ghostAnfora.GetComponentsInChildren<Renderer>())
         {
@@ -506,15 +508,44 @@ public class GestoreAssemblaggio : MonoBehaviour
             {
                 if (mats[i] != null && mats[i].HasProperty(idProprietaMascheraColla))
                 {
-                    mats[i].SetTexture(idProprietaMascheraColla, maskTexture);
+                    mats[i].SetTexture(idProprietaMascheraColla, mascheraCollaUnica);
+                    Debug.Log($"[GestoreAssemblaggio] SetTexture '_mascheraColla' su renderer '{r.name}' mat[{i}]='{mats[i].name}' con texture '{mascheraCollaUnica.name}'");
                     modified = true;
                 }
             }
             if (modified)
-            {
                 r.materials = mats;
-            }
         }
+    }
+
+
+    private Texture2D CopiaTextureCompatibile(Texture2D sorgente)
+    {
+        if (sorgente == null) return null;
+
+        RenderTexture rt = RenderTexture.GetTemporary(
+            sorgente.width, 
+            sorgente.height, 
+            0, 
+            RenderTextureFormat.Default, 
+            RenderTextureReadWrite.Linear
+        );
+
+        Graphics.Blit(sorgente, rt);
+
+        RenderTexture precedenteActive = RenderTexture.active;
+        RenderTexture.active = rt;
+
+        Texture2D nuovaTexture = new Texture2D(sorgente.width, sorgente.height, TextureFormat.RGBA32, false);
+        nuovaTexture.name = sorgente.name + "_Leggibile";
+        
+        nuovaTexture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+        nuovaTexture.Apply();
+
+        RenderTexture.active = precedenteActive;
+        RenderTexture.ReleaseTemporary(rt);
+
+        return nuovaTexture;
     }
 
     private void VerificaSnap(PezzoInfo pezzo)
@@ -540,51 +571,34 @@ public class GestoreAssemblaggio : MonoBehaviour
                 pezzo.collider.enabled = false;
 
             pezzoTrascinato = null;
+            Debug.Log($"[GestoreAssemblaggio] Pezzo '{pezzo.gameObject.name}' posizionato correttamente!");
 
-            PulisciGuidaDopoSnap();
+            // Verifica se tutti i pezzi sono posizionati
+            bool tuttiPosizionati = true;
+            foreach (var p in listaPezzi)
+            {
+                if (!p.isSnapped)
+                {
+                    tuttiPosizionati = false;
+                    break;
+                }
+            }
 
-            currentPezzoIndex++;
-            AggiornaPezzoAttivo();
-
-            ControllaCompletamento();
-        }
-    }
-
-    private void AggiornaPezzoAttivo()
-    {
-        if (currentPezzoIndex >= listaPezzi.Count) return;
-
-        PezzoInfo activePezzo = listaPezzi[currentPezzoIndex];
-
-        if (currentPezzoIndex == 0)
-        {
-            isAreaGlued = true;
-            progressioneColla = 1f;
-            Debug.Log($"[GestoreAssemblaggio] Posiziona il primo pezzo '{activePezzo.gameObject.name}' direttamente (senza colla).");
-        }
-        else
-        {
-            AttivaGuidaCollaPerPezzo(activePezzo);
+            if (tuttiPosizionati)
+            {
+                IniziaFaseIncollaggioFinale();
+            }
         }
     }
 
     private void ControllaCompletamento()
     {
-        bool completato = true;
-        foreach (var pezzo in listaPezzi)
+        if (statoCorrente == StatoAssemblaggio.IncollaggioBordi && progressioneColla >= 0.90f)
         {
-            if (!pezzo.isSnapped)
-            {
-                completato = false;
-                break;
-            }
-        }
-
-        if (completato)
-        {
+            statoCorrente = StatoAssemblaggio.Completato;
             isAssemblaggioActive = false;
             RimuoviMappaColla();
-            Debug.Log("[GestoreAssemblaggio] Assemblaggio completato con successo!");
+            Debug.Log("[GestoreAssemblaggio] Assemblaggio e incollaggio completati con successo!");
             onAssemblaggioCompletato?.Invoke();
         }
     }
@@ -603,17 +617,5 @@ public class GestoreAssemblaggio : MonoBehaviour
             if (result != null) return result;
         }
         return null;
-    }
-
-    private bool IsPointInTriangle(Vector2 p, Vector2 a, Vector2 b, Vector2 c)
-    {
-        float s = (a.x - c.x) * (p.y - c.y) - (a.y - c.y) * (p.x - c.x);
-        float t = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
-
-        if ((s < 0) != (t < 0) && s != 0 && t != 0)
-            return false;
-
-        float d = (c.x - b.x) * (p.y - b.y) - (c.y - b.y) * (p.x - b.x);
-        return d == 0 || (d < 0) == (s + t <= 0);
     }
 }

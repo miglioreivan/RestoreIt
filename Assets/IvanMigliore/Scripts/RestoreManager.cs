@@ -9,6 +9,11 @@ public class RestoreManager : MonoBehaviour, IInteractable
     [SerializeField] private float transitionDuration = 1.0f;
     [SerializeField] private GameObject canvas;
 
+    [Header("Assegnazione Fasi")]
+    [SerializeField] private GameObject fasePuliziaGO;
+    [SerializeField] private GameObject faseAssemblaggioGO;
+
+    [Header("Configurazione Restauro")]
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private Transform targetAssemblaggio;
     [SerializeField] private FaseRestauroSO faseAssemblaggio;
@@ -21,23 +26,28 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
     private void Awake()
     {
+        Debug.Log("[RestoreManager] Awake");
         playerCamera = Camera.main;
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        if (TryGetComponent<Collider>(out var col))
-            col.enabled = (tavoloCorrente != null && tavoloCorrente.vaschettaCorrente != null);
-
+        Debug.Log("[RestoreManager] OnEnable");
         if (tavoloCorrente != null)
         {
             tavoloCorrente.OnVaschettaPosata += OnVaschettaPosata;
             tavoloCorrente.OnFaseCambiata += OnFaseCambiata;
+            Debug.Log("[RestoreManager] Sottoscritto agli eventi di tavoloCorrente.");
+        }
+        else
+        {
+            Debug.LogError("[RestoreManager] tavoloCorrente è NULL in OnEnable!");
         }
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
+        Debug.Log("[RestoreManager] OnDisable");
         if (tavoloCorrente != null)
         {
             tavoloCorrente.OnVaschettaPosata -= OnVaschettaPosata;
@@ -45,23 +55,92 @@ public class RestoreManager : MonoBehaviour, IInteractable
         }
     }
 
+    private void Start()
+    {
+        Debug.Log("[RestoreManager] Start");
+        
+        // Stampa la gerarchia completa a partire dal parent per capire esattamente cosa contiene il tavolo
+        Transform searchRoot = transform.parent != null ? transform.parent : transform;
+        Debug.Log($"=== DIAGNOSTICA GERARCHIA TAVOLO A PARTIRE DA '{searchRoot.name}' ===");
+        StampaGerarchiaEComponenti(searchRoot, 1);
+        Debug.Log("=================================================");
+
+        if (TryGetComponent<Collider>(out var col))
+        {
+            bool hasVaschetta = (tavoloCorrente != null && tavoloCorrente.vaschettaCorrente != null);
+            col.enabled = hasVaschetta;
+            Debug.Log($"[RestoreManager] Collider inizializzato. Enabled: {col.enabled} (ha vaschetta: {hasVaschetta})");
+        }
+        else
+        {
+            if (transform.parent != null && transform.parent.TryGetComponent<Collider>(out var parentCol))
+            {
+                bool hasVaschetta = (tavoloCorrente != null && tavoloCorrente.vaschettaCorrente != null);
+                parentCol.enabled = hasVaschetta;
+                Debug.Log($"[RestoreManager] Collider del parent '{transform.parent.name}' inizializzato. Enabled: {parentCol.enabled}");
+            }
+            else
+            {
+                Debug.LogWarning("[RestoreManager] Nessun Collider trovato né su RestoreManager né su TavoloLavoro!");
+            }
+        }
+
+        // Disattiva le fasi all'avvio del gioco
+        ImpostaStatoFasePulizia(false);
+        ImpostaStatoFaseAssemblaggio(false);
+    }
+
+    private void StampaGerarchiaEComponenti(Transform t, int livello)
+    {
+        string indent = new string('-', livello * 2) + " ";
+        foreach (Transform child in t)
+        {
+            Component[] components = child.GetComponents<Component>();
+            string compList = "";
+            foreach (var c in components)
+            {
+                if (c == null) compList += "[Component mancante/null] ";
+                else compList += $"[{c.GetType().Name}] ";
+            }
+            Debug.Log($"{indent} Figlio: '{child.name}' (Attivo: {child.gameObject.activeSelf}) -> Componenti: {compList}");
+            
+            StampaGerarchiaEComponenti(child, livello + 1);
+        }
+    }
+
     private void OnVaschettaPosata(VaschettaSO vaschetta)
     {
+        Debug.Log($"[RestoreManager] OnVaschettaPosata - Vaschetta posata: {(vaschetta != null ? vaschetta.name : "NULL")}");
+        
         if (TryGetComponent<Collider>(out var col))
+        {
             col.enabled = (vaschetta != null);
+            Debug.Log($"[RestoreManager] Collider del tavolo impostato a: {col.enabled}");
+        }
+        else if (transform.parent != null && transform.parent.TryGetComponent<Collider>(out var parentCol))
+        {
+            parentCol.enabled = (vaschetta != null);
+            Debug.Log($"[RestoreManager] Collider del parent '{transform.parent.name}' impostato a: {parentCol.enabled}");
+        }
     }
 
     private void OnFaseCambiata(FaseRestauroSO fase)
     {
+        Debug.Log($"[RestoreManager] OnFaseCambiata - Nuova fase: {(fase != null ? fase.name : "NULL")}");
         if (fase == faseAssemblaggio && targetAssemblaggio != null)
         {
-            StartCoroutine(MoveCamera(targetAssemblaggio.position, targetAssemblaggio.rotation));
+            ImpostaStatoFasePulizia(false);
+            ImpostaStatoFaseAssemblaggio(true);
+
+            StartCoroutine(TransitionCamera(targetAssemblaggio.position, targetAssemblaggio.rotation, null, false, false));
         }
     }
 
     public bool canInteract()
     {
-        return !isRestoring;
+        bool can = !isRestoring;
+        Debug.Log($"[RestoreManager] canInteract chiamato: {can} (isRestoring: {isRestoring})");
+        return can;
     }
 
     public string GetInteractionText()
@@ -71,12 +150,27 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
     public void StartInteraction()
     {
+        Debug.Log("[RestoreManager] StartInteraction richiesto.");
         if (!canInteract()) return;
 
         isRestoring = true;
 
-        if (player != null) player.enabled = false;
-        if (TryGetComponent<Collider>(out var col)) col.enabled = false;
+        if (player != null)
+        {
+            player.enabled = false;
+            Debug.Log("[RestoreManager] Disattivato script movimento player.");
+        }
+        
+        if (TryGetComponent<Collider>(out var col))
+        {
+            col.enabled = false;
+            Debug.Log("[RestoreManager] Disattivato collider tavolo durante interazione.");
+        }
+        else if (transform.parent != null && transform.parent.TryGetComponent<Collider>(out var parentCol))
+        {
+            parentCol.enabled = false;
+            Debug.Log("[RestoreManager] Disattivato collider parent tavolo durante interazione.");
+        }
 
         startCameraParent = playerCamera.transform.parent;
         startCameraPosition = playerCamera.transform.position;
@@ -89,11 +183,30 @@ public class RestoreManager : MonoBehaviour, IInteractable
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        StartCoroutine(MoveCamera(target.position, target.rotation));
+        Debug.Log("[RestoreManager] Attivo fase pulizia e disattivo fase assemblaggio.");
+        ImpostaStatoFasePulizia(true);
+        ImpostaStatoFaseAssemblaggio(false);
+
+        Debug.Log("[RestoreManager] Avvio coroutine transizione camera.");
+        StartCoroutine(TransitionCamera(target.position, target.rotation, null, true, false));
     }
 
-    private IEnumerator MoveCamera(Vector3 targetPos, Quaternion targetRot)
+    public void StopInteraction()
     {
+        Debug.Log("[RestoreManager] StopInteraction richiesto.");
+        canvas.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        ImpostaStatoFasePulizia(false);
+        ImpostaStatoFaseAssemblaggio(false);
+
+        StartCoroutine(TransitionCamera(startCameraPosition, startCameraRotation, startCameraParent, false, true));
+    }
+
+    private IEnumerator TransitionCamera(Vector3 targetPos, Quaternion targetRot, Transform parent, bool startCleaning, bool restorePlayer)
+    {
+        Debug.Log($"[RestoreManager] TransitionCamera avviata. startCleaning: {startCleaning}, restorePlayer: {restorePlayer}");
         float elapsedTime = 0f;
         Vector3 startPos = playerCamera.transform.position;
         Quaternion startRot = playerCamera.transform.rotation;
@@ -106,54 +219,107 @@ public class RestoreManager : MonoBehaviour, IInteractable
             yield return null;
         }
 
+        playerCamera.transform.SetParent(parent, true);
         playerCamera.transform.position = targetPos;
         playerCamera.transform.rotation = targetRot;
+        Debug.Log("[RestoreManager] TransitionCamera completata.");
 
-        if (this.gameObject.TryGetComponent<StrumentoPulizia>(out var sp))
+        if (startCleaning)
         {
-            sp.CountVisiblePixel();
-            sp.SetMouseCursor();
-            sp.IniziaMinigame();
+            StrumentoPulizia sp = null;
+            if (fasePuliziaGO != null)
+            {
+                sp = fasePuliziaGO.GetComponentInChildren<StrumentoPulizia>(true);
+            }
+            
+            if (sp == null)
+            {
+                Transform searchRoot = transform.parent != null ? transform.parent : transform;
+                sp = searchRoot.GetComponentInChildren<StrumentoPulizia>(true);
+            }
+
+            if (sp != null)
+            {
+                Debug.Log($"[RestoreManager] StrumentoPulizia trovato in '{sp.gameObject.name}'. Avvio il minigioco.");
+                sp.CountVisiblePixel();
+                sp.SetMouseCursor();
+                sp.IniziaMinigame();
+            }
+            else
+            {
+                Debug.LogError("[RestoreManager] ERRORE: StrumentoPulizia NON trovato!");
+            }
+        }
+
+        if (restorePlayer)
+        {
+            if (player != null) player.enabled = true;
+            
+            if (TryGetComponent<Collider>(out var col)) col.enabled = true;
+            else if (transform.parent != null && transform.parent.TryGetComponent<Collider>(out var parentCol)) parentCol.enabled = true;
+
+            isRestoring = false;
+            Debug.Log("[RestoreManager] Interazione terminata, ripristinato player.");
         }
     }
 
-    public void StopInteraction()
+    private void ImpostaStatoFasePulizia(bool attiva)
     {
-        canvas.SetActive(false);
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
-        if (this.gameObject.TryGetComponent<StrumentoPulizia>(out var sp))
+        if (fasePuliziaGO != null)
         {
-            sp.TerminaMinigame();
-            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            Debug.Log($"[RestoreManager] ImpostaStatoFasePulizia({attiva}) su GameObject da Inspector: '{fasePuliziaGO.name}'");
+            fasePuliziaGO.SetActive(attiva);
+            return;
         }
 
-        StartCoroutine(MoveCameraBack());
+        Transform searchRoot = transform.parent != null ? transform.parent : transform;
+        var sp = searchRoot.GetComponentInChildren<StrumentoPulizia>(true);
+        if (sp != null)
+        {
+            if (sp.gameObject != gameObject)
+            {
+                Debug.Log($"[RestoreManager] ImpostaStatoFasePulizia({attiva}) su GameObject '{sp.gameObject.name}' (Fallback)");
+                sp.gameObject.SetActive(attiva);
+            }
+            else
+            {
+                Debug.Log($"[RestoreManager] ImpostaStatoFasePulizia({attiva}) su script '{sp.name}' (Fallback)");
+                sp.enabled = attiva;
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[RestoreManager] ImpostaStatoFasePulizia({attiva}) - StrumentoPulizia non trovato sotto '{searchRoot.name}'!");
+        }
     }
 
-    private IEnumerator MoveCameraBack()
+    private void ImpostaStatoFaseAssemblaggio(bool attiva)
     {
-        float elapsedTime = 0f;
-        Vector3 currentPos = playerCamera.transform.position;
-        Quaternion currentRot = playerCamera.transform.rotation;
-
-        while (elapsedTime < transitionDuration)
+        if (faseAssemblaggioGO != null)
         {
-            playerCamera.transform.position = Vector3.Lerp(currentPos, startCameraPosition, elapsedTime / transitionDuration);
-            playerCamera.transform.rotation = Quaternion.Lerp(currentRot, startCameraRotation, elapsedTime / transitionDuration);
-            elapsedTime += Time.deltaTime;
-            yield return null;
+            Debug.Log($"[RestoreManager] ImpostaStatoFaseAssemblaggio({attiva}) su GameObject da Inspector: '{faseAssemblaggioGO.name}'");
+            faseAssemblaggioGO.SetActive(attiva);
+            return;
         }
 
-        playerCamera.transform.SetParent(startCameraParent, true);
-
-        playerCamera.transform.position = startCameraPosition;
-        playerCamera.transform.rotation = startCameraRotation;
-
-        if (player != null) player.enabled = true;
-        if (TryGetComponent<Collider>(out var col)) col.enabled = true;
-
-        isRestoring = false;
+        Transform searchRoot = transform.parent != null ? transform.parent : transform;
+        var ga = searchRoot.GetComponentInChildren<GestoreAssemblaggio>(true);
+        if (ga != null)
+        {
+            if (ga.gameObject != gameObject)
+            {
+                Debug.Log($"[RestoreManager] ImpostaStatoFaseAssemblaggio({attiva}) su GameObject '{ga.gameObject.name}' (Fallback)");
+                ga.gameObject.SetActive(attiva);
+            }
+            else
+            {
+                Debug.Log($"[RestoreManager] ImpostaStatoFaseAssemblaggio({attiva}) su script '{ga.name}' (Fallback)");
+                ga.enabled = attiva;
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[RestoreManager] ImpostaStatoFaseAssemblaggio({attiva}) - GestoreAssemblaggio non trovato sotto '{searchRoot.name}'!");
+        }
     }
 }

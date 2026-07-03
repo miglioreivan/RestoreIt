@@ -3928,6 +3928,60 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 61.419807, y: 24.631859, z: 48.066853}
   m_Center: {x: -2.9171689, y: 0.964272, z: 23.938566}
+--- !u!1 &754197737
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 754197738}
+  - component: {fileID: 754197739}
+  m_Layer: 3
+  m_Name: Assemblaggio
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &754197738
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 754197737}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 543450652999122850}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &754197739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 754197737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dc14cf53a8f81f4cb9ffe7617ebc896, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GestoreAssemblaggio
+  tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
+  triggerAssemblaggio: {fileID: 11400000, guid: a24be103dbbd85049820d5279daa7f3d, type: 2}
+  cameraRestauro: {fileID: 330585545}
+  puntoSpawnAnfora: {fileID: 1030087355}
+  snapDistance: 0.08
+  snapAngle: 25
+  velocitaRotazione: 100
+  onAssemblaggioCompletato:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &771938090 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2358260544546960407, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -5064,7 +5118,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1030087355}
-  - component: {fileID: 1030087356}
   m_Layer: 3
   m_Name: SpawnPoint
   m_TagString: Untagged
@@ -5087,24 +5140,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 543450652999122850}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1030087356
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1030087354}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3a415b6c6ea9154fbe6260a612106d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpawnRestauro
-  tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
-  faseCheTriggeraSpawn: {fileID: 11400000, guid: a24be103dbbd85049820d5279daa7f3d, type: 2}
-  puntoSpawn: {fileID: 1030087355}
-  onAnforaSpawnata:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1033766251 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9014876929354258262, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -6299,7 +6334,7 @@ MonoBehaviour:
   eventsOnRelease:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1000204085}
+      - m_Target: {fileID: 1312113177}
         m_TargetAssemblyTypeName: UnityEngine.BoxCollider, UnityEngine
         m_MethodName: set_enabled
         m_Mode: 6
@@ -6309,9 +6344,9 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 1
+          m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1000204085}
+      - m_Target: {fileID: 1643050455}
         m_TargetAssemblyTypeName: UnityEngine.BoxCollider, UnityEngine
         m_MethodName: set_enabled
         m_Mode: 6
@@ -8355,6 +8390,81 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -3130142160901300439, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
+--- !u!1 &1643050452
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1643050453}
+  - component: {fileID: 1643050455}
+  - component: {fileID: 1643050454}
+  m_Layer: 3
+  m_Name: RestoreManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1643050453
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1643050452}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.428, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 543450652999122850}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1643050454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1643050452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1984fa4add4f8548973eae330fc43bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RestoreManager
+  player: {fileID: 1411768318}
+  target: {fileID: 1044933714}
+  transitionDuration: 1
+  canvas: {fileID: 2042190477}
+  fasePuliziaGO: {fileID: 1764582472}
+  faseAssemblaggioGO: {fileID: 754197737}
+  tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
+  targetAssemblaggio: {fileID: 1403121574}
+  faseAssemblaggio: {fileID: 11400000, guid: a24be103dbbd85049820d5279daa7f3d, type: 2}
+--- !u!65 &1643050455
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1643050452}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 3.13, y: 1.03, z: 1.42}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1659433403 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -6856587476557069273, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -8586,105 +8696,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -7087727740324750392, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
---- !u!1 &1697571310
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1697571311}
-  - component: {fileID: 1697571313}
-  - component: {fileID: 1697571312}
-  - component: {fileID: 1697571314}
-  m_Layer: 3
-  m_Name: Restore
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1697571311
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1697571310}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.344, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 543450652999122850}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1697571312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1697571310}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1984fa4add4f8548973eae330fc43bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RestoreManager
-  player: {fileID: 1411768318}
-  target: {fileID: 1044933714}
-  transitionDuration: 1.5
-  canvas: {fileID: 2042190477}
-  tavoloCorrente: {fileID: 0}
-  targetAssemblaggio: {fileID: 0}
-  faseAssemblaggio: {fileID: 0}
---- !u!65 &1697571313
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1697571310}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 3, y: 0.85, z: 1.25}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1697571314
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1697571310}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a614abc62f02da64281e4383976e17ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StrumentoPulizia
-  cameraRestauro: {fileID: 330585545}
-  layerRestauro:
-    serializedVersion: 2
-    m_Bits: 64
-  mascheraSporcoOriginale: {fileID: 2800000, guid: 9c32551e3e9ba7d439120b167cf2a7d2, type: 3}
-  rangePaintbrush: 10
-  cursorTexture: {fileID: 2800000, guid: 432759a7dc019e349a7fb66d06fb4768, type: 3}
-  tavoloCorrente: {fileID: 0}
-  faseSuccessiva: {fileID: 0}
-  progression: 0
-  eventoPuliziaCompletata:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1706322120 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4667299546125974754, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -8992,6 +9003,87 @@ Transform:
   m_Children: []
   m_Father: {fileID: 330585546}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1764582472
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1764582473}
+  - component: {fileID: 1764582474}
+  m_Layer: 3
+  m_Name: Pulizia
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1764582473
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1764582472}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 543450652999122850}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1764582474
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1764582472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a614abc62f02da64281e4383976e17ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StrumentoPulizia
+  cameraRestauro: {fileID: 330585545}
+  layerRestauro:
+    serializedVersion: 2
+    m_Bits: 64
+  mascheraSporcoOriginale: {fileID: 2800000, guid: f0642b4ccc4d3af4a9b257f8433a68b7, type: 3}
+  rangePaintbrush: 10
+  cursorTexture: {fileID: 2800000, guid: 432759a7dc019e349a7fb66d06fb4768, type: 3}
+  tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
+  faseSuccessiva: {fileID: 11400000, guid: a24be103dbbd85049820d5279daa7f3d, type: 2}
+  progression: 0
+  eventoPuliziaCompletata:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 754197737}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1000204085}
+        m_TargetAssemblyTypeName: UnityEngine.BoxCollider, UnityEngine
+        m_MethodName: set_enabled
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1773377819 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7347811561771511250, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -10339,7 +10431,7 @@ GameObject:
   - component: {fileID: 5226357498917305822}
   - component: {fileID: 6531388612030476122}
   - component: {fileID: 8498549205872619358}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: amphora03_cell.003
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10413,8 +10505,10 @@ Transform:
   - {fileID: 124095479}
   - {fileID: 1044933714}
   - {fileID: 1403121574}
-  - {fileID: 1697571311}
   - {fileID: 1030087355}
+  - {fileID: 1643050453}
+  - {fileID: 1764582473}
+  - {fileID: 754197738}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!4 &543450653014930785
@@ -10506,9 +10600,6 @@ GameObject:
   m_Component:
   - component: {fileID: 543450652999122850}
   - component: {fileID: 1000204085}
-  - component: {fileID: 919132148790142235}
-  - component: {fileID: 919132148790142233}
-  - component: {fileID: 919132148790142234}
   m_Layer: 3
   m_Name: TavoloLavoro
   m_TagString: Untagged
@@ -10516,68 +10607,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &919132148790142233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 919132148790142232}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a614abc62f02da64281e4383976e17ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StrumentoPulizia
-  cameraRestauro: {fileID: 330585545}
-  layerRestauro:
-    serializedVersion: 2
-    m_Bits: 64
-  mascheraSporcoOriginale: {fileID: 2800000, guid: 9c32551e3e9ba7d439120b167cf2a7d2, type: 3}
-  rangePaintbrush: 5
-  cursorTexture: {fileID: 2800000, guid: 432759a7dc019e349a7fb66d06fb4768, type: 3}
-  tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
-  faseSuccessiva: {fileID: 11400000, guid: a24be103dbbd85049820d5279daa7f3d, type: 2}
-  progression: 0
-  eventoPuliziaCompletata:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &919132148790142234
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 919132148790142232}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3a415b6c6ea9154fbe6260a612106d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpawnRestauro
-  tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
-  faseCheTriggeraSpawn: {fileID: 11400000, guid: a24be103dbbd85049820d5279daa7f3d, type: 2}
-  puntoSpawn: {fileID: 1030087355}
-  onAnforaSpawnata:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &919132148790142235
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 919132148790142232}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1984fa4add4f8548973eae330fc43bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RestoreManager
-  player: {fileID: 1411768318}
-  target: {fileID: 1044933714}
-  transitionDuration: 1
-  canvas: {fileID: 2042190477}
-  tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
-  targetAssemblaggio: {fileID: 1403121574}
-  faseAssemblaggio: {fileID: 11400000, guid: a24be103dbbd85049820d5279daa7f3d, type: 2}
 --- !u!1 &919132148808085467
 GameObject:
   m_ObjectHideFlags: 0
@@ -11112,7 +11141,7 @@ GameObject:
   - component: {fileID: 3445444821767079397}
   - component: {fileID: 6206510950818398868}
   - component: {fileID: 6206510950818398869}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: amphora03_cell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11226,7 +11255,7 @@ GameObject:
   - component: {fileID: 102274179567387980}
   - component: {fileID: 9117516106839213722}
   - component: {fileID: 9117516106839213723}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: amphora02_cell.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11377,7 +11406,7 @@ GameObject:
   - component: {fileID: 2584994325827919756}
   - component: {fileID: 4230369400500546686}
   - component: {fileID: 4342949986419592836}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: amphora02_cell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11418,7 +11447,7 @@ GameObject:
   - component: {fileID: 8001144327192790512}
   - component: {fileID: 2290593820239449068}
   - component: {fileID: 8001144327192790513}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: amphora03_cell.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11573,7 +11602,7 @@ GameObject:
   - component: {fileID: 3434176883070389571}
   - component: {fileID: 2432445615650700396}
   - component: {fileID: 6120353011121164055}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: amphora02_cell.002
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11615,7 +11644,7 @@ GameObject:
   - component: {fileID: 6324015544682503753}
   - component: {fileID: 4570484461609878653}
   - component: {fileID: 6324015544682503754}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: amphora03_cell.002
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11983,7 +12012,7 @@ GameObject:
   - component: {fileID: 7045056430166792096}
   - component: {fileID: 8932915223032896872}
   - component: {fileID: 8932915223032896873}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: amphora02_cell.003
   m_TagString: Untagged
   m_Icon: {fileID: 0}

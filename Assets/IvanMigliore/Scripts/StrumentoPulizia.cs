@@ -30,29 +30,86 @@ public class StrumentoPulizia : MonoBehaviour
     private bool minigiocoFinito = true;
 
     private readonly int idMascheraSporco = Shader.PropertyToID("_MascheraSporco");
+    private readonly int idMostraTerra   = Shader.PropertyToID("_mostraTerra");
+    private readonly int idMostraColla   = Shader.PropertyToID("_mostraColla");
+    private readonly int idMostraPittura = Shader.PropertyToID("_mostraPittura");
 
-    private void Start()
+    private void Awake()
     {
-        textureInstance = Instantiate(mascheraSporcoOriginale);
-        textureRes = textureInstance.width;
-        texture32 = textureInstance.GetPixels32();
+        Debug.Log($"[StrumentoPulizia] Awake - mascheraSporcoOriginale: {(mascheraSporcoOriginale != null ? mascheraSporcoOriginale.name : "NULL")}");
+        if (mascheraSporcoOriginale != null)
+        {
+            Debug.Log($"[StrumentoPulizia] Awake - Formato originale: {mascheraSporcoOriginale.format}, graphicsFormat: {mascheraSporcoOriginale.graphicsFormat}");
+            
+            // Crea una copia virtuale non compressa a runtime usando RenderTexture e Graphics.Blit
+            // per generare una copia perfettamente leggibile e scrivibile.
+            textureInstance = CopiaTextureInRGBA32(mascheraSporcoOriginale);
+            
+            if (textureInstance != null)
+            {
+                textureRes = textureInstance.width;
+                texture32 = textureInstance.GetPixels32();
+                Debug.Log($"[StrumentoPulizia] Awake - Copia RGBA32 creata con successo. Nome: {textureInstance.name}, Risoluzione: {textureRes}x{textureRes}, Pixel: {texture32.Length}");
+            }
+            else
+            {
+                Debug.LogError("[StrumentoPulizia] Awake - FALLITA la creazione della copia scrivibile via Blit!");
+            }
+        }
     }
 
     /// <summary>
-    /// Scansiona il viewport con una griglia 512x512 di raycast per determinare
-    /// quali pixel della texture di sporco sono visibili dalla camera.
-    /// Il raggio di marcatura è calcolato dinamicamente per garantire copertura
-    /// continua senza buchi in UV space: raggio = ceil(textureRes / risoluzione).
+    /// Crea una copia virtuale non compressa a runtime (textureInstance) usando
+    /// RenderTexture e Graphics.Blit per generare una copia perfettamente leggibile e scrivibile.
     /// </summary>
+    private Texture2D CopiaTextureInRGBA32(Texture2D sorgente)
+    {
+        if (sorgente == null) return null;
+
+        RenderTexture rt = RenderTexture.GetTemporary(
+            sorgente.width, 
+            sorgente.height, 
+            0, 
+            RenderTextureFormat.Default, 
+            RenderTextureReadWrite.Linear
+        );
+
+        Graphics.Blit(sorgente, rt);
+
+        RenderTexture precedenteActive = RenderTexture.active;
+        RenderTexture.active = rt;
+
+        Texture2D nuovaTexture = new Texture2D(sorgente.width, sorgente.height, TextureFormat.RGBA32, false);
+        nuovaTexture.name = sorgente.name + "_Leggibile";
+        
+        nuovaTexture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+        nuovaTexture.Apply();
+
+        RenderTexture.active = precedenteActive;
+        RenderTexture.ReleaseTemporary(rt);
+
+        return nuovaTexture;
+    }
+
     public void CountVisiblePixel()
     {
+        Debug.Log("[StrumentoPulizia] CountVisiblePixel avviato.");
         SincronizzaRenderers();
 
         totPixel = 0;
+        if (texture32 == null)
+        {
+            Debug.LogError("[StrumentoPulizia] CountVisiblePixel - texture32 è NULL!");
+            return;
+        }
+
         bool[] pixelRaggiungibili = new bool[texture32.Length];
 
         int risoluzioneScansione = 512;
         int raggioPrecisioneTelecamera = Mathf.CeilToInt((float)textureRes / risoluzioneScansione);
+
+        int raycastLanciati = 0;
+        int raycastColpiti = 0;
 
         for (int x = 0; x <= risoluzioneScansione; x++)
         {
@@ -62,9 +119,11 @@ public class StrumentoPulizia : MonoBehaviour
                 float viewportY = (float)y / risoluzioneScansione;
 
                 Ray ray = cameraRestauro.ViewportPointToRay(new UnityEngine.Vector3(viewportX, viewportY, 0));
+                raycastLanciati++;
 
                 if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerRestauro))
                 {
+                    raycastColpiti++;
                     if (hit.collider is MeshCollider)
                     {
                         if (hit.collider.TryGetComponent(out Renderer rend))
@@ -90,22 +149,68 @@ public class StrumentoPulizia : MonoBehaviour
 
         for (int i = 0; i < texture32.Length; i++)
         {
-            if (pixelRaggiungibili[i] && texture32[i].a > 12)
+            Color32 p = texture32[i];
+            if (pixelRaggiungibili[i] && (p.r > 12 || p.g > 12 || p.b > 12))
                 totPixel++;
         }
 
-        Debug.Log($"[StrumentoPulizia] Pixel sporchi visibili dalla camera: {totPixel}");
+        Debug.Log($"[StrumentoPulizia] Scansione completata. Raycast lanciati: {raycastLanciati}, Colpiti: {raycastColpiti}. Pixel sporchi visibili totali calcolati: {totPixel}");
     }
 
-    /// <summary>
-    /// Assegna la texture istanza (modificabile a runtime) a tutti i renderer
-    /// nel layer di restauro che hanno la proprietà _MascheraSporco.
-    /// Usa sharedMaterials per leggere e materials per scrivere, evitando
-    /// di istanziare inutilmente materiali che non richiedono la modifica.
-    /// </summary>
     private void SincronizzaRenderers()
     {
+        Debug.Log("[StrumentoPulizia] SincronizzaRenderers avviato.");
         Renderer[] tuttiIRenderer = FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        Debug.Log($"[StrumentoPulizia] SincronizzaRenderers - Trovati {tuttiIRenderer.Length} renderer totali nella scena.");
+
+        int renderersModificati = 0;
+
+        foreach (Renderer rend in tuttiIRenderer)
+        {
+            int layerDelRenderer = rend.gameObject.layer;
+            int layerMaskValue = layerRestauro.value;
+            bool layerMatches = (layerMaskValue & (1 << layerDelRenderer)) != 0;
+
+            if (!layerMatches) continue;
+
+            Material[] sharedMats = rend.sharedMaterials;
+            Material[] instanceMats = null;
+            bool modified = false;
+
+            for (int i = 0; i < sharedMats.Length; i++)
+            {
+                if (sharedMats[i] != null && sharedMats[i].HasProperty(idMascheraSporco))
+                {
+                    if (instanceMats == null) instanceMats = rend.materials;
+                    instanceMats[i].SetTexture(idMascheraSporco, textureInstance);
+
+                    if (instanceMats[i].HasProperty(idMostraTerra))
+                        instanceMats[i].SetFloat(idMostraTerra, 1f);
+                    if (instanceMats[i].HasProperty(idMostraColla))
+                        instanceMats[i].SetFloat(idMostraColla, 0f);
+                    if (instanceMats[i].HasProperty(idMostraPittura))
+                        instanceMats[i].SetFloat(idMostraPittura, 0f);
+
+                    Debug.Log($"[StrumentoPulizia] SincronizzaRenderers - Assegnata textureInstance a '{rend.name}' materiale[{i}]: '{sharedMats[i].name}'. Impostato _mostraTerra=1, _mostraColla=0, _mostraPittura=0");
+                    modified = true;
+                }
+            }
+
+            if (modified && instanceMats != null)
+            {
+                rend.materials = instanceMats;
+                renderersModificati++;
+            }
+        }
+
+        Debug.Log($"[StrumentoPulizia] SincronizzaRenderers completato. Renderer modificati: {renderersModificati}");
+    }
+
+    private void ImpostaFaseFinePuliziaSuMateriali()
+    {
+        Debug.Log("[StrumentoPulizia] ImpostaFaseFinePuliziaSuMateriali avviato.");
+        Renderer[] tuttiIRenderer = FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        int modificati = 0;
 
         foreach (Renderer rend in tuttiIRenderer)
         {
@@ -120,14 +225,26 @@ public class StrumentoPulizia : MonoBehaviour
                 if (sharedMats[i] != null && sharedMats[i].HasProperty(idMascheraSporco))
                 {
                     if (instanceMats == null) instanceMats = rend.materials;
-                    instanceMats[i].SetTexture(idMascheraSporco, textureInstance);
+
+                    if (instanceMats[i].HasProperty(idMostraTerra))
+                        instanceMats[i].SetFloat(idMostraTerra, 0f);
+                    if (instanceMats[i].HasProperty(idMostraColla))
+                        instanceMats[i].SetFloat(idMostraColla, 1f);
+                    if (instanceMats[i].HasProperty(idMostraPittura))
+                        instanceMats[i].SetFloat(idMostraPittura, 1f);
+
+                    Debug.Log($"[StrumentoPulizia] ImpostaFaseFinePuliziaSuMateriali - Aggiornato '{rend.name}' materiale[{i}]: '{sharedMats[i].name}'. Impostato _mostraTerra=0, _mostraColla=1, _mostraPittura=1");
                     modified = true;
                 }
             }
 
             if (modified && instanceMats != null)
+            {
                 rend.materials = instanceMats;
+                modificati++;
+            }
         }
+        Debug.Log($"[StrumentoPulizia] ImpostaFaseFinePuliziaSuMateriali completato. Renderer aggiornati: {modificati}");
     }
 
     private void SegnaAreaVisibile(int centroX, int centroY, bool[] mappa, int raggioCalcolo)
@@ -147,9 +264,13 @@ public class StrumentoPulizia : MonoBehaviour
 
     private void Update()
     {
-        if (minigiocoFinito || Mouse.current == null || !Mouse.current.leftButton.isPressed) return;
+        if (minigiocoFinito) return;
+        if (Mouse.current == null) return;
 
-        UseBrush();
+        if (Mouse.current.leftButton.isPressed)
+        {
+            UseBrush();
+        }
     }
 
     private void UseBrush()
@@ -168,8 +289,10 @@ public class StrumentoPulizia : MonoBehaviour
                     Material targetMat = mats[submeshIndex];
                     if (targetMat != null && targetMat.HasProperty(idMascheraSporco))
                     {
-                        if (targetMat.GetTexture(idMascheraSporco) != textureInstance)
+                        Texture currentTex = targetMat.GetTexture(idMascheraSporco);
+                        if (currentTex != textureInstance)
                         {
+                            Debug.LogWarning($"[StrumentoPulizia] UseBrush - Trovata texture discrepanza su '{rend.name}' materiale[{submeshIndex}]. Era '{currentTex?.name ?? "NULL"}', imposto '{textureInstance.name}'");
                             targetMat.SetTexture(idMascheraSporco, textureInstance);
                             rend.materials = mats;
                         }
@@ -188,6 +311,7 @@ public class StrumentoPulizia : MonoBehaviour
     private void PitturaPixel(int centroX, int centroY)
     {
         bool textureModificata = false;
+        int pixelCancellatiInQuestoColpo = 0;
 
         for (int x = -rangePaintbrush; x <= rangePaintbrush; x++)
         {
@@ -201,11 +325,15 @@ public class StrumentoPulizia : MonoBehaviour
                     if (targetX >= 0 && targetX < textureRes && targetY >= 0 && targetY < textureRes)
                     {
                         int indice = targetY * textureRes + targetX;
+                        Color32 p = texture32[indice];
 
-                        if (texture32[indice].a > 12)
+                        // Se il pixel è sporco (RGB o Alpha superiori a 12), lo puliamo
+                        if (p.r > 12 || p.g > 12 || p.b > 12)
                         {
-                            texture32[indice] = new Color32(0, 0, 0, 0);
+                            // Sostituiamo con un pixel nero opaco (0, 0, 0, 255) per le massime prestazioni a runtime
+                            texture32[indice] = new Color32(0, 0, 0, 255);
                             pixelPainted++;
+                            pixelCancellatiInQuestoColpo++;
                             textureModificata = true;
                         }
                     }
@@ -221,11 +349,17 @@ public class StrumentoPulizia : MonoBehaviour
             if (totPixel > 0)
                 progression = Mathf.Clamp01((float)pixelPainted / totPixel);
 
+            Debug.Log($"[StrumentoPulizia] PitturaPixel a ({centroX}, {centroY}) - Cancellati: {pixelCancellatiInQuestoColpo}. Progressi: {pixelPainted}/{totPixel} ({progression * 100:F1}%)");
+
             if (progression >= 0.95f)
             {
+                Debug.Log("[StrumentoPulizia] Progresso raggiunto 95%! Completamento minigioco.");
                 minigiocoFinito = true;
                 progression = 1f;
                 ResetMouseCursor();
+                
+                ImpostaFaseFinePuliziaSuMateriali();
+
                 tavoloCorrente?.AvanzaFase(faseSuccessiva);
                 eventoPuliziaCompletata?.Invoke(tavoloCorrente?.vaschettaCorrente);
             }
@@ -247,20 +381,15 @@ public class StrumentoPulizia : MonoBehaviour
         pixelPainted = 0;
         progression = 0f;
         minigiocoFinito = false;
+        Debug.Log("[StrumentoPulizia] IniziaMinigame - Minigioco attivato!");
     }
 
     public void TerminaMinigame()
     {
         minigiocoFinito = true;
+        Debug.Log("[StrumentoPulizia] TerminaMinigame - Minigioco disattivato manualmente!");
     }
 
-
-    /// <summary>
-    /// Risale alla submesh colpita dal raycast a partire dal triangleIndex globale.
-    /// Unity non espone direttamente l'indice di submesh nel RaycastHit,
-    /// quindi si scorrono i conteggi di triangoli di ciascuna submesh cumulativamente.
-    /// Richiede che la mesh abbia Read/Write Enabled.
-    /// </summary>
     private int GetSubMeshIndex(MeshCollider meshCollider, int triangleIndex)
     {
         if (meshCollider == null || meshCollider.sharedMesh == null) return -1;
