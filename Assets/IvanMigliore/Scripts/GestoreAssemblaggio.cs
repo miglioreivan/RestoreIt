@@ -52,6 +52,8 @@ public class GestoreAssemblaggio : MonoBehaviour
     private PezzoInfo pezzoTrascinato;
     private Plane dragPlane;
     private Vector3 dragOffset;
+    private Vector3 positionBeforeDrag;
+    private Quaternion rotationBeforeDrag;
 
     // Stato della colla
     private Texture2D collaTextureInstance;
@@ -301,9 +303,38 @@ public class GestoreAssemblaggio : MonoBehaviour
                             if (!pezzo.isSnapped && (hit.collider.gameObject == pezzo.gameObject || hit.collider.transform.IsChildOf(pezzo.gameObject.transform)))
                             {
                                 pezzoTrascinato = pezzo;
-                                dragPlane = new Plane(-cameraRestauro.transform.forward, hit.point);
-                                dragOffset = pezzoTrascinato.gameObject.transform.position - hit.point;
-                                Debug.Log($"[GestoreAssemblaggio] Inizio drag del pezzo '{pezzoTrascinato.gameObject.name}'");
+                                
+                                // Salva la posizione e la rotazione iniziale per poter fare il fallback in caso di mancato snap
+                                positionBeforeDrag = pezzoTrascinato.gameObject.transform.position;
+                                rotationBeforeDrag = pezzoTrascinato.gameObject.transform.localRotation;
+
+                                // Azzera la rotazione locale (imposta 0,0,0 nell'Inspector sotto localRotation)
+                                pezzoTrascinato.gameObject.transform.localRotation = Quaternion.identity;
+
+                                // Calcola la posizione target specifica del pezzo nel mondo
+                                Vector3 targetWorldPos = ghostAnfora.transform.TransformPoint(pezzoTrascinato.originalLocalPos);
+
+                                // Calcola la profondità di questo target specifico rispetto alla camera
+                                float targetDepth = Vector3.Dot(targetWorldPos - cameraRestauro.transform.position, cameraRestauro.transform.forward);
+                                
+                                // Crea il piano di drag perpendicolare alla camera, posizionato leggermente davanti al target specifico del pezzo (es. 0.05 unità più vicino)
+                                // Questo assicura che il pezzo sia sempre renderizzato SOPRA (davanti) al suo target specifico e che non ci sia parallasse!
+                                Vector3 planePoint = cameraRestauro.transform.position + cameraRestauro.transform.forward * (targetDepth - 0.05f);
+                                dragPlane = new Plane(-cameraRestauro.transform.forward, planePoint);
+
+                                // Proietta la posizione iniziale del mouse sul piano di drag e sposta l'oggetto lì,
+                                // centrando perfettamente il pivot del pezzo sotto il cursore del mouse
+                                Ray rayStart = cameraRestauro.ScreenPointToRay(mousePos);
+                                if (dragPlane.Raycast(rayStart, out float enterStart))
+                                {
+                                    Vector3 pointOnPlane = rayStart.GetPoint(enterStart);
+                                    pezzoTrascinato.gameObject.transform.position = pointOnPlane;
+                                }
+
+                                // Imposta l'offset a zero in modo che l'oggetto rimanga perfettamente centrato rispetto al mouse
+                                dragOffset = Vector3.zero;
+
+                                Debug.Log($"[GestoreAssemblaggio] Inizio drag del pezzo '{pezzoTrascinato.gameObject.name}' a profondità target: {targetDepth - 0.05f}");
                                 trovato = true;
                                 break;
                             }
@@ -322,13 +353,26 @@ public class GestoreAssemblaggio : MonoBehaviour
                         Vector3 targetPos = ray.GetPoint(enter) + dragOffset;
                         pezzoTrascinato.gameObject.transform.position = targetPos;
 
+                        // Mantiene la rotazione locale a 0,0,0 durante tutto il movimento
+                        pezzoTrascinato.gameObject.transform.localRotation = Quaternion.identity;
+
                         VerificaSnap(pezzoTrascinato);
                     }
                 }
             }
             else
             {
-                pezzoTrascinato = null;
+                if (pezzoTrascinato != null)
+                {
+                    // Se non è snapped, ritorna alla sua posizione originaria nella vaschetta
+                    if (!pezzoTrascinato.isSnapped)
+                    {
+                        pezzoTrascinato.gameObject.transform.position = positionBeforeDrag;
+                        pezzoTrascinato.gameObject.transform.localRotation = rotationBeforeDrag;
+                        Debug.Log($"[GestoreAssemblaggio] Rilascio senza snap. Ritorno di '{pezzoTrascinato.gameObject.name}' nella vaschetta.");
+                    }
+                    pezzoTrascinato = null;
+                }
             }
         }
         else if (statoCorrente == StatoAssemblaggio.IncollaggioBordi)
@@ -556,9 +600,20 @@ public class GestoreAssemblaggio : MonoBehaviour
         Quaternion targetWorldRot = ghostAnfora.transform.rotation * pezzo.originalLocalRot;
 
         float dist = Vector3.Distance(pezzo.gameObject.transform.position, targetWorldPos);
-        float angle = Quaternion.Angle(pezzo.gameObject.transform.rotation, targetWorldRot);
 
-        if (dist <= snapDistance && angle <= snapAngle)
+        // Se il pezzo è quello trascinato, la sua rotazione è bloccata a identity, quindi lo snap si basa solo sulla distanza spaziale.
+        bool match = false;
+        if (pezzo == pezzoTrascinato)
+        {
+            match = (dist <= snapDistance);
+        }
+        else
+        {
+            float angle = Quaternion.Angle(pezzo.gameObject.transform.rotation, targetWorldRot);
+            match = (dist <= snapDistance && angle <= snapAngle);
+        }
+
+        if (match)
         {
             pezzo.isSnapped = true;
             pezzo.gameObject.transform.SetParent(ghostAnfora.transform, false);
