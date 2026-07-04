@@ -3982,6 +3982,11 @@ MonoBehaviour:
   onAssemblaggioCompletato:
     m_PersistentCalls:
       m_Calls: []
+  rangePennelloColla: 10
+  sogliaCompletamentoColla: 0.7
+  totPixelCollaNecessari: 0
+  pixelCollaDipinti: 0
+  progressioneColla: 0
 --- !u!1 &771938090 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2358260544546960407, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -10476,8 +10481,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 919132147971219663}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 92.442, y: 1.229, z: -31.265}
+  m_LocalRotation: {x: 0.00044641638, y: -0.70710665, z: 0.70710665, w: 0.00044641638}
+  m_LocalPosition: {x: 92.442, y: 1.229, z: -30.497}
   m_LocalScale: {x: 100, y: 100, z: 53.680176}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -10486,7 +10491,7 @@ Transform:
   - {fileID: 1962454815950733535}
   - {fileID: 8498549205872619357}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 179.928}
 --- !u!4 &543450652999122850
 Transform:
   m_ObjectHideFlags: 0

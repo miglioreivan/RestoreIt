@@ -224,6 +224,29 @@ public class RestoreManager : MonoBehaviour, IInteractable
         playerCamera.transform.rotation = targetRot;
         Debug.Log("[RestoreManager] TransitionCamera completata.");
 
+        // Se la transizione era per la fase di assemblaggio, notifica il GestoreAssemblaggio per abilitare il drag & drop
+        if (!startCleaning && !restorePlayer)
+        {
+            GestoreAssemblaggio gestore = null;
+            if (faseAssemblaggioGO != null)
+            {
+                gestore = faseAssemblaggioGO.GetComponentInChildren<GestoreAssemblaggio>(true);
+            }
+            if (gestore == null)
+            {
+                Transform searchRoot = transform.parent != null ? transform.parent : transform;
+                gestore = searchRoot.GetComponentInChildren<GestoreAssemblaggio>(true);
+            }
+            if (gestore != null)
+            {
+                gestore.CameraTransitionCompleted();
+            }
+            else
+            {
+                Debug.LogWarning("[RestoreManager] Transizione camera completata ma GestoreAssemblaggio non trovato!");
+            }
+        }
+
         if (startCleaning)
         {
             StrumentoPulizia sp = null;

@@ -16,4 +16,5 @@ MonoBehaviour:
   raccogliOggetto: {fileID: 11400000, guid: 704f7a5dd2bbf2d4386b4d40f8fa1883, type: 2}
   prefabAnfora: {fileID: 1242412026410207383, guid: a54e0fcc5c5df464ab8a9ee11b35f5a8, type: 3}
   prefabPezzi: {fileID: 0}
-  mascheraCollaUnica: {fileID: 2800000, guid: b8df4218f287b51458a533b724890f96, type: 3}
+  prefabAnforaIntera: {fileID: 8021613997145106471, guid: da0aa7f27e11f9746914835f031af774, type: 3}
+  mascheraCollaUnica: {fileID: 2800000, guid: 66e9c0af7b1353743be9238f41d44570, type: 3}

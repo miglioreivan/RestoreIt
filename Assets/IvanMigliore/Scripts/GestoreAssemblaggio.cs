@@ -32,7 +32,9 @@ public class GestoreAssemblaggio : MonoBehaviour
     [Header("Eventi")]
     public UnityEvent onAssemblaggioCompletato;
     
-    private int rangePennelloColla = 10;
+    [Header("Configurazioni Pennello e Soglie")]
+    [SerializeField] private int rangePennelloColla = 15;
+    [SerializeField] [Range(0.1f, 1f)] private float sogliaCompletamentoColla = 0.70f;
     private string nomeProprietaMascheraColla = "_mascheraColla";
     private string nomeProprietaCollaDipingibile = "_Colla";
 
@@ -54,15 +56,17 @@ public class GestoreAssemblaggio : MonoBehaviour
     private Vector3 dragOffset;
     private Vector3 positionBeforeDrag;
     private Quaternion rotationBeforeDrag;
+    private bool cameraTransitionFinished = false;
 
     // Stato della colla
     private Texture2D collaTextureInstance;
     private Color32[] coloreTextureColla;
     private bool[] pixelCollaNecessari;
     private bool[] pixelCollaMappati;
-    private int totPixelCollaNecessari;
-    private int pixelCollaDipinti;
-    private float progressioneColla = 0f;
+    [Header("Debug Incollaggio (Sola Lettura)")]
+    [SerializeField] private int totPixelCollaNecessari;
+    [SerializeField] private int pixelCollaDipinti;
+    [SerializeField] [Range(0f, 1f)] private float progressioneColla = 0f;
     private Texture2D mascheraCollaUnica;
     private int idProprietaMascheraColla;
     private int idProprietaCollaDipingibile;
@@ -115,6 +119,7 @@ public class GestoreAssemblaggio : MonoBehaviour
     private void IniziaAssemblaggio()
     {
         Debug.Log($"[GestoreAssemblaggio] IniziaAssemblaggio - vaschettaCorrente: {(tavoloCorrente.vaschettaCorrente != null ? tavoloCorrente.vaschettaCorrente.name : "null")}, vaschettaGameObject: {(tavoloCorrente.vaschettaGameObject != null ? tavoloCorrente.vaschettaGameObject.name : "null")}");
+        cameraTransitionFinished = false;
         if (tavoloCorrente.vaschettaCorrente == null || tavoloCorrente.vaschettaGameObject == null) return;
 
         if (puntoSpawnAnfora == null)
@@ -282,7 +287,7 @@ public class GestoreAssemblaggio : MonoBehaviour
 
     private void GestisciDragAndDrop()
     {
-        if (cameraRestauro == null || Mouse.current == null) return;
+        if (cameraRestauro == null || Mouse.current == null || !cameraTransitionFinished) return;
 
         bool isLeftPressed = Mouse.current.leftButton.isPressed;
         Vector2 mousePos = Mouse.current.position.ReadValue();
@@ -439,7 +444,9 @@ public class GestoreAssemblaggio : MonoBehaviour
                 float rapporto = (float)pixelCollaDipinti / totPixelCollaNecessari;
                 progressioneColla = Mathf.Clamp01(rapporto);
 
-                if (progressioneColla >= 0.90f)
+                Debug.Log($"[GestoreAssemblaggio] Progresso Applicazione Colla: {pixelCollaDipinti}/{totPixelCollaNecessari} ({progressioneColla * 100f:F1}%)");
+
+                if (progressioneColla >= sogliaCompletamentoColla)
                 {
                     ControllaCompletamento();
                 }
@@ -459,6 +466,54 @@ public class GestoreAssemblaggio : MonoBehaviour
 
         statoCorrente = StatoAssemblaggio.IncollaggioBordi;
         Debug.Log("[GestoreAssemblaggio] Tutti i pezzi sono stati posizionati! Inizia la fase di incollaggio dei bordi.");
+
+        // Disabilita tutti i collider originali di ghostAnfora che non appartengono ai pezzi posizionati dal giocatore
+        if (ghostAnfora != null)
+        {
+            foreach (var col in ghostAnfora.GetComponentsInChildren<Collider>(true))
+            {
+                bool isPezzoSnapped = false;
+                foreach (var p in listaPezzi)
+                {
+                    if (p.gameObject == col.gameObject)
+                    {
+                        isPezzoSnapped = true;
+                        break;
+                    }
+                }
+                if (!isPezzoSnapped)
+                {
+                    col.enabled = false;
+                    Debug.Log($"[GestoreAssemblaggio] Disabilitato collider originale ghost '{col.gameObject.name}'");
+                }
+            }
+        }
+
+        // Riabilita e configura i collider dei pezzi posizionati dal giocatore come MeshCollider per il raycast UV
+        foreach (var p in listaPezzi)
+        {
+            if (p.gameObject != null)
+            {
+                Collider col = p.gameObject.GetComponent<Collider>();
+                if (col != null)
+                {
+                    if (!(col is MeshCollider))
+                    {
+                        Destroy(col);
+                        col = p.gameObject.AddComponent<MeshCollider>();
+                    }
+                    col.enabled = true;
+                    Debug.Log($"[GestoreAssemblaggio] Riabilitato MeshCollider su pezzo snapped '{p.gameObject.name}'");
+                }
+                else
+                {
+                    col = p.gameObject.AddComponent<MeshCollider>();
+                    col.enabled = true;
+                    Debug.Log($"[GestoreAssemblaggio] Aggiunto e abilitato MeshCollider su pezzo snapped '{p.gameObject.name}'");
+                }
+                p.collider = col;
+            }
+        }
 
         Texture2D mascheraLeggibile = CopiaTextureCompatibile(mascheraCollaUnica);
         if (mascheraLeggibile == null)
@@ -646,16 +701,165 @@ public class GestoreAssemblaggio : MonoBehaviour
         }
     }
 
+    public void CameraTransitionCompleted()
+    {
+        cameraTransitionFinished = true;
+        Debug.Log("[GestoreAssemblaggio] Camera transition completed. Drag and drop is now enabled.");
+    }
+
     private void ControllaCompletamento()
     {
-        if (statoCorrente == StatoAssemblaggio.IncollaggioBordi && progressioneColla >= 0.90f)
+        if (statoCorrente == StatoAssemblaggio.IncollaggioBordi && progressioneColla >= sogliaCompletamentoColla)
         {
-            statoCorrente = StatoAssemblaggio.Completato;
-            isAssemblaggioActive = false;
-            RimuoviMappaColla();
-            Debug.Log("[GestoreAssemblaggio] Assemblaggio e incollaggio completati con successo!");
-            onAssemblaggioCompletato?.Invoke();
+            StartCoroutine(SequenzaCompletamento());
         }
+    }
+
+    private System.Collections.IEnumerator SequenzaCompletamento()
+    {
+        statoCorrente = StatoAssemblaggio.Completato;
+        isAssemblaggioActive = false;
+
+        // 1. Vibrazione della mesh dell'anfora
+        float duration = 0.6f;
+        float magnitude = 0.012f;
+        Vector3 originalPos = ghostAnfora != null ? ghostAnfora.transform.position : Vector3.zero;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            if (ghostAnfora != null)
+            {
+                float x = Random.Range(-1f, 1f) * magnitude;
+                float y = Random.Range(-1f, 1f) * magnitude;
+                float z = Random.Range(-1f, 1f) * magnitude;
+                ghostAnfora.transform.position = originalPos + new Vector3(x, y, z);
+            }
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (ghostAnfora != null)
+        {
+            ghostAnfora.transform.position = originalPos;
+        }
+
+        // 2. Sostituzione visiva con il vaso intero (pulito, senza colla e senza terra)
+        Debug.Log("[GestoreAssemblaggio] Completamento - Disattivazione colla e terra, sostituzione con il vaso intero.");
+
+        // Imposta globalmente _mostraColla=0, _mostraTerra=0, _mostraPittura=1
+        Shader.SetGlobalFloat(idMostraTerra, 0f);
+        Shader.SetGlobalFloat(idMostraColla, 0f);
+        Shader.SetGlobalFloat(idMostraPittura, 1f);
+
+        // Rimuovi la mappa della colla
+        RimuoviMappaColla();
+
+        GameObject prefabIntero = tavoloCorrente.vaschettaCorrente.prefabAnforaIntera;
+        if (prefabIntero != null && ghostAnfora != null)
+        {
+            Vector3 pos = ghostAnfora.transform.position;
+            Quaternion rot = ghostAnfora.transform.rotation;
+            Vector3 scale = ghostAnfora.transform.localScale;
+            Transform parent = ghostAnfora.transform.parent;
+
+            // Distrugge la Geometry Collection e tutti i pezzi snapped sotto di essa
+            Destroy(ghostAnfora);
+            ghostAnfora = null;
+
+            // Spawna il prefab dell'anfora intera al suo posto
+            GameObject anforaIntera = Instantiate(prefabIntero, pos, rot, parent);
+            anforaIntera.name = prefabIntero.name;
+            anforaIntera.transform.localScale = Vector3.one;
+
+            // Configura i materiali dell'anfora intera per sicurezza
+            foreach (var r in anforaIntera.GetComponentsInChildren<Renderer>())
+            {
+                Material[] mats = r.materials;
+                bool modified = false;
+                for (int i = 0; i < mats.Length; i++)
+                {
+                    if (mats[i] != null)
+                    {
+                        if (mats[i].HasProperty(idMostraTerra))
+                        {
+                            mats[i].SetFloat(idMostraTerra, 0f);
+                            modified = true;
+                        }
+                        if (mats[i].HasProperty(idMostraColla))
+                        {
+                            mats[i].SetFloat(idMostraColla, 0f);
+                            modified = true;
+                        }
+                        if (mats[i].HasProperty(idMostraPittura))
+                        {
+                            mats[i].SetFloat(idMostraPittura, 1f);
+                            modified = true;
+                        }
+                    }
+                }
+                if (modified)
+                {
+                    r.materials = mats;
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[GestoreAssemblaggio] prefabAnforaIntera non assegnato nel VaschettaSO. Eseguo il fallback nascondendo gli outline.");
+
+            // Disattiva le mesh originali del ghost (le sagome trasparenti)
+            if (ghostAnfora != null)
+            {
+                foreach (Transform child in ghostAnfora.transform)
+                {
+                    bool isPezzoSnapped = false;
+                    foreach (var p in listaPezzi)
+                    {
+                        if (p.gameObject == child.gameObject)
+                        {
+                            isPezzoSnapped = true;
+                            break;
+                        }
+                    }
+
+                    if (!isPezzoSnapped)
+                    {
+                        child.gameObject.SetActive(false);
+                    }
+                }
+            }
+
+            // Rimuovi l'outline (secondo materiale) da tutti i pezzi snapped
+            foreach (var p in listaPezzi)
+            {
+                if (p.gameObject != null)
+                {
+                    Renderer r = p.gameObject.GetComponent<Renderer>();
+                    if (r != null && r.materials.Length > 1)
+                    {
+                        r.materials = new Material[] { r.materials[0] };
+                    }
+                }
+            }
+        }
+
+        // Attesa finale per dare feedback visivo
+        yield return new WaitForSeconds(0.4f);
+
+        // 3. Ferma l'interazione nel RestoreManager (sblocca il player, ripristina la camera)
+        RestoreManager manager = FindFirstObjectByType<RestoreManager>();
+        if (manager != null)
+        {
+            manager.StopInteraction();
+        }
+        else
+        {
+            Debug.LogWarning("[GestoreAssemblaggio] RestoreManager non trovato nella scena al completamento!");
+        }
+
+        // 4. Notifica il completamento
+        onAssemblaggioCompletato?.Invoke();
     }
 
     private Transform TrovaFiglioNelPrefab(GameObject prefab, string nomeFiglio)
