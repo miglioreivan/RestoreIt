@@ -31,6 +31,14 @@ public class GestoreAssemblaggio : MonoBehaviour
 
     [Header("Eventi")]
     public UnityEvent onAssemblaggioCompletato;
+
+    [Header("Grafica Cursore Drag & Drop")]
+    [SerializeField] private Texture2D cursorDragTexture;
+    [SerializeField] private Vector2 cursorDragHotspot = Vector2.zero;
+
+    [Header("Grafica Cursore Applicazione Colla")]
+    [SerializeField] private Texture2D cursorGlueTexture;
+    [SerializeField] private Vector2 cursorGlueHotspot = Vector2.zero;
     
     [Header("Configurazioni Pennello e Soglie")]
     [SerializeField] private int rangePennelloColla = 15;
@@ -245,7 +253,11 @@ public class GestoreAssemblaggio : MonoBehaviour
     private void TerminaAssemblaggio()
     {
         isAssemblaggioActive = false;
-        pezzoTrascinato = null;
+        if (pezzoTrascinato != null)
+        {
+            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            pezzoTrascinato = null;
+        }
         RimuoviMappaColla();
 
         if (ghostAnfora != null)
@@ -340,6 +352,12 @@ public class GestoreAssemblaggio : MonoBehaviour
                                 dragOffset = Vector3.zero;
 
                                 Debug.Log($"[GestoreAssemblaggio] Inizio drag del pezzo '{pezzoTrascinato.gameObject.name}' a profondità target: {targetDepth - 0.05f}");
+                                
+                                if (cursorDragTexture != null)
+                                {
+                                    Cursor.SetCursor(cursorDragTexture, cursorDragHotspot, CursorMode.Auto);
+                                }
+
                                 trovato = true;
                                 break;
                             }
@@ -377,6 +395,7 @@ public class GestoreAssemblaggio : MonoBehaviour
                         Debug.Log($"[GestoreAssemblaggio] Rilascio senza snap. Ritorno di '{pezzoTrascinato.gameObject.name}' nella vaschetta.");
                     }
                     pezzoTrascinato = null;
+                    Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
                 }
             }
         }
@@ -466,6 +485,11 @@ public class GestoreAssemblaggio : MonoBehaviour
 
         statoCorrente = StatoAssemblaggio.IncollaggioBordi;
         Debug.Log("[GestoreAssemblaggio] Tutti i pezzi sono stati posizionati! Inizia la fase di incollaggio dei bordi.");
+
+        if (cursorGlueTexture != null)
+        {
+            Cursor.SetCursor(cursorGlueTexture, cursorGlueHotspot, CursorMode.Auto);
+        }
 
         // Disabilita tutti i collider originali di ghostAnfora che non appartengono ai pezzi posizionati dal giocatore
         if (ghostAnfora != null)
@@ -681,6 +705,7 @@ public class GestoreAssemblaggio : MonoBehaviour
                 pezzo.collider.enabled = false;
 
             pezzoTrascinato = null;
+            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             Debug.Log($"[GestoreAssemblaggio] Pezzo '{pezzo.gameObject.name}' posizionato correttamente!");
 
             // Verifica se tutti i pezzi sono posizionati
@@ -719,6 +744,7 @@ public class GestoreAssemblaggio : MonoBehaviour
     {
         statoCorrente = StatoAssemblaggio.Completato;
         isAssemblaggioActive = false;
+        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
 
         // 1. Vibrazione della mesh dell'anfora
         float duration = 0.6f;
@@ -771,6 +797,26 @@ public class GestoreAssemblaggio : MonoBehaviour
             GameObject anforaIntera = Instantiate(prefabIntero, pos, rot, parent);
             anforaIntera.name = prefabIntero.name;
             anforaIntera.transform.localScale = Vector3.one;
+
+            // Aggiunge la componente tag OggettoRestaurato per identificarla come restaurata
+            if (anforaIntera.GetComponent<OggettoRestaurato>() == null)
+            {
+                anforaIntera.AddComponent<OggettoRestaurato>();
+            }
+
+            // Configura PickUp_Interaction per svuotare il tavolo al raccoglimento
+            if (anforaIntera.TryGetComponent<PickUp_Interaction>(out var pickUp))
+            {
+                pickUp.ImpostaTavolo(tavoloCorrente);
+            }
+            else
+            {
+                var childPickUp = anforaIntera.GetComponentInChildren<PickUp_Interaction>();
+                if (childPickUp != null)
+                {
+                    childPickUp.ImpostaTavolo(tavoloCorrente);
+                }
+            }
 
             // Configura i materiali dell'anfora intera per sicurezza
             foreach (var r in anforaIntera.GetComponentsInChildren<Renderer>())
@@ -851,6 +897,7 @@ public class GestoreAssemblaggio : MonoBehaviour
         RestoreManager manager = FindFirstObjectByType<RestoreManager>();
         if (manager != null)
         {
+            manager.CompletaRestauro();
             manager.StopInteraction();
         }
         else

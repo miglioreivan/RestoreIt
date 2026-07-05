@@ -23,6 +23,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
     private Quaternion startCameraRotation;
     private Transform startCameraParent;
     private bool isRestoring = false;
+    private bool isRestorationComplete = false;
 
     private void Awake()
     {
@@ -37,6 +38,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
         {
             tavoloCorrente.OnVaschettaPosata += OnVaschettaPosata;
             tavoloCorrente.OnFaseCambiata += OnFaseCambiata;
+            tavoloCorrente.OnTavoloSvuotato += OnTavoloSvuotato;
             Debug.Log("[RestoreManager] Sottoscritto agli eventi di tavoloCorrente.");
         }
         else
@@ -52,6 +54,47 @@ public class RestoreManager : MonoBehaviour, IInteractable
         {
             tavoloCorrente.OnVaschettaPosata -= OnVaschettaPosata;
             tavoloCorrente.OnFaseCambiata -= OnFaseCambiata;
+            tavoloCorrente.OnTavoloSvuotato -= OnTavoloSvuotato;
+        }
+    }
+
+    private void OnTavoloSvuotato()
+    {
+        isRestorationComplete = false;
+        DisattivaColliderInterazione();
+    }
+
+    public void CompletaRestauro()
+    {
+        isRestorationComplete = true;
+        DisattivaColliderInterazione();
+    }
+
+    private void DisattivaColliderInterazione()
+    {
+        if (TryGetComponent<Collider>(out var col))
+        {
+            col.enabled = false;
+            Debug.Log("[RestoreManager] Disattivato collider tavolo.");
+        }
+        else if (transform.parent != null && transform.parent.TryGetComponent<Collider>(out var parentCol))
+        {
+            parentCol.enabled = false;
+            Debug.Log("[RestoreManager] Disattivato collider parent tavolo.");
+        }
+    }
+
+    private void AttivaColliderInterazione()
+    {
+        if (TryGetComponent<Collider>(out var col))
+        {
+            col.enabled = true;
+            Debug.Log("[RestoreManager] Attivato collider tavolo.");
+        }
+        else if (transform.parent != null && transform.parent.TryGetComponent<Collider>(out var parentCol))
+        {
+            parentCol.enabled = true;
+            Debug.Log("[RestoreManager] Attivato collider parent tavolo.");
         }
     }
 
@@ -112,15 +155,14 @@ public class RestoreManager : MonoBehaviour, IInteractable
     {
         Debug.Log($"[RestoreManager] OnVaschettaPosata - Vaschetta posata: {(vaschetta != null ? vaschetta.name : "NULL")}");
         
-        if (TryGetComponent<Collider>(out var col))
+        if (vaschetta != null)
         {
-            col.enabled = (vaschetta != null);
-            Debug.Log($"[RestoreManager] Collider del tavolo impostato a: {col.enabled}");
+            isRestorationComplete = false;
+            AttivaColliderInterazione();
         }
-        else if (transform.parent != null && transform.parent.TryGetComponent<Collider>(out var parentCol))
+        else
         {
-            parentCol.enabled = (vaschetta != null);
-            Debug.Log($"[RestoreManager] Collider del parent '{transform.parent.name}' impostato a: {parentCol.enabled}");
+            DisattivaColliderInterazione();
         }
     }
 
@@ -161,16 +203,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
             Debug.Log("[RestoreManager] Disattivato script movimento player.");
         }
         
-        if (TryGetComponent<Collider>(out var col))
-        {
-            col.enabled = false;
-            Debug.Log("[RestoreManager] Disattivato collider tavolo durante interazione.");
-        }
-        else if (transform.parent != null && transform.parent.TryGetComponent<Collider>(out var parentCol))
-        {
-            parentCol.enabled = false;
-            Debug.Log("[RestoreManager] Disattivato collider parent tavolo durante interazione.");
-        }
+        DisattivaColliderInterazione();
 
         startCameraParent = playerCamera.transform.parent;
         startCameraPosition = playerCamera.transform.position;
@@ -278,8 +311,14 @@ public class RestoreManager : MonoBehaviour, IInteractable
         {
             if (player != null) player.enabled = true;
             
-            if (TryGetComponent<Collider>(out var col)) col.enabled = true;
-            else if (transform.parent != null && transform.parent.TryGetComponent<Collider>(out var parentCol)) parentCol.enabled = true;
+            if (!isRestorationComplete)
+            {
+                AttivaColliderInterazione();
+            }
+            else
+            {
+                Debug.Log("[RestoreManager] Restauro completato. Non riattivo il collider delle interazioni di restauro.");
+            }
 
             isRestoring = false;
             Debug.Log("[RestoreManager] Interazione terminata, ripristinato player.");

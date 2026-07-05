@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VaschettaSO
   nomeOggetto: Anfora1
   raccogliOggetto: {fileID: 11400000, guid: 704f7a5dd2bbf2d4386b4d40f8fa1883, type: 2}
-  prefabAnfora: {fileID: 1780022628991882264, guid: 3e695d9e1053b8d4eb1501ba88a33a54, type: 3}
+  prefabAnfora: {fileID: 7409734899052523955, guid: 5b0f1ed003436aa408e6344be85e7a35, type: 3}
   prefabPezzi: {fileID: 0}
   prefabAnforaIntera: {fileID: 7009092463037622468, guid: 71c78f8ac42a4bd47ae26c1e94158583, type: 3}
-  mascheraCollaUnica: {fileID: 2800000, guid: fdf138b23a6b8444c82ad1d8d0a6339a, type: 3}
+  mascheraCollaUnica: {fileID: 2800000, guid: 79f11557dffb35146b58248ac3b8e566, type: 3}

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6224786322655309041}
   - component: {fileID: 1726751192890622781}
   - component: {fileID: 7640559038601932194}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Anfora3
   m_TagString: Untagged
   m_Icon: {fileID: 0}

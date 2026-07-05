@@ -11,7 +11,9 @@ GameObject:
   - component: {fileID: 363843864862118361}
   - component: {fileID: 4799271918303026053}
   - component: {fileID: 3317380926791018849}
-  m_Layer: 0
+  - component: {fileID: 3556128542169506857}
+  - component: {fileID: 3578645149579414843}
+  m_Layer: 3
   m_Name: Anfora2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -90,3 +92,41 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &3556128542169506857
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8021613997145106471}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 2604380516977810354, guid: b79ccd57398305b46bc9e569ce09d7a4, type: 3}
+--- !u!114 &3578645149579414843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8021613997145106471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ceca8c7636624e4899b1b830b2b91c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PickUp_Interaction
+  datiOggetto: {fileID: 0}
+  manoGiocatore: {fileID: 0}
+  onPickUp: {fileID: 0}
+  tavoloCorrente: {fileID: 0}

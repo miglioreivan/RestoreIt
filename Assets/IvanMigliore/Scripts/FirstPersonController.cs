@@ -33,6 +33,8 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private InventarioManoSO inventario;
     [SerializeField] private Transform handTransform;
 
+    public InventarioManoSO Inventario => inventario;
+
     private CharacterController characterController;
     private float verticalRotation = 0f;
     private Vector3 hitNormal;

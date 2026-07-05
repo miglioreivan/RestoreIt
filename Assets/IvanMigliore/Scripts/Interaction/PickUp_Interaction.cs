@@ -6,17 +6,46 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
     [SerializeField] private InventarioManoSO manoGiocatore;
     [SerializeField] private VoidEventChannelSO onPickUp;
 
+    [Header("Restauro / Tavolo (Opzionale)")]
+    [SerializeField] private TavoloSO tavoloCorrente;
+
+    private void Awake()
+    {
+        if (manoGiocatore == null)
+        {
+            FirstPersonController controller = FindFirstObjectByType<FirstPersonController>();
+            if (controller != null)
+            {
+                manoGiocatore = controller.Inventario;
+            }
+            else
+            {
+                Debug.LogWarning($"[PickUp_Interaction] '{gameObject.name}': manoGiocatore è null e FirstPersonController non trovato nella scena.");
+            }
+        }
+    }
+
+    public void ImpostaTavolo(TavoloSO tavolo)
+    {
+        tavoloCorrente = tavolo;
+    }
+
     public bool canInteract()
     {
-        return manoGiocatore.oggettoCorrente == null;
+        return manoGiocatore.oggettoCorrente == null && manoGiocatore.currentGO == null;
     }
 
     public string GetInteractionText()
     {
         if (canInteract())
-            return "[E] Raccogli " + datiOggetto.nomeOggetto;
+        {
+            string nome = datiOggetto != null ? datiOggetto.nomeOggetto : gameObject.name;
+            return "[E] Raccogli " + nome;
+        }
         else
+        {
             return "Hai già un oggetto in mano!";
+        }
     }
 
     public void StartInteraction()
@@ -31,6 +60,14 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
         if (TryGetComponent(out Collider col))
             col.enabled = false;
 
-        datiOggetto.EseguiInterazione();
+        if (datiOggetto != null)
+        {
+            datiOggetto.EseguiInterazione();
+        }
+
+        if (tavoloCorrente != null)
+        {
+            tavoloCorrente.SvuotaTavolo();
+        }
     }
 }

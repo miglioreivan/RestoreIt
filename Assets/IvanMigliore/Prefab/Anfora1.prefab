@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3258315038936443802}
   - component: {fileID: 4031583503965750844}
   - component: {fileID: 9218082067720359059}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Anfora1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129,3 +129,4 @@ MonoBehaviour:
   datiOggetto: {fileID: 0}
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   onPickUp: {fileID: 11400000, guid: 704f7a5dd2bbf2d4386b4d40f8fa1883, type: 2}
+  tavoloCorrente: {fileID: 0}

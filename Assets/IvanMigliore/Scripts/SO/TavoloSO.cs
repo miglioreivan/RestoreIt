@@ -10,6 +10,7 @@ public class TavoloSO : ScriptableObject
 
     public event Action<VaschettaSO> OnVaschettaPosata;
     public event Action<FaseRestauroSO> OnFaseCambiata;
+    public event Action OnTavoloSvuotato;
 
     private void OnEnable()
     {
@@ -28,5 +29,17 @@ public class TavoloSO : ScriptableObject
     {
         faseCorrente = prossima;
         OnFaseCambiata?.Invoke(prossima);
+    }
+
+    public void SvuotaTavolo()
+    {
+        if (vaschettaGameObject != null)
+        {
+            Destroy(vaschettaGameObject);
+            vaschettaGameObject = null;
+        }
+        vaschettaCorrente = null;
+        faseCorrente = null;
+        OnTavoloSvuotato?.Invoke();
     }
 }

@@ -13,6 +13,7 @@ public class StrumentoPulizia : MonoBehaviour
     [SerializeField] private Texture2D mascheraSporcoOriginale;
     [SerializeField, Range(5, 15)] private int rangePaintbrush;
     [SerializeField] private Texture2D cursorTexture;
+    [SerializeField] private Vector2 cursorHotspot = Vector2.zero;
 
     [Header("Progressione Restauro")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -368,7 +369,7 @@ public class StrumentoPulizia : MonoBehaviour
 
     public void SetMouseCursor()
     {
-        Cursor.SetCursor(cursorTexture, Vector2.zero, CursorMode.Auto);
+        Cursor.SetCursor(cursorTexture, cursorHotspot, CursorMode.Auto);
     }
 
     public void ResetMouseCursor()
