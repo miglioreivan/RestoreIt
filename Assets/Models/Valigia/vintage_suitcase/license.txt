@@ -1,0 +1,8 @@
+Model Information:
+* title:	Vintage Suitcase
+* source:	https://sketchfab.com/3d-models/vintage-suitcase-c5cddbff1b26435db917a21e450924ec
+* author:	carlcapu9 (https://sketchfab.com/carlcapu9)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
