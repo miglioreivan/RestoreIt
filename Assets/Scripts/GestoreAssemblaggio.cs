@@ -20,6 +20,7 @@ public class GestoreAssemblaggio : MonoBehaviour
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO triggerAssemblaggio;
     [SerializeField] private Camera cameraRestauro;
+    [SerializeField] private RestoreManager restoreManager;
 
     [Header("Spawn Anfora Centrale")]
     [SerializeField] private Transform puntoSpawnAnfora;
@@ -30,7 +31,7 @@ public class GestoreAssemblaggio : MonoBehaviour
     [SerializeField] private float velocitaRotazione = 100f;
 
     [Header("Eventi")]
-    public UnityEvent onAssemblaggioCompletato;
+    [SerializeField] private UnityEvent onAssemblaggioCompletato;
 
     [Header("Grafica Cursore Drag & Drop")]
     [SerializeField] private Texture2D cursorDragTexture;
@@ -40,9 +41,8 @@ public class GestoreAssemblaggio : MonoBehaviour
     [SerializeField] private Texture2D cursorGlueTexture;
     [SerializeField] private Vector2 cursorGlueHotspot = Vector2.zero;
     
-    [Header("Configurazioni Pennello e Soglie")]
+    [Header("Configurazioni Pennello")]
     [SerializeField] private int rangePennelloColla = 15;
-    [SerializeField] [Range(0.1f, 1f)] private float sogliaCompletamentoColla = 0.70f;
     private string nomeProprietaMascheraColla = "_mascheraColla";
     private string nomeProprietaCollaDipingibile = "_Colla";
 
@@ -75,6 +75,17 @@ public class GestoreAssemblaggio : MonoBehaviour
     [SerializeField] private int totPixelCollaNecessari;
     [SerializeField] private int pixelCollaDipinti;
     [SerializeField] [Range(0f, 1f)] private float progressioneColla = 0f;
+    public float ProgressioneColla => progressioneColla;
+
+    private float SogliaCompletamentoColla
+    {
+        get
+        {
+            if (tavoloCorrente != null && tavoloCorrente.vaschettaCorrente != null)
+                return tavoloCorrente.vaschettaCorrente.SogliaCompletamentoColla;
+            return 0.70f; // Fallback
+        }
+    }
     private Texture2D mascheraCollaUnica;
     private int idProprietaMascheraColla;
     private int idProprietaCollaDipingibile;
@@ -84,11 +95,29 @@ public class GestoreAssemblaggio : MonoBehaviour
 
     private void Awake()
     {
-        idProprietaMascheraColla = Shader.PropertyToID(nomeProprietaMascheraColla);
+        idProprietaMascheraColla    = Shader.PropertyToID(nomeProprietaMascheraColla);
         idProprietaCollaDipingibile = Shader.PropertyToID(nomeProprietaCollaDipingibile);
-        idMostraTerra = Shader.PropertyToID("_mostraTerra");
-        idMostraColla = Shader.PropertyToID("_mostraColla");
-        idMostraPittura = Shader.PropertyToID("_mostraPittura");
+        idMostraTerra    = Shader.PropertyToID("_mostraTerra");
+        idMostraColla    = Shader.PropertyToID("_mostraColla");
+        idMostraPittura  = Shader.PropertyToID("_mostraPittura");
+
+        if (restoreManager == null)
+        {
+            restoreManager = GetComponentInParent<RestoreManager>(true);
+            if (restoreManager == null && transform.parent != null)
+            {
+                restoreManager = transform.parent.GetComponentInChildren<RestoreManager>(true);
+            }
+        }
+
+        if (cameraRestauro == null)
+        {
+            cameraRestauro = GetComponentInChildren<Camera>(true);
+            if (cameraRestauro == null)
+            {
+                cameraRestauro = GetComponentInParent<Camera>(true);
+            }
+        }
     }
 
     private void OnEnable()
@@ -184,9 +213,7 @@ public class GestoreAssemblaggio : MonoBehaviour
 
             Debug.Log($"[GestoreAssemblaggio] ConfigurazioneVaschetta trovata. Pezzi ordinati nella vaschetta da posizionare: {config.pezziOrdinati.Count}");
 
-            mascheraCollaUnica = tavoloCorrente.vaschettaCorrente.mascheraCollaUnica != null 
-                ? tavoloCorrente.vaschettaCorrente.mascheraCollaUnica 
-                : config.mascheraCollaUnica;
+            mascheraCollaUnica = tavoloCorrente.vaschettaCorrente.mascheraCollaUnica;
             ConfiguraMaterialiAnfora();
 
             foreach (var goPezzo in config.pezziOrdinati)
@@ -325,12 +352,12 @@ public class GestoreAssemblaggio : MonoBehaviour
                                 positionBeforeDrag = pezzoTrascinato.gameObject.transform.position;
                                 rotationBeforeDrag = pezzoTrascinato.gameObject.transform.localRotation;
 
-                                // Azzera la rotazione locale (imposta 0,0,0 nell'Inspector sotto localRotation)
-                                pezzoTrascinato.gameObject.transform.localRotation = Quaternion.identity;
-
+                                // Allinea la rotazione del pezzo nel mondo a quella target finale definita dal ghost
+                                pezzoTrascinato.gameObject.transform.rotation = ghostAnfora.transform.rotation * pezzoTrascinato.originalLocalRot;
+                                
                                 // Calcola la posizione target specifica del pezzo nel mondo
                                 Vector3 targetWorldPos = ghostAnfora.transform.TransformPoint(pezzoTrascinato.originalLocalPos);
-
+ 
                                 // Calcola la profondità di questo target specifico rispetto alla camera
                                 float targetDepth = Vector3.Dot(targetWorldPos - cameraRestauro.transform.position, cameraRestauro.transform.forward);
                                 
@@ -338,7 +365,7 @@ public class GestoreAssemblaggio : MonoBehaviour
                                 // Questo assicura che il pezzo sia sempre renderizzato SOPRA (davanti) al suo target specifico e che non ci sia parallasse!
                                 Vector3 planePoint = cameraRestauro.transform.position + cameraRestauro.transform.forward * (targetDepth - 0.05f);
                                 dragPlane = new Plane(-cameraRestauro.transform.forward, planePoint);
-
+ 
                                 // Proietta la posizione iniziale del mouse sul piano di drag e sposta l'oggetto lì,
                                 // centrando perfettamente il pivot del pezzo sotto il cursore del mouse
                                 Ray rayStart = cameraRestauro.ScreenPointToRay(mousePos);
@@ -347,17 +374,17 @@ public class GestoreAssemblaggio : MonoBehaviour
                                     Vector3 pointOnPlane = rayStart.GetPoint(enterStart);
                                     pezzoTrascinato.gameObject.transform.position = pointOnPlane;
                                 }
-
+ 
                                 // Imposta l'offset a zero in modo che l'oggetto rimanga perfettamente centrato rispetto al mouse
                                 dragOffset = Vector3.zero;
-
+ 
                                 Debug.Log($"[GestoreAssemblaggio] Inizio drag del pezzo '{pezzoTrascinato.gameObject.name}' a profondità target: {targetDepth - 0.05f}");
                                 
                                 if (cursorDragTexture != null)
                                 {
                                     Cursor.SetCursor(cursorDragTexture, cursorDragHotspot, CursorMode.Auto);
                                 }
-
+ 
                                 trovato = true;
                                 break;
                             }
@@ -375,10 +402,10 @@ public class GestoreAssemblaggio : MonoBehaviour
                     {
                         Vector3 targetPos = ray.GetPoint(enter) + dragOffset;
                         pezzoTrascinato.gameObject.transform.position = targetPos;
-
-                        // Mantiene la rotazione locale a 0,0,0 durante tutto il movimento
-                        pezzoTrascinato.gameObject.transform.localRotation = Quaternion.identity;
-
+ 
+                        // Mantiene la rotazione target corretta durante tutto il movimento
+                        pezzoTrascinato.gameObject.transform.rotation = ghostAnfora.transform.rotation * pezzoTrascinato.originalLocalRot;
+ 
                         VerificaSnap(pezzoTrascinato);
                     }
                 }
@@ -465,7 +492,7 @@ public class GestoreAssemblaggio : MonoBehaviour
 
                 Debug.Log($"[GestoreAssemblaggio] Progresso Applicazione Colla: {pixelCollaDipinti}/{totPixelCollaNecessari} ({progressioneColla * 100f:F1}%)");
 
-                if (progressioneColla >= sogliaCompletamentoColla)
+                if (progressioneColla >= SogliaCompletamentoColla)
                 {
                     ControllaCompletamento();
                 }
@@ -734,7 +761,7 @@ public class GestoreAssemblaggio : MonoBehaviour
 
     private void ControllaCompletamento()
     {
-        if (statoCorrente == StatoAssemblaggio.IncollaggioBordi && progressioneColla >= sogliaCompletamentoColla)
+        if (statoCorrente == StatoAssemblaggio.IncollaggioBordi && progressioneColla >= SogliaCompletamentoColla)
         {
             StartCoroutine(SequenzaCompletamento());
         }
@@ -894,15 +921,14 @@ public class GestoreAssemblaggio : MonoBehaviour
         yield return new WaitForSeconds(0.4f);
 
         // 3. Ferma l'interazione nel RestoreManager (sblocca il player, ripristina la camera)
-        RestoreManager manager = FindFirstObjectByType<RestoreManager>();
-        if (manager != null)
+        if (restoreManager != null)
         {
-            manager.CompletaRestauro();
-            manager.StopInteraction();
+            restoreManager.CompletaRestauro();
+            restoreManager.StopInteraction();
         }
         else
         {
-            Debug.LogWarning("[GestoreAssemblaggio] RestoreManager non trovato nella scena al completamento!");
+            Debug.LogWarning("[GestoreAssemblaggio] RestoreManager non trovato (né assegnato né trovato nella gerarchia parent).");
         }
 
         // 4. Notifica il completamento

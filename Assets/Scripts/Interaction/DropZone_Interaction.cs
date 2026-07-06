@@ -6,25 +6,23 @@ public class UnityEventDatiOggetto : UnityEvent<GameObject> { }
 
 public class DropZone_Interaction : MonoBehaviour, IInteractable
 {
+    public enum TipoOggettoAccettato
+    {
+        Qualsiasi,
+        SoloAnfore,
+        SoloMosaici
+    }
+
     [Header("Dati")]
     [SerializeField] private InventarioManoSO manoGiocatore;
     [SerializeField] private Transform puntoRelease;
     [SerializeField] private TavoloSO tavoloCorrente;
+    [SerializeField] private TipoOggettoAccettato tipoAccettato = TipoOggettoAccettato.Qualsiasi;
 
     private void Awake()
     {
         if (manoGiocatore == null)
-        {
-            FirstPersonController controller = FindFirstObjectByType<FirstPersonController>();
-            if (controller != null)
-            {
-                manoGiocatore = controller.Inventario;
-            }
-            else
-            {
-                Debug.LogWarning($"[DropZone_Interaction] '{gameObject.name}': manoGiocatore è null e FirstPersonController non trovato nella scena.");
-            }
-        }
+            Debug.LogError($"[DropZone_Interaction] '{gameObject.name}': manoGiocatore non assegnato nell'Inspector.");
     }
 
     [Header("Eventi")]
@@ -60,16 +58,47 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
 
     public bool canInteract()
     {
-        return manoGiocatore.currentGO != null && (tavoloCorrente == null || tavoloCorrente.vaschettaCorrente == null);
+        if (manoGiocatore == null || manoGiocatore.currentGO == null)
+            return false;
+
+        if (tavoloCorrente != null && tavoloCorrente.oggettoCorrente != null)
+            return false;
+
+        DatiOggettoSO oggetto = manoGiocatore.oggettoCorrente;
+        if (oggetto == null)
+            return false;
+
+        switch (tipoAccettato)
+        {
+            case TipoOggettoAccettato.SoloAnfore:
+                return oggetto is VaschettaSO;
+            case TipoOggettoAccettato.SoloMosaici:
+                return oggetto is MosaicoSO;
+            case TipoOggettoAccettato.Qualsiasi:
+            default:
+                return true;
+        }
     }
 
     public string GetInteractionText()
     {
-        if (manoGiocatore.currentGO == null)
+        if (manoGiocatore == null || manoGiocatore.currentGO == null)
             return "Non hai un oggetto da rilasciare.";
         
-        if (tavoloCorrente != null && tavoloCorrente.vaschettaCorrente != null)
-            return "Il tavolo deve essere vuoto per posare una nuova vaschetta.";
+        if (tavoloCorrente != null && tavoloCorrente.oggettoCorrente != null)
+            return "Il tavolo deve essere vuoto per posare un nuovo oggetto.";
+
+        DatiOggettoSO oggetto = manoGiocatore.oggettoCorrente;
+        if (oggetto != null)
+        {
+            if (tipoAccettato == TipoOggettoAccettato.SoloAnfore && !(oggetto is VaschettaSO))
+                return "Questo tavolo accetta solo anfore.";
+            
+            if (tipoAccettato == TipoOggettoAccettato.SoloMosaici && !(oggetto is MosaicoSO))
+                return "Questo tavolo accetta solo mosaici.";
+
+            return $"[E] Rilascia {oggetto.nomeOggetto}";
+        }
 
         return "[E] Rilascia";
     }
@@ -85,10 +114,10 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         lastReleasedItem = manoGiocatore.currentGO;
         GameObject go = manoGiocatore.currentGO;
 
-        if (tavoloCorrente != null && manoGiocatore.oggettoCorrente is VaschettaSO vaschetta)
+        if (tavoloCorrente != null && manoGiocatore.oggettoCorrente != null)
         {
             tavoloCorrente.vaschettaGameObject = go;
-            tavoloCorrente.PosaVaschetta(vaschetta);
+            tavoloCorrente.PosaOggetto(manoGiocatore.oggettoCorrente);
         }
 
         manoGiocatore.oggettoCorrente = null;

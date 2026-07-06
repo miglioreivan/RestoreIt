@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 636b0b4935d6462478ab0578c88c806e, type: 3}
+  m_Name: Vaschetta3
+  m_EditorClassIdentifier: Assembly-CSharp::VaschettaSO
+  nomeOggetto: Anfora2
+  raccogliOggetto: {fileID: 11400000, guid: 704f7a5dd2bbf2d4386b4d40f8fa1883, type: 2}
+  _prefabAnfora: {fileID: 3925882508175755076, guid: a890431f0a613254885530689dbc09db, type: 3}
+  _prefabPezzi: {fileID: 0}
+  _prefabAnforaIntera: {fileID: 8094961643443772075, guid: 6bb896519bac7b74393598c0008bd9a9, type: 3}
+  _mascheraCollaUnica: {fileID: 0}
+  sogliaCompletamentoColla: 0.85

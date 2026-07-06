@@ -16,17 +16,7 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
     private void Awake()
     {
         if (manoGiocatore == null)
-        {
-            FirstPersonController controller = FindFirstObjectByType<FirstPersonController>();
-            if (controller != null)
-            {
-                manoGiocatore = controller.Inventario;
-            }
-            else
-            {
-                Debug.LogWarning($"[PedestalDropZone] '{gameObject.name}': manoGiocatore è null e FirstPersonController non trovato nella scena.");
-            }
-        }
+            Debug.LogError($"[PedestalDropZone] '{gameObject.name}': manoGiocatore non assegnato nell'Inspector.");
     }
 
     public bool canInteract()

@@ -4,25 +4,28 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NuovoTavolo", menuName = "ScriptableObjects/Stato/Tavolo")]
 public class TavoloSO : ScriptableObject
 {
+    public DatiOggettoSO oggettoCorrente;
     public VaschettaSO vaschettaCorrente;
     public GameObject vaschettaGameObject;
     public FaseRestauroSO faseCorrente;
 
-    public event Action<VaschettaSO> OnVaschettaPosata;
+    public event Action<DatiOggettoSO> OnOggettoPosato;
     public event Action<FaseRestauroSO> OnFaseCambiata;
     public event Action OnTavoloSvuotato;
 
     private void OnEnable()
     {
+        oggettoCorrente = null;
         vaschettaCorrente = null;
         vaschettaGameObject = null;
         faseCorrente = null;
     }
 
-    public void PosaVaschetta(VaschettaSO vaschetta)
+    public void PosaOggetto(DatiOggettoSO oggetto)
     {
-        vaschettaCorrente = vaschetta;
-        OnVaschettaPosata?.Invoke(vaschetta);
+        oggettoCorrente = oggetto;
+        vaschettaCorrente = oggetto as VaschettaSO;
+        OnOggettoPosato?.Invoke(oggetto);
     }
 
     public void AvanzaFase(FaseRestauroSO prossima)
@@ -38,6 +41,7 @@ public class TavoloSO : ScriptableObject
             Destroy(vaschettaGameObject);
             vaschettaGameObject = null;
         }
+        oggettoCorrente = null;
         vaschettaCorrente = null;
         faseCorrente = null;
         OnTavoloSvuotato?.Invoke();

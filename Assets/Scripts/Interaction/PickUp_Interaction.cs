@@ -4,7 +4,6 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
 {
     [SerializeField] private DatiOggettoSO datiOggetto;
     [SerializeField] private InventarioManoSO manoGiocatore;
-    [SerializeField] private VoidEventChannelSO onPickUp;
 
     [Header("Restauro / Tavolo (Opzionale)")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -12,17 +11,7 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
     private void Awake()
     {
         if (manoGiocatore == null)
-        {
-            FirstPersonController controller = FindFirstObjectByType<FirstPersonController>();
-            if (controller != null)
-            {
-                manoGiocatore = controller.Inventario;
-            }
-            else
-            {
-                Debug.LogWarning($"[PickUp_Interaction] '{gameObject.name}': manoGiocatore è null e FirstPersonController non trovato nella scena.");
-            }
-        }
+            Debug.LogError($"[PickUp_Interaction] '{gameObject.name}': manoGiocatore non assegnato nell'Inspector.");
     }
 
     public void ImpostaTavolo(TavoloSO tavolo)
