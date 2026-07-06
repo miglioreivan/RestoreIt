@@ -17,5 +17,5 @@ MonoBehaviour:
   _prefabAnfora: {fileID: 3925882508175755076, guid: a890431f0a613254885530689dbc09db, type: 3}
   _prefabPezzi: {fileID: 0}
   _prefabAnforaIntera: {fileID: 8094961643443772075, guid: 6bb896519bac7b74393598c0008bd9a9, type: 3}
-  _mascheraCollaUnica: {fileID: 0}
+  _mascheraCollaUnica: {fileID: 2800000, guid: 3b3b298ffbbbb304fa930a3e0bb84637, type: 3}
   sogliaCompletamentoColla: 0.85

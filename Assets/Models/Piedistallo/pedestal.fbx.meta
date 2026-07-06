@@ -3,7 +3,12 @@ guid: 49981ace05b024a87bd1cc94c7567eb3
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pedestal
+    second: {fileID: 2100000, guid: 221874e513832844ca09c206a237f8b0, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

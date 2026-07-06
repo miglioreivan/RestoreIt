@@ -3,7 +3,72 @@ guid: bc0c2c48c38e94fe39ff97bea3f51e2d
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: GREEN MARKER
+    second: {fileID: 2100000, guid: ff6ea2751bedf9f45b02f7495f255ef5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: METAL CHROME
+    second: {fileID: 2100000, guid: 48ab9da79e798a7448941b1a75168e08, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: PLASTIC BLACK
+    second: {fileID: 2100000, guid: 1fdc57f8e7be95442addc1920cc8f81e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: granite
+    second: {fileID: 2100000, guid: aa9eddfbe4bbb1346904324fc2831e63, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metal
+    second: {fileID: 2100000, guid: e33b3061452565e4dbef5db15b9e9da2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metalic blue
+    second: {fileID: 2100000, guid: 17c67b84bea7a7143be5c4ad1cc0da4a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metalic blue.001
+    second: {fileID: 2100000, guid: df6629303e6dbf0428dc624ba9e136a5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pencil paint
+    second: {fileID: 2100000, guid: d59fd5877dbc9b84482ccc3be6ed95b0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: plastic grey
+    second: {fileID: 2100000, guid: 417116cbd7e22e743b69eeaf7ce39326, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: plastic yelow
+    second: {fileID: 2100000, guid: 5bd608a846fc21e4ebe4b7bfb4f25004, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ruller
+    second: {fileID: 2100000, guid: e8adabdc9afeec9458d3949d71410856, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wood pencil
+    second: {fileID: 2100000, guid: 8582b58ee2b296d469e3fd220e3b5912, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yelow marker
+    second: {fileID: 2100000, guid: b21e9948c2772bd4896a074bc5a3822b, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

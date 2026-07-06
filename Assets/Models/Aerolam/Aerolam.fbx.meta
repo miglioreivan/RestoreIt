@@ -3,7 +3,17 @@ guid: 9aca7c71fb7db4b19959918c6db0c85c
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Alluminio
+    second: {fileID: 2100000, guid: e70d42ecd1c3e9443becd4c7f9bf5ee7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Fiberglass
+    second: {fileID: 2100000, guid: c13385b21a963594c9ed29432d85a42d, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

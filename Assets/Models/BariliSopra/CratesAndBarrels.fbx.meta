@@ -3,7 +3,27 @@ guid: d9fa2d389bcb94611aba328e605d9319
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Barrel
+    second: {fileID: 2100000, guid: e56c337f84dfc624a802ff3638c7397e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cloth
+    second: {fileID: 2100000, guid: 135059809b79bbf4fad4327f6c731e60, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cloth2
+    second: {fileID: 2100000, guid: 96cb3661bad6f71429e44cdf6c9e8aa3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Crate
+    second: {fileID: 2100000, guid: fd299d70dc0381147a11b4dfdbfa4a37, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

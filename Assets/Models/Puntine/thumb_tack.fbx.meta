@@ -3,7 +3,32 @@ guid: 00ef79f7ecbe74f69bb61fc7b38ff281
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blue_blinn
+    second: {fileID: 2100000, guid: 89e824bd4d3ae30489d171f01b474c81, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: purple__blinn
+    second: {fileID: 2100000, guid: 08f3f578a92a94d4f800629b80e86b9f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: red_blinn
+    second: {fileID: 2100000, guid: 6a2a179c10ef55743a311c0113c37d92, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: silver
+    second: {fileID: 2100000, guid: 332cd9014c9e72c46bcd7171881dd3b5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: thumb_tack_gold
+    second: {fileID: 2100000, guid: c6420c1c6769c494dab093333643f7f3, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
