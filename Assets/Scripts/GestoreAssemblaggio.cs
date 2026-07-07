@@ -64,6 +64,7 @@ public class GestoreAssemblaggio : MonoBehaviour
     private Vector3 dragOffset;
     private Vector3 positionBeforeDrag;
     private Quaternion rotationBeforeDrag;
+    private Vector3 scaleBeforeDrag;
     private bool cameraTransitionFinished = false;
 
     // Stato della colla
@@ -348,9 +349,22 @@ public class GestoreAssemblaggio : MonoBehaviour
                             {
                                 pezzoTrascinato = pezzo;
                                 
-                                // Salva la posizione e la rotazione iniziale per poter fare il fallback in caso di mancato snap
+                                // Salva la posizione, rotazione e scala iniziale per poter fare il fallback in caso di mancato snap
                                 positionBeforeDrag = pezzoTrascinato.gameObject.transform.position;
                                 rotationBeforeDrag = pezzoTrascinato.gameObject.transform.localRotation;
+                                scaleBeforeDrag = pezzoTrascinato.gameObject.transform.localScale;
+
+                                // Calcola e applica la scala locale temporanea per il drag per evitare distorsioni causate da scale dei parent differenti
+                                if (ghostAnfora != null)
+                                {
+                                    Vector3 parentLossyScale = pezzoTrascinato.gameObject.transform.parent != null ? pezzoTrascinato.gameObject.transform.parent.lossyScale : Vector3.one;
+                                    Vector3 targetWorldScale = Vector3.Scale(ghostAnfora.transform.lossyScale, pezzoTrascinato.originalLocalScale);
+                                    pezzoTrascinato.gameObject.transform.localScale = new Vector3(
+                                        parentLossyScale.x != 0 ? targetWorldScale.x / parentLossyScale.x : targetWorldScale.x,
+                                        parentLossyScale.y != 0 ? targetWorldScale.y / parentLossyScale.y : targetWorldScale.y,
+                                        parentLossyScale.z != 0 ? targetWorldScale.z / parentLossyScale.z : targetWorldScale.z
+                                    );
+                                }
 
                                 // Allinea la rotazione del pezzo nel mondo a quella target finale definita dal ghost
                                 pezzoTrascinato.gameObject.transform.rotation = ghostAnfora.transform.rotation * pezzoTrascinato.originalLocalRot;
@@ -377,7 +391,8 @@ public class GestoreAssemblaggio : MonoBehaviour
  
                                 // Imposta l'offset a zero in modo che l'oggetto rimanga perfettamente centrato rispetto al mouse
                                 dragOffset = Vector3.zero;
- 
+
+                                Debug.Log($"[DEBUG SCALE] Dragging piece '{pezzoTrascinato.gameObject.name}', lossyScale = {pezzoTrascinato.gameObject.transform.lossyScale}");
                                 Debug.Log($"[GestoreAssemblaggio] Inizio drag del pezzo '{pezzoTrascinato.gameObject.name}' a profondità target: {targetDepth - 0.05f}");
                                 
                                 if (cursorDragTexture != null)
@@ -419,6 +434,7 @@ public class GestoreAssemblaggio : MonoBehaviour
                     {
                         pezzoTrascinato.gameObject.transform.position = positionBeforeDrag;
                         pezzoTrascinato.gameObject.transform.localRotation = rotationBeforeDrag;
+                        pezzoTrascinato.gameObject.transform.localScale = scaleBeforeDrag;
                         Debug.Log($"[GestoreAssemblaggio] Rilascio senza snap. Ritorno di '{pezzoTrascinato.gameObject.name}' nella vaschetta.");
                     }
                     pezzoTrascinato = null;
@@ -728,6 +744,8 @@ public class GestoreAssemblaggio : MonoBehaviour
             pezzo.gameObject.transform.localRotation = pezzo.originalLocalRot;
             pezzo.gameObject.transform.localScale = pezzo.originalLocalScale;
 
+            Debug.Log($"[DEBUG SCALE] Snapped piece '{pezzo.gameObject.name}', lossyScale = {pezzo.gameObject.transform.lossyScale}");
+
             if (pezzo.collider != null)
                 pezzo.collider.enabled = false;
 
@@ -909,9 +927,13 @@ public class GestoreAssemblaggio : MonoBehaviour
                 if (p.gameObject != null)
                 {
                     Renderer r = p.gameObject.GetComponent<Renderer>();
-                    if (r != null && r.materials.Length > 1)
+                    if (r != null)
                     {
-                        r.materials = new Material[] { r.materials[0] };
+                        Material[] mats = r.materials;
+                        if (mats.Length > 1)
+                        {
+                            r.materials = new Material[] { mats[0] };
+                        }
                     }
                 }
             }
