@@ -44,8 +44,28 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
         manoGiocatore.oggettoCorrente = datiOggetto;
         manoGiocatore.currentGO = this.gameObject;
 
+        // Salva la scala globale originale prima del cambio di parent per evitare distorsioni
+        Vector3 targetWorldScale = transform.lossyScale;
+
         transform.SetParent(manoGiocatore.puntoMano, false);
         transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+
+        // Ricalcola la scala locale in base alla scala globale del nuovo parent
+        if (manoGiocatore.puntoMano != null)
+        {
+            Vector3 parentLossyScale = manoGiocatore.puntoMano.lossyScale;
+            transform.localScale = new Vector3(
+                parentLossyScale.x != 0 ? targetWorldScale.x / parentLossyScale.x : targetWorldScale.x,
+                parentLossyScale.y != 0 ? targetWorldScale.y / parentLossyScale.y : targetWorldScale.y,
+                parentLossyScale.z != 0 ? targetWorldScale.z / parentLossyScale.z : targetWorldScale.z
+            );
+        }
+        else
+        {
+            transform.localScale = targetWorldScale;
+        }
+
         if (TryGetComponent(out Collider col))
             col.enabled = false;
 

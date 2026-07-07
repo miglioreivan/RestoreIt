@@ -12,7 +12,7 @@ public class StrumentoPulizia : MonoBehaviour
 
     [Header("Impostazioni Pennello/Spugna")]
     [SerializeField] private Texture2D mascheraSporcoOriginale;
-    [SerializeField, Range(15, 25)] private int rangePaintbrush;
+    [SerializeField] private int rangePaintbrush = 30;
     [SerializeField] private Texture2D cursorTexture;
     [SerializeField] private Vector2 cursorHotspot = Vector2.zero;
 

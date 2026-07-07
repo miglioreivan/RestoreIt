@@ -67,10 +67,28 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
         manoGiocatore.oggettoCorrente = null;
         manoGiocatore.currentGO = null;
 
+        // Salva la scala globale originale prima del cambio di parent per evitare distorsioni
+        Vector3 targetWorldScale = go.transform.lossyScale;
+
         // Posiziona l'oggetto sul piedistallo
         go.transform.SetParent(puntoRelease, false);
         go.transform.localPosition = Vector3.zero;
         go.transform.localRotation = Quaternion.identity;
+
+        // Ricalcola la scala locale in base alla scala globale del nuovo parent
+        if (puntoRelease != null)
+        {
+            Vector3 parentLossyScale = puntoRelease.lossyScale;
+            go.transform.localScale = new Vector3(
+                parentLossyScale.x != 0 ? targetWorldScale.x / parentLossyScale.x : targetWorldScale.x,
+                parentLossyScale.y != 0 ? targetWorldScale.y / parentLossyScale.y : targetWorldScale.y,
+                parentLossyScale.z != 0 ? targetWorldScale.z / parentLossyScale.z : targetWorldScale.z
+            );
+        }
+        else
+        {
+            go.transform.localScale = targetWorldScale;
+        }
 
         // Disabilita il collider dell'oggetto posizionato per bloccarlo
         if (go.TryGetComponent(out Collider objCollider))
