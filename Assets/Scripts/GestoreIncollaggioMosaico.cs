@@ -62,6 +62,12 @@ public class GestoreIncollaggioMosaico : MonoBehaviour
 
     private void Awake()
     {
+        if (layerRestauro.value == 0)
+        {
+            layerRestauro = LayerMask.GetMask("Restauro");
+            Debug.Log($"[GestoreIncollaggioMosaico] layerRestauro vuoto. Impostato automaticamente al layer 'Restauro' (valore: {layerRestauro.value}).");
+        }
+
         if (cameraRestauro == null)
         {
             cameraRestauro = GetComponentInChildren<Camera>(true);

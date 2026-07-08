@@ -72,6 +72,12 @@ public class GestoreIncollaggio : MonoBehaviour
         idMostraColla    = Shader.PropertyToID("_mostraColla");
         idMostraPittura  = Shader.PropertyToID("_mostraPittura");
 
+        if (layerRestauro.value == 0)
+        {
+            layerRestauro = LayerMask.GetMask("Restauro");
+            Debug.Log($"[GestoreIncollaggio] layerRestauro vuoto. Impostato automaticamente al layer 'Restauro' (valore: {layerRestauro.value}).");
+        }
+
         if (restoreManager == null)
         {
             restoreManager = GetComponentInParent<RestoreManager>(true);

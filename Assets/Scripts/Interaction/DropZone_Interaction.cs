@@ -61,6 +61,9 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         if (manoGiocatore == null || manoGiocatore.currentGO == null)
             return false;
 
+        if (manoGiocatore.currentGO.GetComponent<OggettoRestaurato>() != null)
+            return false;
+
         if (tavoloCorrente != null && tavoloCorrente.oggettoCorrente != null)
             return false;
 
@@ -84,6 +87,9 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
     {
         if (manoGiocatore == null || manoGiocatore.currentGO == null)
             return "Non hai un oggetto da rilasciare.";
+
+        if (manoGiocatore.currentGO.GetComponent<OggettoRestaurato>() != null)
+            return "Non puoi rimettere sul tavolo un oggetto già restaurato!";
         
         if (tavoloCorrente != null && tavoloCorrente.oggettoCorrente != null)
             return "Il tavolo deve essere vuoto per posare un nuovo oggetto.";

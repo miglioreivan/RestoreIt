@@ -76,6 +76,14 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
 
         if (tavoloCorrente != null)
         {
+            if (tavoloCorrente.vaschettaGameObject == this.gameObject)
+            {
+                tavoloCorrente.vaschettaGameObject = null;
+            }
+            if (tavoloCorrente.anforaAssemblata == this.gameObject)
+            {
+                tavoloCorrente.anforaAssemblata = null;
+            }
             tavoloCorrente.SvuotaTavolo();
         }
     }

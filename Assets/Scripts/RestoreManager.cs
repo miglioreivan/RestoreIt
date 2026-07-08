@@ -192,6 +192,27 @@ public class RestoreManager : MonoBehaviour, IInteractable
             istruzioniText.text = "Restauro completato!";
             istruzioniText.gameObject.SetActive(true);
         }
+
+        // Riattiva il collider dell'oggetto restaurato per permettere il pickup
+        GameObject objRestaurato = tavoloCorrente.vaschettaGameObject != null ? tavoloCorrente.vaschettaGameObject : tavoloCorrente.anforaAssemblata;
+        if (objRestaurato != null)
+        {
+            if (objRestaurato.GetComponent<OggettoRestaurato>() == null)
+            {
+                objRestaurato.AddComponent<OggettoRestaurato>();
+                Debug.Log($"[RestoreManager] Aggiunto componente OggettoRestaurato a '{objRestaurato.name}'.");
+            }
+
+            Collider col = objRestaurato.GetComponent<Collider>();
+            if (col != null)
+            {
+                col.enabled = true;
+                Debug.Log($"[RestoreManager] Riattivato collider su '{objRestaurato.name}' per renderlo raccoglibile.");
+            }
+        }
+
+        // Uscita automatica dopo un breve ritardo per ripristinare il controllo del player
+        StartCoroutine(AutoExitRestoration(1.5f));
     }
 
     // IInteractable
@@ -444,5 +465,11 @@ public class RestoreManager : MonoBehaviour, IInteractable
             Debug.Log($"{indent}'{child.name}' (Attivo: {child.gameObject.activeSelf}) -> {compList}");
             StampaGerarchiaEComponenti(child, livello + 1);
         }
+    }
+
+    private IEnumerator AutoExitRestoration(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        StopInteraction();
     }
 }

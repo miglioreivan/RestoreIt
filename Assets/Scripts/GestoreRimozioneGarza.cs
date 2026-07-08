@@ -25,6 +25,15 @@ public class GestoreRimozioneGarza : MonoBehaviour
     private bool cameraTransitionFinished = false;
     private GameObject oggettoDaRimuovere;
 
+    private void Awake()
+    {
+        if (layerRestauro.value == 0)
+        {
+            layerRestauro = LayerMask.GetMask("Restauro");
+            Debug.Log($"[GestoreRimozioneGarza] layerRestauro vuoto. Impostato automaticamente al layer 'Restauro' (valore: {layerRestauro.value}).");
+        }
+    }
+
     private void OnEnable()
     {
         if (tavoloCorrente != null)
@@ -145,6 +154,27 @@ public class GestoreRimozioneGarza : MonoBehaviour
         Destroy(oggettoDaRimuovere);
         oggettoDaRimuovere = null;
         
+        if (tavoloCorrente != null && tavoloCorrente.vaschettaGameObject != null)
+        {
+            int idMostraPittura = Shader.PropertyToID("_mostraPittura");
+            foreach (var r in tavoloCorrente.vaschettaGameObject.GetComponentsInChildren<Renderer>())
+            {
+                Material[] mats = r.materials;
+                bool modified = false;
+                for (int i = 0; i < mats.Length; i++)
+                {
+                    if (mats[i] != null && mats[i].HasProperty(idMostraPittura))
+                    {
+                        mats[i].SetFloat(idMostraPittura, 0f);
+                        modified = true;
+                    }
+                }
+                if (modified)
+                    r.materials = mats;
+            }
+            Debug.Log("[GestoreRimozioneGarza] Impostato _mostraPittura a 0 su tutti i materiali del mosaico.");
+        }
+
         StartCoroutine(AvanzaFaseRitardato());
     }
 
