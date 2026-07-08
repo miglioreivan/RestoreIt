@@ -21,6 +21,7 @@ public class StrumentoPulizia : MonoBehaviour
     [SerializeField] private FaseRestauroSO faseSuccessiva;
     [SerializeField] private float progression = 0f;
     public float Progression => progression;
+    [SerializeField] [Range(0.1f, 1f)] private float sogliaCompletamentoPulizia = 0.95f;
     [SerializeField] private UnityEvent<VaschettaSO> eventoPuliziaCompletata;
 
     [System.Serializable]
@@ -112,6 +113,7 @@ public class StrumentoPulizia : MonoBehaviour
     public void CountVisiblePixel()
     {
         Debug.Log("[StrumentoPulizia] CountVisiblePixel avviato.");
+        ConfiguraCollidersMosaico(true);
         SincronizzaRenderers();
 
         totPixel = 0;
@@ -156,7 +158,7 @@ public class StrumentoPulizia : MonoBehaviour
                                     bool daModificare = hitMat.HasProperty(idMascheraSporco);
                                     if (daModificare)
                                     {
-                                        Vector2 uv = hit.textureCoord;
+                                        Vector2 uv = WrapUV(hit.textureCoord);
                                         int pixelX = (int)(uv.x * textureRes);
                                         int pixelY = (int)(uv.y * textureRes);
                                         SegnaAreaVisibile(pixelX, pixelY, pixelRaggiungibili, raggioPrecisioneTelecamera);
@@ -178,20 +180,54 @@ public class StrumentoPulizia : MonoBehaviour
 
         Debug.Log($"[StrumentoPulizia] Scansione completata. Raycast lanciati: {raycastLanciati}, Colpiti: {raycastColpiti}. Pixel sporchi visibili totali calcolati: {totPixel}");
     }
-
     private void SincronizzaRenderers()
     {
         Debug.Log("[StrumentoPulizia] SincronizzaRenderers avviato.");
-        Renderer[] tuttiIRenderer = FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        Debug.Log($"[StrumentoPulizia] SincronizzaRenderers - Trovati {tuttiIRenderer.Length} renderer totali nella scena.");
+        if (tavoloCorrente == null)
+        {
+            Debug.LogError("[StrumentoPulizia] SincronizzaRenderers - tavoloCorrente è NULL!");
+            return;
+        }
+        if (tavoloCorrente.vaschettaGameObject == null)
+        {
+            Debug.LogError("[StrumentoPulizia] SincronizzaRenderers - vaschettaGameObject è NULL!");
+            return;
+        }
 
+        GameObject activeObj = tavoloCorrente.vaschettaGameObject;
+        Debug.Log($"[StrumentoPulizia] SincronizzaRenderers - Oggetto attivo sul tavolo: '{activeObj.name}'");
+
+        List<Renderer> list = new List<Renderer>();
+        list.AddRange(activeObj.GetComponentsInChildren<Renderer>(true));
+
+        Transform current = activeObj.transform.parent;
+        while (current != null)
+        {
+            Transform planeT = current.Find("Plane");
+            if (planeT != null)
+            {
+                Renderer r = planeT.GetComponent<Renderer>();
+                if (r != null)
+                {
+                    list.Add(r);
+                    Debug.Log($"[StrumentoPulizia] SincronizzaRenderers - Trovato Plane del tavolo '{current.name}', aggiunto alla lista.");
+                    break;
+                }
+            }
+            if (current.parent == null) break;
+            current = current.parent;
+        }
+
+        Debug.Log($"[StrumentoPulizia] SincronizzaRenderers - Trovati {list.Count} renderer da controllare.");
         int renderersModificati = 0;
 
-        foreach (Renderer rend in tuttiIRenderer)
+        foreach (Renderer rend in list)
         {
             int layerDelRenderer = rend.gameObject.layer;
             int layerMaskValue = layerRestauro.value;
             bool layerMatches = (layerMaskValue & (1 << layerDelRenderer)) != 0;
+
+            Debug.Log($"[StrumentoPulizia-Debug-Sincronizza] Controllo Renderer '{rend.name}' (Layer: {LayerMask.LayerToName(layerDelRenderer)}, Compatibile: {layerMatches})");
 
             if (!layerMatches) continue;
 
@@ -204,20 +240,26 @@ public class StrumentoPulizia : MonoBehaviour
                 if (sharedMats[i] != null)
                 {
                     bool daModificare = sharedMats[i].HasProperty(idMascheraSporco);
+                    Debug.Log($"[StrumentoPulizia-Debug-Sincronizza] Materiale '{sharedMats[i].name}' submesh {i} ha '_MascheraSporco'? {daModificare}");
 
                     if (daModificare)
                     {
                         if (instanceMats == null) instanceMats = rend.materials;
                         instanceMats[i].SetTexture(idMascheraSporco, textureInstance);
 
-                        if (instanceMats[i].HasProperty(idMostraTerra))
+                        bool haMostraTerra = instanceMats[i].HasProperty(idMostraTerra);
+                        bool haMostraColla = instanceMats[i].HasProperty(idMostraColla);
+                        bool haMostraPittura = instanceMats[i].HasProperty(idMostraPittura);
+
+                        Debug.Log($"[StrumentoPulizia-Debug-Sincronizza] Impostazione parametri su '{sharedMats[i].name}': haMostraTerra={haMostraTerra}, haMostraColla={haMostraColla}, haMostraPittura={haMostraPittura}");
+
+                        if (haMostraTerra)
                             instanceMats[i].SetFloat(idMostraTerra, 1f);
-                        if (instanceMats[i].HasProperty(idMostraColla))
+                        if (haMostraColla)
                             instanceMats[i].SetFloat(idMostraColla, 0f);
-                        if (instanceMats[i].HasProperty(idMostraPittura))
+                        if (haMostraPittura)
                             instanceMats[i].SetFloat(idMostraPittura, 0f);
 
-                        Debug.Log($"[StrumentoPulizia] SincronizzaRenderers - Assegnata textureInstance a '{rend.name}' materiale[{i}]: '{sharedMats[i].name}'. Impostato _mostraTerra=1, _mostraColla=0, _mostraPittura=0");
                         modified = true;
                     }
                 }
@@ -236,12 +278,46 @@ public class StrumentoPulizia : MonoBehaviour
     private void ImpostaFaseFinePuliziaSuMateriali()
     {
         Debug.Log("[StrumentoPulizia] ImpostaFaseFinePuliziaSuMateriali avviato.");
-        Renderer[] tuttiIRenderer = FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        
+        if (tavoloCorrente == null || tavoloCorrente.vaschettaGameObject == null)
+        {
+            Debug.LogError("[StrumentoPulizia] ImpostaFaseFinePuliziaSuMateriali - tavoloCorrente o vaschettaGameObject è NULL!");
+            return;
+        }
+
+        GameObject activeObj = tavoloCorrente.vaschettaGameObject;
+        Debug.Log($"[StrumentoPulizia] ImpostaFaseFinePuliziaSuMateriali - Oggetto attivo sul tavolo: '{activeObj.name}'");
+
+        List<Renderer> list = new List<Renderer>();
+        list.AddRange(activeObj.GetComponentsInChildren<Renderer>(true));
+
+        Transform current = activeObj.transform.parent;
+        while (current != null)
+        {
+            Transform planeT = current.Find("Plane");
+            if (planeT != null)
+            {
+                Renderer r = planeT.GetComponent<Renderer>();
+                if (r != null)
+                {
+                    list.Add(r);
+                    Debug.Log($"[StrumentoPulizia] ImpostaFaseFinePuliziaSuMateriali - Trovato Plane del tavolo '{current.name}', aggiunto alla lista.");
+                    break;
+                }
+            }
+            if (current.parent == null) break;
+            current = current.parent;
+        }
+
         int modificati = 0;
 
-        foreach (Renderer rend in tuttiIRenderer)
+        foreach (Renderer rend in list)
         {
-            if ((layerRestauro.value & (1 << rend.gameObject.layer)) == 0) continue;
+            int layerDelRenderer = rend.gameObject.layer;
+            int layerMaskValue = layerRestauro.value;
+            bool layerMatches = (layerMaskValue & (1 << layerDelRenderer)) != 0;
+
+            if (!layerMatches) continue;
 
             Material[] sharedMats = rend.sharedMaterials;
             Material[] instanceMats = null;
@@ -252,19 +328,23 @@ public class StrumentoPulizia : MonoBehaviour
                 if (sharedMats[i] != null)
                 {
                     bool daModificare = sharedMats[i].HasProperty(idMascheraSporco);
-
                     if (daModificare)
                     {
                         if (instanceMats == null) instanceMats = rend.materials;
 
-                        if (instanceMats[i].HasProperty(idMostraTerra))
+                        bool haMostraTerra = instanceMats[i].HasProperty(idMostraTerra);
+                        bool haMostraColla = instanceMats[i].HasProperty(idMostraColla);
+                        bool haMostraPittura = instanceMats[i].HasProperty(idMostraPittura);
+
+                        Debug.Log($"[StrumentoPulizia-Debug-FinePulizia] Impostazione parametri fine pulizia su '{sharedMats[i].name}': haMostraTerra={haMostraTerra}, haMostraColla={haMostraColla}, haMostraPittura={haMostraPittura}");
+
+                        if (haMostraTerra)
                             instanceMats[i].SetFloat(idMostraTerra, 0f);
-                        if (instanceMats[i].HasProperty(idMostraColla))
+                        if (haMostraColla)
                             instanceMats[i].SetFloat(idMostraColla, 1f);
-                        if (instanceMats[i].HasProperty(idMostraPittura))
+                        if (haMostraPittura)
                             instanceMats[i].SetFloat(idMostraPittura, 1f);
 
-                        Debug.Log($"[StrumentoPulizia] ImpostaFaseFinePuliziaSuMateriali - Aggiornato '{rend.name}' materiale[{i}]: '{sharedMats[i].name}'. Impostato _mostraTerra=0, _mostraColla=1, _mostraPittura=1");
                         modified = true;
                     }
                 }
@@ -373,11 +453,12 @@ public class StrumentoPulizia : MonoBehaviour
                                         rend.materials = mats;
                                     }
 
-                                    Vector2 coordinataUV = hitInfo.textureCoord;
+                                    Vector2 coordinataUV = WrapUV(hitInfo.textureCoord);
                                     int pixelCentroX = (int)(coordinataUV.x * textureRes);
                                     int pixelCentroY = (int)(coordinataUV.y * textureRes);
-
-                                    Debug.Log($"[StrumentoPulizia-Debug] Pitturazione UV: ({coordinataUV.x:F3}, {coordinataUV.y:F3}) -> Coordinate Pixel: ({pixelCentroX}, {pixelCentroY})");
+                                    
+                                    // Log di debug con UV grezza e UV wrappata
+                                    Debug.Log($"[StrumentoPulizia-Debug] Pitturazione UV Grezza: ({hitInfo.textureCoord.x:F3}, {hitInfo.textureCoord.y:F3}) -> UV Wrappata: ({coordinataUV.x:F3}, {coordinataUV.y:F3}) -> Pixel: ({pixelCentroX}, {pixelCentroY})");
                                     PitturaPixel(pixelCentroX, pixelCentroY);
                                 }
                             }
@@ -443,14 +524,16 @@ public class StrumentoPulizia : MonoBehaviour
 
             Debug.Log($"[StrumentoPulizia] PitturaPixel a ({centroX}, {centroY}) - Cancellati: {pixelCancellatiInQuestoColpo}. Progressi: {pixelPainted}/{totPixel} ({progression * 100:F1}%)");
 
-            if (progression >= 0.95f)
+            if (progression >= sogliaCompletamentoPulizia)
             {
-                Debug.Log("[StrumentoPulizia] Progresso raggiunto 95%! Completamento minigioco.");
+                Debug.Log($"[StrumentoPulizia] Progresso raggiunto {sogliaCompletamentoPulizia * 100f:F1}%! Completamento minigioco.");
                 minigiocoFinito = true;
                 progression = 1f;
                 ResetMouseCursor();
                 
                 ImpostaFaseFinePuliziaSuMateriali();
+
+                ConfiguraCollidersMosaico(false);
 
                 tavoloCorrente?.AvanzaFase(faseSuccessiva);
                 eventoPuliziaCompletata?.Invoke(tavoloCorrente?.vaschettaCorrente);
@@ -498,5 +581,63 @@ public class StrumentoPulizia : MonoBehaviour
         }
 
         return -1;
+    }
+
+    private void ConfiguraCollidersMosaico(bool restoreMode)
+    {
+        if (tavoloCorrente == null || tavoloCorrente.vaschettaGameObject == null) return;
+        GameObject obj = tavoloCorrente.vaschettaGameObject;
+
+        if (restoreMode)
+        {
+            // Disabilita l'interazione pick-up
+            if (obj.TryGetComponent<PickUp_Interaction>(out var pickup))
+            {
+                pickup.enabled = false;
+            }
+            else
+            {
+                var childPickup = obj.GetComponentInChildren<PickUp_Interaction>(true);
+                if (childPickup != null) childPickup.enabled = false;
+            }
+
+            // Disabilita tutti i collider non MeshCollider e assicura che tutti i MeshCollider siano abilitati
+            foreach (var c in obj.GetComponentsInChildren<Collider>(true))
+            {
+                if (c is MeshCollider)
+                {
+                    c.enabled = true;
+                }
+                else
+                {
+                    c.enabled = false;
+                }
+            }
+        }
+        else
+        {
+            // Ripristina l'interazione e abilita tutti i collider
+            if (obj.TryGetComponent<PickUp_Interaction>(out var pickup))
+            {
+                pickup.enabled = true;
+            }
+            else
+            {
+                var childPickup = obj.GetComponentInChildren<PickUp_Interaction>(true);
+                if (childPickup != null) childPickup.enabled = true;
+            }
+
+            foreach (var c in obj.GetComponentsInChildren<Collider>(true))
+            {
+                c.enabled = true;
+            }
+        }
+    }
+    
+    private Vector2 WrapUV(Vector2 uv)
+    {
+        uv.x = uv.x - Mathf.Floor(uv.x);
+        uv.y = uv.y - Mathf.Floor(uv.y);
+        return uv;
     }
 }

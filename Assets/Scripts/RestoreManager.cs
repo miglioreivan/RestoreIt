@@ -138,7 +138,32 @@ public class RestoreManager : MonoBehaviour, IInteractable
     {
         Debug.Log($"[RestoreManager] OnOggettoPosato: {(oggetto != null ? oggetto.name : "NULL")}");
         ImpostaCollider(oggetto != null);
-        if (oggetto != null) isRestorationComplete = false;
+        
+        if (oggetto != null)
+        {
+            isRestorationComplete = false;
+
+            // Pulizia di eventuali residui di garze o aerolam incollati da sessioni precedenti
+            if (tavoloCorrente != null && tavoloCorrente.vaschettaGameObject != null)
+            {
+                GameObject vaschettaGO = tavoloCorrente.vaschettaGameObject;
+                List<GameObject> cloniDaDistruggere = new List<GameObject>();
+
+                foreach (Transform child in vaschettaGO.transform)
+                {
+                    if (child.name.Contains("(Clone)") || child.name.Contains("Garza") || child.name.Contains("Aerolam"))
+                    {
+                        cloniDaDistruggere.Add(child.gameObject);
+                    }
+                }
+
+                foreach (GameObject clone in cloniDaDistruggere)
+                {
+                    Debug.Log($"[RestoreManager] Trovato residuo di una sessione precedente: '{clone.name}' su '{vaschettaGO.name}'. Rimozione in corso.");
+                    Destroy(clone);
+                }
+            }
+        }
     }
 
     private void OnFaseCambiata(FaseRestauroSO fase)
@@ -308,7 +333,47 @@ public class RestoreManager : MonoBehaviour, IInteractable
             yield break;
         }
 
-        Debug.LogWarning($"[RestoreManager] Fase '{faseMappingCorrente.faseSO?.name}': nessun StrumentoPulizia ne GestoreAssemblaggio trovato in '{faseGO.name}'.");
+        GestoreIncollaggio gestoreIncollaggio = faseGO.GetComponentInChildren<GestoreIncollaggio>(true);
+        if (gestoreIncollaggio != null)
+        {
+            Debug.Log("[RestoreManager] Notifica GestoreIncollaggio: transizione completata.");
+            gestoreIncollaggio.CameraTransitionCompleted();
+            yield break;
+        }
+
+        GestoreIncollaggioMosaico gestoreIncollaggioMosaico = faseGO.GetComponentInChildren<GestoreIncollaggioMosaico>(true);
+        if (gestoreIncollaggioMosaico != null)
+        {
+            Debug.Log("[RestoreManager] Notifica GestoreIncollaggioMosaico: transizione completata.");
+            gestoreIncollaggioMosaico.CameraTransitionCompleted();
+            yield break;
+        }
+
+        GestoreGarze gestoreGarze = faseGO.GetComponentInChildren<GestoreGarze>(true);
+        if (gestoreGarze != null)
+        {
+            Debug.Log("[RestoreManager] Notifica GestoreGarze: transizione completata.");
+            gestoreGarze.CameraTransitionCompleted();
+            yield break;
+        }
+
+        GestoreRotazioneMosaico gestoreRotazione = faseGO.GetComponentInChildren<GestoreRotazioneMosaico>(true);
+        if (gestoreRotazione != null)
+        {
+            Debug.Log("[RestoreManager] Notifica GestoreRotazioneMosaico: transizione completata.");
+            gestoreRotazione.CameraTransitionCompleted();
+            yield break;
+        }
+
+        GestoreRimozioneGarza gestoreRimozione = faseGO.GetComponentInChildren<GestoreRimozioneGarza>(true);
+        if (gestoreRimozione != null)
+        {
+            Debug.Log("[RestoreManager] Notifica GestoreRimozioneGarza: transizione completata.");
+            gestoreRimozione.CameraTransitionCompleted();
+            yield break;
+        }
+
+        Debug.LogWarning($"[RestoreManager] Fase '{faseMappingCorrente.faseSO?.name}': nessun StrumentoPulizia, GestoreAssemblaggio, GestoreIncollaggio, GestoreIncollaggioMosaico, GestoreGarze, GestoreRotazioneMosaico o GestoreRimozioneGarza trovato in '{faseGO.name}'.");
     }
 
     // Collider

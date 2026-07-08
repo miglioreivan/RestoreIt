@@ -8,6 +8,8 @@ public class TavoloSO : ScriptableObject
     public VaschettaSO vaschettaCorrente;
     public GameObject vaschettaGameObject;
     public FaseRestauroSO faseCorrente;
+    [HideInInspector] public GameObject anforaAssemblata;
+    [HideInInspector] public Texture2D collaTextureMosaico;
 
     public event Action<DatiOggettoSO> OnOggettoPosato;
     public event Action<FaseRestauroSO> OnFaseCambiata;
@@ -19,6 +21,12 @@ public class TavoloSO : ScriptableObject
         vaschettaCorrente = null;
         vaschettaGameObject = null;
         faseCorrente = null;
+        anforaAssemblata = null;
+        if (collaTextureMosaico != null)
+        {
+            Destroy(collaTextureMosaico);
+            collaTextureMosaico = null;
+        }
     }
 
     public void PosaOggetto(DatiOggettoSO oggetto)
@@ -40,6 +48,16 @@ public class TavoloSO : ScriptableObject
         {
             Destroy(vaschettaGameObject);
             vaschettaGameObject = null;
+        }
+        if (anforaAssemblata != null)
+        {
+            Destroy(anforaAssemblata);
+            anforaAssemblata = null;
+        }
+        if (collaTextureMosaico != null)
+        {
+            Destroy(collaTextureMosaico);
+            collaTextureMosaico = null;
         }
         oggettoCorrente = null;
         vaschettaCorrente = null;

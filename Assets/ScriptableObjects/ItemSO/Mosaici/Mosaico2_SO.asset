@@ -14,3 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MosaicoSO
   nomeOggetto: Mosaico 2
   raccogliOggetto: {fileID: 11400000, guid: 704f7a5dd2bbf2d4386b4d40f8fa1883, type: 2}
+  prefabGarza: {fileID: 1685849641156999476, guid: 207d941eb3b0c2442be3220e7c2c03b8, type: 3}
+  prefabAerolam: {fileID: 5662098451071119522, guid: fb7b507492eb47d4cba33ae5f553d987, type: 3}
+  mascheraCollaMosaico: {fileID: 2800000, guid: 6cb36b1a7f36ef247ae47625cb032ac5, type: 3}
+  mascheraResinaMosaico: {fileID: 2800000, guid: 43f571751371769428b4810865b67812, type: 3}
+  sogliaCompletamentoColla: 0.7

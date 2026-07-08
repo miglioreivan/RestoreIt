@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 7b55e09228e547b4d930a558d2303e2a
+guid: 58764bc74d9598f418e27e86bf2f2577
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -8,12 +8,27 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Black Concrete Wall
-    second: {fileID: 2100000, guid: eb5a2470ef2287248bc604e17b583c75, type: 2}
+    second: {fileID: 2100000, guid: bdfe5bac6c7b1dc43badd62004f50674, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: main
-    second: {fileID: 2100000, guid: 0b1fe7fa1a374464f979aae443b60765, type: 2}
+      name: Material
+    second: {fileID: 2100000, guid: 689dc27b748306646af98f47e05adf21, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: MosaicoTraiano
+    second: {fileID: 2800000, guid: 65c260db6a79cf7448f96d6a67dc17dc, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: black_Concrete_Wall_010_Base_Color
+    second: {fileID: 2800000, guid: 4af2b18dc6951e9468ebf39e070e8ea0, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: black_Concrete_Wall_010_Roughness
+    second: {fileID: 2800000, guid: 7af8d318da088e44197dc194009c18c2, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -43,7 +58,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 0.5
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -101,7 +116,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.005
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
