@@ -16,6 +16,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
     [SerializeField] private MonoBehaviour player;
     [SerializeField] private float         transitionDuration = 1.0f;
     [SerializeField] private GameObject    canvas;
+    [SerializeField] private TMPro.TextMeshProUGUI istruzioniText;
 
     [Header("Stato Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -129,6 +130,10 @@ public class RestoreManager : MonoBehaviour, IInteractable
                 return false;
             }
         }
+        if (istruzioniText == null)
+        {
+            Debug.LogWarning($"[RestoreManager] '{gameObject.name}': istruzioniText non assegnato nell'Inspector. Non verranno mostrate le istruzioni delle fasi.");
+        }
         return true;
     }
 
@@ -182,6 +187,11 @@ public class RestoreManager : MonoBehaviour, IInteractable
     {
         isRestorationComplete = true;
         ImpostaCollider(false);
+        if (istruzioniText != null)
+        {
+            istruzioniText.text = "Restauro completato!";
+            istruzioniText.gameObject.SetActive(true);
+        }
     }
 
     // IInteractable
@@ -227,6 +237,12 @@ public class RestoreManager : MonoBehaviour, IInteractable
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible   = false;
 
+        if (istruzioniText != null)
+        {
+            istruzioniText.text = "";
+            istruzioniText.gameObject.SetActive(false);
+        }
+
         DisattivaFasi();
         StartCoroutine(TransitionCamera(startCameraPosition, startCameraRotation, startCameraParent, restorePlayer: true));
     }
@@ -252,7 +268,11 @@ public class RestoreManager : MonoBehaviour, IInteractable
                 m.faseGameObject.SetActive(m.faseGameObject == mapping.faseGameObject);
         }
 
-
+        if (istruzioniText != null)
+        {
+            istruzioniText.text = fase.DescrizioneFase;
+            istruzioniText.gameObject.SetActive(!string.IsNullOrEmpty(fase.DescrizioneFase));
+        }
 
         StartCoroutine(TransitionCamera(mapping.targetCamera.position, mapping.targetCamera.rotation, null, restorePlayer: false));
     }
