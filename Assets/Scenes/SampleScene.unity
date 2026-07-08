@@ -4483,6 +4483,61 @@ Transform:
   - {fileID: 1532976786}
   m_Father: {fileID: 577984509}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &474629110
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 474629111}
+  - component: {fileID: 474629112}
+  m_Layer: 0
+  m_Name: RimuoviGarza
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &474629111
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474629110}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 543450651932049517}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &474629112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474629110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd3629a835e75d44d891ee9d056bc482, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GestoreRimozioneGarza
+  tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
+  triggerRimozione: {fileID: 11400000, guid: 6dc237bb2c64d6e4f8b1bd22ac9853ed, type: 2}
+  cameraRestauro: {fileID: 330585545}
+  restoreManager: {fileID: 1086795824}
+  faseSuccessiva: {fileID: 0}
+  nomeOggettoDaCercare: Garza
+  layerRestauro:
+    serializedVersion: 2
+    m_Bits: 64
+  cursorClickTexture: {fileID: 2800000, guid: f95423e72af4bf54790bef78a6b1b659, type: 3}
+  cursorHotspot: {x: 0, y: 0}
 --- !u!1 &480570483
 GameObject:
   m_ObjectHideFlags: 0
@@ -4529,7 +4584,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GestoreRotazioneMosaico
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   triggerRotazione: {fileID: 11400000, guid: 20a064464b9948c49bf72e4ecb1cb4f0, type: 2}
-  faseSuccessiva: {fileID: 0}
+  faseSuccessiva: {fileID: 11400000, guid: 6dc237bb2c64d6e4f8b1bd22ac9853ed, type: 2}
   durataRotazione: 1.5
   angoliRotazione: {x: 180, y: 0, z: 0}
 --- !u!1 &488671150 stripped
@@ -9264,6 +9319,9 @@ MonoBehaviour:
     targetCamera: {fileID: 1791071982}
   - faseSO: {fileID: 11400000, guid: 20a064464b9948c49bf72e4ecb1cb4f0, type: 2}
     faseGameObject: {fileID: 480570483}
+    targetCamera: {fileID: 1791071982}
+  - faseSO: {fileID: 11400000, guid: 6dc237bb2c64d6e4f8b1bd22ac9853ed, type: 2}
+    faseGameObject: {fileID: 474629110}
     targetCamera: {fileID: 1791071982}
 --- !u!1 &1096930128 stripped
 GameObject:
@@ -17479,6 +17537,7 @@ Transform:
   - {fileID: 562086247}
   - {fileID: 209028316}
   - {fileID: 480570484}
+  - {fileID: 474629111}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!4 &543450652999122850
