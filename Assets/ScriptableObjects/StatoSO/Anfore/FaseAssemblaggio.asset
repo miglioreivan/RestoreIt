@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccf77abd33acacf448539b6f7d49c5dc, type: 3}
   m_Name: FaseAssemblaggio
   m_EditorClassIdentifier: Assembly-CSharp::FaseRestauroSO
-  descrizioneFase: Trascina i pezzi nel posto giusto
+  descrizioneFase: 'Trascina i pezzi nel posto giusto
+
+    [S,D] Per ruotare l''anfora.'

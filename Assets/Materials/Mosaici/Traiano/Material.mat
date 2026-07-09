@@ -155,7 +155,7 @@ Material:
     - _ZWrite: 1
     - _mostraColla: 0
     - _mostraPittura: 0
-    - _mostraTerra: 0
+    - _mostraTerra: 1
     - _trasparenza: 0.5
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}

@@ -54,13 +54,12 @@ public class GestoreEsposizione : MonoBehaviour
         {
             if (pedestal == null || !pedestal.HasObject)
             {
-                return; // Almeno un piedistallo non è occupato
+                return;
             }
         }
 
-        // Tutti i piedistalli sono occupati!
         completato = true;
-        Debug.Log("[GestoreEsposizione] Tutti i piedistalli sono occupati. Esecuzione eventi di completamento.");
+        Debug.Log("Tutti i piedistalli sono stati occupati. Avvio eventi di completamento.");
         
         onEsposizioneCompletata?.Invoke();
 

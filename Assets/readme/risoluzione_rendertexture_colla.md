@@ -23,7 +23,7 @@ In Unity, la proprietà `Renderer.materials` è un getter che ad ogni chiamata *
 Questo processo di seconda istanziazione fa perdere i parametri impostati a runtime (come la texture/RenderTexture `_Colla` assegnata precedentemente), ripristinando i valori di default dello shader (che tipicamente per le texture è il bianco).
 
 ### Soluzione applicata:
-Abbiamo modificato [GestoreAssemblaggio.cs](file:///c:/Users/migli/Documents/Unity%20Projects/RestoreIt/Assets/Scripts/GestoreAssemblaggio.cs#L909-L920) per accedere alla proprietà una sola volta tramite una variabile locale:
+Abbiamo modificato [GestoreAssemblaggio.cs](file:///c:/Users/migli/Documents/Unity%20Projects/RestoreIt/Assets/Scripts/Restoration/GestoreAssemblaggio.cs#L909-L920) per accedere alla proprietà una sola volta tramite una variabile locale:
 
 ```csharp
 Renderer r = p.gameObject.GetComponent<Renderer>();

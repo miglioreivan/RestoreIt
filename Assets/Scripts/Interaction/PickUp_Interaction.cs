@@ -11,7 +11,7 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
     private void Awake()
     {
         if (manoGiocatore == null)
-            Debug.LogError($"[PickUp_Interaction] '{gameObject.name}': manoGiocatore non assegnato nell'Inspector.");
+            Debug.LogError($"Componente manoGiocatore non assegnato nell'Inspector su {gameObject.name}.");
     }
 
     public void ImpostaTavolo(TavoloSO tavolo)
@@ -41,21 +41,46 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
     {
         if (!canInteract()) return;
 
-        manoGiocatore.oggettoCorrente = datiOggetto;
-        manoGiocatore.currentGO = this.gameObject;
+        // Determina qual è l'oggetto effettivo da raccogliere.
+        // Se siamo su un tavolo e questo oggetto è figlio della vaschetta o dell'anfora assemblata, raccogliamo il padre.
+        GameObject oggettoDaRaccogliere = this.gameObject;
+        if (tavoloCorrente != null)
+        {
+            if (tavoloCorrente.vaschettaGameObject != null && (this.gameObject == tavoloCorrente.vaschettaGameObject || transform.IsChildOf(tavoloCorrente.vaschettaGameObject.transform)))
+            {
+                oggettoDaRaccogliere = tavoloCorrente.vaschettaGameObject;
+            }
+            else if (tavoloCorrente.anforaAssemblata != null && (this.gameObject == tavoloCorrente.anforaAssemblata || transform.IsChildOf(tavoloCorrente.anforaAssemblata.transform)))
+            {
+                oggettoDaRaccogliere = tavoloCorrente.anforaAssemblata;
+            }
+        }
 
-        // Salva la scala globale originale prima del cambio di parent per evitare distorsioni
-        Vector3 targetWorldScale = transform.lossyScale;
+        // Se l'oggetto o la sua gerarchia originale è contrassegnata come restaurata, garantisce che il tag sia presente sull'oggetto raccolto
+        bool wasRestored = oggettoDaRaccogliere.GetComponent<OggettoRestaurato>() != null ||
+                           oggettoDaRaccogliere.GetComponentInParent<OggettoRestaurato>() != null ||
+                           oggettoDaRaccogliere.GetComponentInChildren<OggettoRestaurato>() != null;
 
-        transform.SetParent(manoGiocatore.puntoMano, false);
-        transform.localPosition = Vector3.zero;
-        transform.localRotation = Quaternion.identity;
+        if (wasRestored && oggettoDaRaccogliere.GetComponent<OggettoRestaurato>() == null)
+        {
+            oggettoDaRaccogliere.AddComponent<OggettoRestaurato>();
+            Debug.Log($"Componente OggettoRestaurato propagato direttamente a {oggettoDaRaccogliere.name} durante la raccolta.");
+        }
 
-        // Ricalcola la scala locale in base alla scala globale del nuovo parent
+        manoGiocatore.ImpostaOggetto(datiOggetto, oggettoDaRaccogliere);
+
+        // Memorizzazione della scala globale per evitare distorsioni dimensionali dopo il reparenting
+        Vector3 targetWorldScale = oggettoDaRaccogliere.transform.lossyScale;
+
+        oggettoDaRaccogliere.transform.SetParent(manoGiocatore.puntoMano, false);
+        oggettoDaRaccogliere.transform.localPosition = Vector3.zero;
+        oggettoDaRaccogliere.transform.localRotation = Quaternion.identity;
+
+        // Compensazione della scala in base alle dimensioni globali del nuovo genitore
         if (manoGiocatore.puntoMano != null)
         {
             Vector3 parentLossyScale = manoGiocatore.puntoMano.lossyScale;
-            transform.localScale = new Vector3(
+            oggettoDaRaccogliere.transform.localScale = new Vector3(
                 parentLossyScale.x != 0 ? targetWorldScale.x / parentLossyScale.x : targetWorldScale.x,
                 parentLossyScale.y != 0 ? targetWorldScale.y / parentLossyScale.y : targetWorldScale.y,
                 parentLossyScale.z != 0 ? targetWorldScale.z / parentLossyScale.z : targetWorldScale.z
@@ -63,11 +88,13 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
         }
         else
         {
-            transform.localScale = targetWorldScale;
+            oggettoDaRaccogliere.transform.localScale = targetWorldScale;
         }
 
-        if (TryGetComponent(out Collider col))
+        foreach (var col in oggettoDaRaccogliere.GetComponentsInChildren<Collider>())
+        {
             col.enabled = false;
+        }
 
         if (datiOggetto != null)
         {
@@ -76,11 +103,11 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
 
         if (tavoloCorrente != null)
         {
-            if (tavoloCorrente.vaschettaGameObject == this.gameObject)
+            if (tavoloCorrente.vaschettaGameObject == oggettoDaRaccogliere)
             {
                 tavoloCorrente.vaschettaGameObject = null;
             }
-            if (tavoloCorrente.anforaAssemblata == this.gameObject)
+            if (tavoloCorrente.anforaAssemblata == oggettoDaRaccogliere)
             {
                 tavoloCorrente.anforaAssemblata = null;
             }

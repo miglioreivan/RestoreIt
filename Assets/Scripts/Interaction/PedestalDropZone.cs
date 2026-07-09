@@ -3,9 +3,19 @@ using UnityEngine.Events;
 
 public class PedestalDropZone : MonoBehaviour, IInteractable
 {
+    public enum TipoOggettoAccettato
+    {
+        Qualsiasi,
+        SoloAnfore,
+        SoloMosaici
+    }
+
     [Header("Dati")]
     [SerializeField] private InventarioManoSO manoGiocatore;
     [SerializeField] private Transform puntoRelease;
+
+    [Header("Tipo di Oggetto Accettato")]
+    [SerializeField] private TipoOggettoAccettato tipoAccettato = TipoOggettoAccettato.Qualsiasi;
 
     [Header("Eventi")]
     [SerializeField] private VoidEventChannelSO onReleaseEvent;
@@ -16,7 +26,7 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
     private void Awake()
     {
         if (manoGiocatore == null)
-            Debug.LogError($"[PedestalDropZone] '{gameObject.name}': manoGiocatore non assegnato nell'Inspector.");
+            Debug.LogError($"Componente manoGiocatore non assegnato nell'Inspector su {gameObject.name}.");
     }
 
     public bool canInteract()
@@ -26,23 +36,44 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
 
         GameObject go = manoGiocatore.currentGO;
 
-        // Se ha il componente OggettoRestaurato, è sicuramente un oggetto restaurato
-        if (go.GetComponent<OggettoRestaurato>() != null)
-            return true;
-
-        // Se è una vaschetta, NON è un oggetto restaurato e non può essere posizionato sul piedistallo
-        bool isVaschetta = go.GetComponent<ConfigurazioneVaschetta>() != null || 
-                           go.GetComponentInChildren<ConfigurazioneVaschetta>() != null ||
-                           (manoGiocatore.oggettoCorrente is VaschettaSO);
-
-        if (isVaschetta)
+        // Verifica che l'oggetto in mano sia stato restaurato
+        bool isRestored = go.GetComponent<OggettoRestaurato>() != null ||
+                          go.GetComponentInParent<OggettoRestaurato>() != null ||
+                          go.GetComponentInChildren<OggettoRestaurato>() != null;
+        if (!isRestored)
             return false;
 
-        // Safe fallback basato sul nome, escludendo le vaschette
-        bool hasAnforaName = go.name.ToLower().Contains("anfora") ||
-                            (manoGiocatore.oggettoCorrente != null && manoGiocatore.oggettoCorrente.nomeOggetto.ToLower().Contains("anfora"));
+        // Determina se l'oggetto è un'anfora o un mosaico tramite controlli incrociati su tipo, nome dati e nome del GameObject
+        bool isAnfora = false;
+        bool isMosaico = false;
 
-        return hasAnforaName;
+        DatiOggettoSO oggetto = manoGiocatore.oggettoCorrente;
+        if (oggetto != null)
+        {
+            if (oggetto is VaschettaSO) isAnfora = true;
+            else if (oggetto is MosaicoSO) isMosaico = true;
+            else if (oggetto.nomeOggetto.ToLower().Contains("anfora")) isAnfora = true;
+            else if (oggetto.nomeOggetto.ToLower().Contains("mosaico")) isMosaico = true;
+        }
+
+        // Controllo di fallback sul nome del GameObject fisico
+        if (!isAnfora && !isMosaico)
+        {
+            string goName = go.name.ToLower();
+            if (goName.Contains("anfora")) isAnfora = true;
+            else if (goName.Contains("mosaico")) isMosaico = true;
+        }
+
+        switch (tipoAccettato)
+        {
+            case TipoOggettoAccettato.SoloAnfore:
+                return isAnfora;
+            case TipoOggettoAccettato.SoloMosaici:
+                return isMosaico;
+            case TipoOggettoAccettato.Qualsiasi:
+            default:
+                return true;
+        }
     }
 
     public string GetInteractionText()
@@ -51,7 +82,14 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
             return "Non hai nessun oggetto da posizionare.";
 
         if (!canInteract())
-            return "Questo oggetto non può essere posizionato sul piedistallo (solo oggetti restaurati).";
+        {
+            if (tipoAccettato == TipoOggettoAccettato.SoloAnfore)
+                return "Questo piedistallo accetta solo anfore restaurate.";
+            if (tipoAccettato == TipoOggettoAccettato.SoloMosaici)
+                return "Questo piedistallo accetta solo mosaici restaurati.";
+
+            return "Questo oggetto non può essere posizionato sul piedistallo.";
+        }
 
         return "[E] Posiziona sul piedistallo";
     }
@@ -63,19 +101,16 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
         lastReleasedItem = manoGiocatore.currentGO;
         GameObject go = manoGiocatore.currentGO;
 
-        // Rilascia l'oggetto dalla mano
-        manoGiocatore.oggettoCorrente = null;
-        manoGiocatore.currentGO = null;
+        manoGiocatore.SvuotaMano();
 
-        // Salva la scala globale originale prima del cambio di parent per evitare distorsioni
+        // Memorizzazione della scala globale per prevenire distorsioni dimensionali dopo il reparenting
         Vector3 targetWorldScale = go.transform.lossyScale;
 
-        // Posiziona l'oggetto sul piedistallo
         go.transform.SetParent(puntoRelease, false);
         go.transform.localPosition = Vector3.zero;
         go.transform.localRotation = Quaternion.identity;
 
-        // Ricalcola la scala locale in base alla scala globale del nuovo parent
+        // Compensazione della scala in base alle dimensioni globali del nuovo genitore
         if (puntoRelease != null)
         {
             Vector3 parentLossyScale = puntoRelease.lossyScale;
@@ -90,11 +125,12 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
             go.transform.localScale = targetWorldScale;
         }
 
-        // Disabilita il collider dell'oggetto posizionato per bloccarlo
-        if (go.TryGetComponent(out Collider objCollider))
-            objCollider.enabled = false;
+        foreach (var col in go.GetComponentsInChildren<Collider>())
+        {
+            col.enabled = false;
+        }
 
-        // Disabilita il collider del piedistallo stesso in modo che non si possa più interagire ("si blocca e basta")
+        // Disattivazione definitiva dell'interazione sul piedistallo dopo il posizionamento
         if (TryGetComponent(out Collider pedestalCollider))
             pedestalCollider.enabled = false;
 
@@ -105,7 +141,7 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
 
         OnObjectPlaced?.Invoke(this);
 
-        Debug.Log($"[PedestalDropZone] Oggetto '{go.name}' posizionato sul piedistallo e bloccato.");
+        Debug.Log($"Oggetto {go.name} posizionato sul piedistallo {gameObject.name}.");
     }
 
     public bool HasObject => lastReleasedItem != null;

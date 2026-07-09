@@ -22,7 +22,7 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
     private void Awake()
     {
         if (manoGiocatore == null)
-            Debug.LogError($"[DropZone_Interaction] '{gameObject.name}': manoGiocatore non assegnato nell'Inspector.");
+            Debug.LogError($"Componente manoGiocatore non assegnato nell'Inspector su {gameObject.name}.");
     }
 
     [Header("Eventi")]
@@ -52,7 +52,7 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         if (TryGetComponent(out Collider dropZoneCollider))
         {
             dropZoneCollider.enabled = true;
-            Debug.Log($"[DropZone_Interaction] '{gameObject.name}': Tavolo svuotato, riabilitato collider.");
+            Debug.Log($"Tavolo svuotato, riabilitato il collider per {gameObject.name}.");
         }
     }
 
@@ -61,7 +61,10 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         if (manoGiocatore == null || manoGiocatore.currentGO == null)
             return false;
 
-        if (manoGiocatore.currentGO.GetComponent<OggettoRestaurato>() != null)
+        bool isRestored = manoGiocatore.currentGO.GetComponent<OggettoRestaurato>() != null ||
+                          manoGiocatore.currentGO.GetComponentInParent<OggettoRestaurato>() != null ||
+                          manoGiocatore.currentGO.GetComponentInChildren<OggettoRestaurato>() != null;
+        if (isRestored)
             return false;
 
         if (tavoloCorrente != null && tavoloCorrente.oggettoCorrente != null)
@@ -88,7 +91,10 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         if (manoGiocatore == null || manoGiocatore.currentGO == null)
             return "Non hai un oggetto da rilasciare.";
 
-        if (manoGiocatore.currentGO.GetComponent<OggettoRestaurato>() != null)
+        bool isRestored = manoGiocatore.currentGO.GetComponent<OggettoRestaurato>() != null ||
+                          manoGiocatore.currentGO.GetComponentInParent<OggettoRestaurato>() != null ||
+                          manoGiocatore.currentGO.GetComponentInChildren<OggettoRestaurato>() != null;
+        if (isRestored)
             return "Non puoi rimettere sul tavolo un oggetto già restaurato!";
         
         if (tavoloCorrente != null && tavoloCorrente.oggettoCorrente != null)
@@ -115,7 +121,7 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         if (!canInteract()) return;
 
         if (onReleaseEvent == null)
-            Debug.LogWarning($"[DropZone_Interaction] '{gameObject.name}': onReleaseEvent non assegnato nell'Inspector.");
+            Debug.LogWarning($"Evento onReleaseEvent non assegnato nell'Inspector su {gameObject.name}.");
 
         lastReleasedItem = manoGiocatore.currentGO;
         GameObject go = manoGiocatore.currentGO;
@@ -126,17 +132,16 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
             tavoloCorrente.PosaOggetto(manoGiocatore.oggettoCorrente);
         }
 
-        manoGiocatore.oggettoCorrente = null;
-        manoGiocatore.currentGO = null;
+        manoGiocatore.SvuotaMano();
 
-        // Salva la scala globale originale prima del cambio di parent per evitare distorsioni
+        // Memorizzazione della scala globale per evitare distorsioni dimensionali dopo il reparenting
         Vector3 targetWorldScale = go.transform.lossyScale;
 
         go.transform.SetParent(puntoRelease, false);
         go.transform.localPosition = Vector3.zero;
         go.transform.localRotation = Quaternion.identity;
 
-        // Ricalcola la scala locale in base alla scala globale del nuovo parent
+        // Compensazione della scala in base alle dimensioni globali del nuovo genitore
         if (puntoRelease != null)
         {
             Vector3 parentLossyScale = puntoRelease.lossyScale;
@@ -151,8 +156,10 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
             go.transform.localScale = targetWorldScale;
         }
 
-        if (go.TryGetComponent(out Collider objCollider))
-            objCollider.enabled = false;
+        foreach (var col in go.GetComponentsInChildren<Collider>())
+        {
+            col.enabled = false;
+        }
 
         if (TryGetComponent(out Collider dropZoneCollider))
             dropZoneCollider.enabled = false;
