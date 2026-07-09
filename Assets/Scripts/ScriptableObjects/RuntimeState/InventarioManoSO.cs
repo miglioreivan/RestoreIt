@@ -21,14 +21,23 @@ public class InventarioManoSO : ScriptableObject
     {
         oggettoCorrente = dati;
         currentGO = go;
+        
+        int count = OnInventarioAggiornato != null ? OnInventarioAggiornato.GetInvocationList().Length : 0;
+        Debug.Log($"[ManoSO] ImpostaOggetto chiamato. Oggetto: {(dati != null ? dati.nomeOggetto : "null")}, GO: {(go != null ? go.name : "null")}. Notifica a {count} ascoltatori.");
+        
         OnInventarioAggiornato?.Invoke();
     }
 
     // Svuota la mano e notifica l'evento
     public void SvuotaMano()
     {
+        Debug.Log("[ManoSO] SvuotaMano chiamato.");
         oggettoCorrente = null;
         currentGO = null;
+        
+        int count = OnInventarioAggiornato != null ? OnInventarioAggiornato.GetInvocationList().Length : 0;
+        Debug.Log($"[ManoSO] Stato mano azzerato. Notifica a {count} ascoltatori.");
+        
         OnInventarioAggiornato?.Invoke();
     }
 

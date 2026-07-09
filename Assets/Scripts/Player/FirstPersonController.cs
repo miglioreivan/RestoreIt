@@ -89,9 +89,33 @@ public class FirstPersonController : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible   = true;
 
+            NascondiTestoInterazione();
+
             // Disabilita solo questo script, non il GameObject
             this.enabled = false;
             Debug.Log("InfoCanvas aperto, FirstPersonController disabilitato.");
+        }
+    }
+
+    private void OnEnable()
+    {
+        // Quando lo script viene abilitato/riabilitato, riaccende l'HUD e i suggerimenti
+        MostraTestoInterazione();
+    }
+
+    public void NascondiTestoInterazione()
+    {
+        if (interactionText != null)
+        {
+            interactionText.gameObject.SetActive(false);
+        }
+    }
+
+    public void MostraTestoInterazione()
+    {
+        if (interactionText != null)
+        {
+            interactionText.gameObject.SetActive(true);
         }
     }
 

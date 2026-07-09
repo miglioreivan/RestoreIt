@@ -17,13 +17,21 @@ public class SuggerimentoMano : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log("[SuggerimentoMano] Start chiamato.");
         AggiornaSuggerimento();
     }
 
     private void OnEnable()
     {
         if (inventario != null)
+        {
             inventario.OnInventarioAggiornato += AggiornaSuggerimento;
+            Debug.Log("[SuggerimentoMano] Sottoscrizione all'evento OnInventarioAggiornato eseguita.");
+        }
+        else
+        {
+            Debug.LogError("[SuggerimentoMano] InventarioManoSO non assegnato nell'Inspector.");
+        }
 
         // Sincronizza subito il testo con lo stato attuale dell'inventario
         AggiornaSuggerimento();
@@ -32,17 +40,30 @@ public class SuggerimentoMano : MonoBehaviour
     private void OnDisable()
     {
         if (inventario != null)
+        {
             inventario.OnInventarioAggiornato -= AggiornaSuggerimento;
+            Debug.Log("[SuggerimentoMano] Annullamento sottoscrizione all'evento OnInventarioAggiornato eseguita.");
+        }
     }
 
-    private void AggiornaSuggerimento()
+    public void AggiornaSuggerimento()
     {
-        if (testoSuggerimento == null || inventario == null)
+        if (testoSuggerimento == null)
+        {
+            Debug.LogError("[SuggerimentoMano] Riferimento TextMeshProUGUI testoSuggerimento non assegnato.");
             return;
+        }
+
+        if (inventario == null)
+        {
+            Debug.LogError("[SuggerimentoMano] Riferimento InventarioManoSO inventario è null.");
+            return;
+        }
 
         if (inventario.currentGO == null)
         {
             testoSuggerimento.text = testoManoVuota;
+            Debug.Log($"[SuggerimentoMano] Inventario vuoto. Testo UI impostato a: \"{testoManoVuota}\"");
             return;
         }
 
@@ -52,6 +73,9 @@ public class SuggerimentoMano : MonoBehaviour
                           go.GetComponentInParent<OggettoRestaurato>() != null ||
                           go.GetComponentInChildren<OggettoRestaurato>() != null;
 
-        testoSuggerimento.text = isRestored ? testoOggettoFinito : testoManoPiena;
+        string testoScelto = isRestored ? testoOggettoFinito : testoManoPiena;
+        testoSuggerimento.text = testoScelto;
+        
+        Debug.Log($"[SuggerimentoMano] Oggetto in mano: {go.name}. Restaurato: {isRestored}. Testo UI impostato a: \"{testoScelto}\"");
     }
 }

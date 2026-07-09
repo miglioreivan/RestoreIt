@@ -13,7 +13,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
     }
 
     [Header("Impostazioni Generali")]
-    [SerializeField] private MonoBehaviour player;
+    [SerializeField] private FirstPersonController player;
     [SerializeField] private float         transitionDuration = 1.0f;
     [SerializeField] private GameObject    canvas;
     [SerializeField] private TMPro.TextMeshProUGUI istruzioniText;
@@ -32,6 +32,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
     private bool           isRestorationComplete = false;
     private FaseMapping    faseMappingCorrente;
     private Coroutine      activeTransitionCoroutine;
+    private SuggerimentoMano suggerimentoMano;
 
     // Unity Lifecycle
 
@@ -50,6 +51,8 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
         InitCollider();
         DisattivaFasi();
+
+        suggerimentoMano = FindFirstObjectByType<SuggerimentoMano>();
 
         Transform searchRoot = transform.parent != null ? transform.parent : transform;
         Debug.Log($"Gerarchia di {searchRoot.name}:");
@@ -232,6 +235,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
         isRestoring = true;
         player.enabled = false;
+        player.NascondiTestoInterazione();
         ImpostaCollider(false);
 
         startCameraParent   = playerCamera.transform.parent;
@@ -262,7 +266,10 @@ public class RestoreManager : MonoBehaviour, IInteractable
         if (istruzioniText != null)
         {
             istruzioniText.text = "";
-            istruzioniText.gameObject.SetActive(false);
+            if (suggerimentoMano == null)
+            {
+                istruzioniText.gameObject.SetActive(false);
+            }
         }
 
         DisattivaFasi();
@@ -293,7 +300,14 @@ public class RestoreManager : MonoBehaviour, IInteractable
         if (istruzioniText != null)
         {
             istruzioniText.text = fase.DescrizioneFase;
-            istruzioniText.gameObject.SetActive(!string.IsNullOrEmpty(fase.DescrizioneFase));
+            if (suggerimentoMano == null)
+            {
+                istruzioniText.gameObject.SetActive(!string.IsNullOrEmpty(fase.DescrizioneFase));
+            }
+            else
+            {
+                istruzioniText.gameObject.SetActive(true);
+            }
         }
 
         StartCameraTransition(mapping.targetCamera.position, mapping.targetCamera.rotation, null, restorePlayer: false);
@@ -360,6 +374,13 @@ public class RestoreManager : MonoBehaviour, IInteractable
             if (!isRestorationComplete) ImpostaCollider(true);
             isRestoring = false;
             Debug.Log("Posizione e controllo del giocatore ripristinati.");
+
+            // Aggiorna il testo del suggerimento mano al termine del restauro/transizione
+            if (suggerimentoMano != null)
+            {
+                suggerimentoMano.AggiornaSuggerimento();
+            }
+
             yield break;
         }
 

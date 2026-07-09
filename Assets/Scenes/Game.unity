@@ -192,7 +192,7 @@ Light:
   serializedVersion: 12
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 3
+  m_Intensity: 1
   m_Range: 3.1244915
   m_SpotAngle: 179
   m_InnerSpotAngle: 164.91388
@@ -395,7 +395,7 @@ Light:
   serializedVersion: 12
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 3
+  m_Intensity: 1
   m_Range: 3.1244915
   m_SpotAngle: 179
   m_InnerSpotAngle: 164.91388
@@ -600,7 +600,7 @@ GameObject:
   - component: {fileID: 39463678}
   - component: {fileID: 39463677}
   m_Layer: 5
-  m_Name: Interaction Text
+  m_Name: TextTutorial
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
