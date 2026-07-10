@@ -40,6 +40,7 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float footstepWalkInterval = 0.6f;
     [SerializeField] private float footstepSprintInterval = 0.38f;
     private float footstepTimer = 0f;
+    private float _debugMovementLogTimer = 0f; // Throttle per il log di diagnostica movimento
 
     public InventarioManoSO Inventario => inventario;
 
@@ -57,6 +58,15 @@ public class FirstPersonController : MonoBehaviour
         inventario.puntoMano = handTransform;
         // Inizializza il timer in modo che il primo passo avvenga rapidamente
         footstepTimer = footstepWalkInterval;
+
+        // Debug configurazione audio passi
+        if (footstepSound.clip == null)
+            Debug.LogWarning("[FirstPersonController] footstepSound.clip non è assegnato nell'Inspector! I passi non saranno udibili.");
+        else
+            Debug.Log($"[FirstPersonController] footstepSound configurato: clip='{footstepSound.clip.name}', volume={footstepSound.volume}. Walk interval={footstepWalkInterval}s, Sprint interval={footstepSprintInterval}s.");
+
+        if (footstepSound.volume <= 0f)
+            Debug.LogWarning($"[FirstPersonController] footstepSound.volume={footstepSound.volume}! Il volume del SoundEffect nell'Inspector è 0 — i passi non saranno udibili anche se il clip è assegnato.");
     }
 
     private void Start()
@@ -186,17 +196,50 @@ public class FirstPersonController : MonoBehaviour
         characterController.Move(movement * Time.deltaTime);
 
         // Gestione audio dei passi
-        if (characterController.isGrounded && !isSliding && moveValue.sqrMagnitude > 0.01f)
+        bool isMoving = characterController.isGrounded && !isSliding && moveValue.sqrMagnitude > 0.01f;
+
+        // Log diagnostica movimento (throttled a 1 volta al secondo) — rimuovere dopo il debug
+        if (moveValue.sqrMagnitude > 0.01f)
+        {
+            _debugMovementLogTimer += Time.deltaTime;
+            if (_debugMovementLogTimer >= 1f)
+            {
+                _debugMovementLogTimer = 0f;
+                Debug.Log($"[FirstPersonController] Diagnostica passi: isGrounded={characterController.isGrounded}, isSliding={isSliding}, sqrMagnitude={moveValue.sqrMagnitude:F3}, isMoving={isMoving}, footstepTimer={footstepTimer:F3}, interval={(sprintAction.IsPressed() ? footstepSprintInterval : footstepWalkInterval):F3}.");
+            }
+        }
+        else
+        {
+            _debugMovementLogTimer = 0f;
+        }
+
+        if (isMoving)
         {
             float interval = sprintAction.IsPressed() ? footstepSprintInterval : footstepWalkInterval;
             footstepTimer += Time.deltaTime;
             if (footstepTimer >= interval)
             {
                 footstepTimer = 0f;
-                if (AudioManager.Instance != null && footstepSound.clip != null)
+
+                // --- DEBUG PASSI ---
+                if (AudioManager.Instance == null)
                 {
+                    Debug.LogWarning("[FirstPersonController] Passo: AudioManager.Instance è null! Il GameObject AudioManager non è presente nella scena o non è ancora inizializzato.");
+                }
+                else if (footstepSound.clip == null)
+                {
+                    Debug.LogWarning("[FirstPersonController] Passo: footstepSound.clip è null. Assegna un AudioClip nel campo 'Footstep Sound' dell'Inspector.");
+                }
+                else if (footstepSound.volume <= 0f)
+                {
+                    Debug.LogWarning($"[FirstPersonController] Passo: footstepSound.volume={footstepSound.volume}. Il volume del SoundEffect è 0! Imposta un valore > 0 nell'Inspector.");
+                }
+                else
+                {
+                    Debug.Log($"[FirstPersonController] Passo: riproduzione '{footstepSound.clip.name}', vol={footstepSound.volume}, sfxMult={AudioManager.Instance.SFXVolumeMultiplier}, isSprinting={sprintAction.IsPressed()}.");
                     AudioManager.Instance.Play2D(footstepSound, 0.9f, 1.1f);
                 }
+                // --- FINE DEBUG ---
             }
         }
         else

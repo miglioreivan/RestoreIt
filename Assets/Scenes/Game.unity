@@ -2283,8 +2283,8 @@ MonoBehaviour:
   cursorDragTexture: {fileID: 2800000, guid: f95423e72af4bf54790bef78a6b1b659, type: 3}
   cursorDragHotspot: {x: 0, y: 0}
   gauzeSound:
-    clip: {fileID: 0}
-    volume: 0
+    clip: {fileID: 8300000, guid: f477636834a52724d91bd31619f4c454, type: 3}
+    volume: 0.5
   aerolamSound:
     clip: {fileID: 8300000, guid: f477636834a52724d91bd31619f4c454, type: 3}
     volume: 0.7
@@ -5184,11 +5184,11 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   glueSound:
-    clip: {fileID: 0}
-    volume: 0
-  resinSound:
     clip: {fileID: 8300000, guid: 0abb55d09e8844549bd30c97531eac76, type: 3}
     volume: 0.7
+  resinSound:
+    clip: {fileID: 0}
+    volume: 0
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
   progressioneColla: 0
@@ -5678,7 +5678,7 @@ MonoBehaviour:
     volume: 0
   resinSound:
     clip: {fileID: 8300000, guid: 0abb55d09e8844549bd30c97531eac76, type: 3}
-    volume: 0.7
+    volume: 0.8
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
   progressioneColla: 0
@@ -6536,7 +6536,7 @@ MonoBehaviour:
     m_Bits: 64
   glueSound:
     clip: {fileID: 8300000, guid: 9569b0ea193e6a74aa75842e9cd30426, type: 3}
-    volume: 1
+    volume: 0.8
   velocitaRotazione: 100
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
@@ -9308,7 +9308,7 @@ MonoBehaviour:
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   faseSuccessiva: {fileID: 11400000, guid: f83fc0ecedaefa94eac377ab60dd6365, type: 2}
   progression: 0
-  sogliaCompletamentoPulizia: 0.95
+  sogliaCompletamentoPulizia: 0.99
   eventoPuliziaCompletata:
     m_PersistentCalls:
       m_Calls: []
@@ -10149,7 +10149,7 @@ MonoBehaviour:
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   faseSuccessiva: {fileID: 11400000, guid: 366c3a8a3c915844ea91737efc8df5b1, type: 2}
   progression: 0
-  sogliaCompletamentoPulizia: 0.95
+  sogliaCompletamentoPulizia: 0.99
   eventoPuliziaCompletata:
     m_PersistentCalls:
       m_Calls:
@@ -13869,8 +13869,8 @@ MonoBehaviour:
   inventario: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   handTransform: {fileID: 1764232024}
   footstepSound:
-    clip: {fileID: 0}
-    volume: 0
+    clip: {fileID: 8300000, guid: f26cd371510ebc549b1214abe419da2b, type: 3}
+    volume: 1
   footstepWalkInterval: 0.6
   footstepSprintInterval: 0.38
 --- !u!4 &1411768322
@@ -17728,7 +17728,7 @@ MonoBehaviour:
   tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
   faseSuccessiva: {fileID: 11400000, guid: a24be103dbbd85049820d5279daa7f3d, type: 2}
   progression: 0
-  sogliaCompletamentoPulizia: 0.95
+  sogliaCompletamentoPulizia: 0.99
   eventoPuliziaCompletata:
     m_PersistentCalls:
       m_Calls:
@@ -19151,7 +19151,7 @@ MonoBehaviour:
   cursorDragHotspot: {x: 0, y: 0}
   gauzeSound:
     clip: {fileID: 8300000, guid: bf501fe374196354b926017049158477, type: 3}
-    volume: 0.7
+    volume: 0.5
   aerolamSound:
     clip: {fileID: 0}
     volume: 0
