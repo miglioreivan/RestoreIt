@@ -16,8 +16,11 @@ public class MosaicoSO : DatiOggettoSO
     [SerializeField] private Texture2D mascheraResinaMosaico;
     [Tooltip("Percentuale minima di colla richiesta per completare la fase di incollaggio (es. 0.70 = 70%).")]
     [SerializeField] [Range(0.1f, 1f)] private float sogliaCompletamentoColla = 0.70f;
+    [Tooltip("Percentuale minima di resina richiesta per completare la fase di resinatura (es. 0.70 = 70%).")]
+    [SerializeField] [Range(0.1f, 1f)] private float sogliaCompletamentoResina = 0.70f;
 
     public Texture2D  MascheraCollaMosaico => mascheraCollaMosaico;
     public Texture2D  MascheraResinaMosaico => mascheraResinaMosaico;
     public float      SogliaCompletamentoColla => sogliaCompletamentoColla;
+    public float      SogliaCompletamentoResina => sogliaCompletamentoResina;
 }

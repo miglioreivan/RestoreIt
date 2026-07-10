@@ -45,6 +45,10 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
     private bool[] pixelCollaNecessari;
     private bool[] pixelCollaMappati;
 
+    [Header("Soglia di Completamento")]
+    [Tooltip("Percentuale minima di colla richiesta per completare la fase di incollaggio (es. 0.70 = 70%). Se impostata a 0, usa la soglia definita nel ScriptableObject.")]
+    [SerializeField] [Range(0f, 1f)] private float sogliaCompletamentoOverride = 0f;
+
     [Header("Debug Incollaggio (Sola Lettura)")]
     [SerializeField] private int totPixelCollaNecessari;
     [SerializeField] private int pixelCollaDipinti;
@@ -55,6 +59,9 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
     {
         get
         {
+            if (sogliaCompletamentoOverride > 0f)
+                return sogliaCompletamentoOverride;
+
             if (tavoloCorrente != null && tavoloCorrente.vaschettaCorrente != null)
                 return tavoloCorrente.vaschettaCorrente.SogliaCompletamentoColla;
             return 0.70f; // Fallback

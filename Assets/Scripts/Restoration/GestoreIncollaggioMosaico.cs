@@ -40,6 +40,10 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
     private bool[] pixelCollaNecessari;
     private bool[] pixelCollaMappati;
 
+    [Header("Soglia di Completamento")]
+    [Tooltip("Percentuale minima richiesta per completare la fase di incollaggio/resinatura (es. 0.70 = 70%). Se impostata a 0, usa la soglia definita nel ScriptableObject.")]
+    [SerializeField] [Range(0f, 1f)] private float sogliaCompletamentoOverride = 0f;
+
     [Header("Debug Incollaggio (Sola Lettura)")]
     [SerializeField] private int totPixelCollaNecessari;
     [SerializeField] private int pixelCollaDipinti;
@@ -59,8 +63,13 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
     {
         get
         {
+            if (sogliaCompletamentoOverride > 0f)
+                return sogliaCompletamentoOverride;
+
             if (mosaicoCorrente != null)
-                return mosaicoCorrente.SogliaCompletamentoColla;
+            {
+                return usaResina ? mosaicoCorrente.SogliaCompletamentoResina : mosaicoCorrente.SogliaCompletamentoColla;
+            }
             return 0.70f;
         }
     }

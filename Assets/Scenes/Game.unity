@@ -1603,6 +1603,7 @@ MonoBehaviour:
   resinSound:
     clip: {fileID: 0}
     volume: 0
+  sogliaCompletamentoOverride: 0.99
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
   progressioneColla: 0
@@ -5189,6 +5190,7 @@ MonoBehaviour:
   resinSound:
     clip: {fileID: 0}
     volume: 0
+  sogliaCompletamentoOverride: 0.99
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
   progressioneColla: 0
@@ -5679,6 +5681,7 @@ MonoBehaviour:
   resinSound:
     clip: {fileID: 8300000, guid: 0abb55d09e8844549bd30c97531eac76, type: 3}
     volume: 0.8
+  sogliaCompletamentoOverride: 0.99
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
   progressioneColla: 0
@@ -6538,6 +6541,7 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 9569b0ea193e6a74aa75842e9cd30426, type: 3}
     volume: 0.8
   velocitaRotazione: 100
+  sogliaCompletamentoOverride: 0.99
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
   progressioneColla: 0
