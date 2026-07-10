@@ -1588,7 +1588,7 @@ MonoBehaviour:
   usaResina: 0
   cursorGlueTexture: {fileID: 2800000, guid: b41d9f22b2cf46d4a9a6da29dcb87521, type: 3}
   cursorGlueHotspot: {x: 0, y: 0}
-  rangePennelloColla: 40
+  rangePennelloColla: 50
   layerRestauro:
     serializedVersion: 2
     m_Bits: 0
@@ -5666,7 +5666,7 @@ MonoBehaviour:
   usaResina: 1
   cursorGlueTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
   cursorGlueHotspot: {x: 0, y: 0}
-  rangePennelloColla: 15
+  rangePennelloColla: 40
   layerRestauro:
     serializedVersion: 2
     m_Bits: 64
@@ -9303,7 +9303,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   mascheraSporcoOriginale: {fileID: 2800000, guid: 6cb36b1a7f36ef247ae47625cb032ac5, type: 3}
-  rangePaintbrush: 15
+  rangePaintbrush: 40
   cursorTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
   cursorHotspot: {x: 0, y: 0}
   cleaningSound:
@@ -10144,7 +10144,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   mascheraSporcoOriginale: {fileID: 2800000, guid: f0642b4ccc4d3af4a9b257f8433a68b7, type: 3}
-  rangePaintbrush: 60
+  rangePaintbrush: 50
   cursorTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
   cursorHotspot: {x: 0, y: 0}
   cleaningSound:

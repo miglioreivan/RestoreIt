@@ -36,7 +36,8 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
     private Color32[] texture32;
 
     private int totPixel = 0;
-    private int textureRes = 1024;
+    private int textureWidth = 1024;
+    private int textureHeight = 1024;
 
     private int pixelPainted = 0;
     private bool minigiocoFinito = true;
@@ -83,7 +84,8 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
             
             if (textureInstance != null)
             {
-                textureRes = textureInstance.width;
+                textureWidth = textureInstance.width;
+                textureHeight = textureInstance.height;
                 texture32 = textureInstance.GetPixels32();
                 Debug.Log("Nuova copia RGBA32 della maschera dello sporco creata correttamente.");
             }
@@ -119,7 +121,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
         bool[] pixelRaggiungibili = new bool[texture32.Length];
 
         int risoluzioneScansione = 512;
-        int raggioPrecisioneTelecamera = Mathf.CeilToInt((float)textureRes / risoluzioneScansione);
+        int raggioPrecisioneTelecamera = Mathf.CeilToInt((float)Mathf.Max(textureWidth, textureHeight) / risoluzioneScansione);
 
         int raycastLanciati = 0;
         int raycastColpiti = 0;
@@ -152,8 +154,8 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
                                     if (daModificare)
                                     {
                                         Vector2 uv = RestorationUtils.WrapUV(hit.textureCoord);
-                                        int pixelX = (int)(uv.x * textureRes);
-                                        int pixelY = (int)(uv.y * textureRes);
+                                        int pixelX = (int)(uv.x * textureWidth);
+                                        int pixelY = (int)(uv.y * textureHeight);
                                         SegnaAreaVisibile(pixelX, pixelY, pixelRaggiungibili, raggioPrecisioneTelecamera);
                                     }
                                 }
@@ -354,8 +356,8 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
                 int targetX = centroX + x;
                 int targetY = centroY + y;
 
-                if (targetX >= 0 && targetX < textureRes && targetY >= 0 && targetY < textureRes)
-                    mappa[targetY * textureRes + targetX] = true;
+                if (targetX >= 0 && targetX < textureWidth && targetY >= 0 && targetY < textureHeight)
+                    mappa[targetY * textureWidth + targetX] = true;
             }
         }
     }
@@ -470,8 +472,8 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
                                     }
 
                                     Vector2 coordinataUV = RestorationUtils.WrapUV(hitInfo.textureCoord);
-                                    int pixelCentroX = (int)(coordinataUV.x * textureRes);
-                                    int pixelCentroY = (int)(coordinataUV.y * textureRes);
+                                    int pixelCentroX = (int)(coordinataUV.x * textureWidth);
+                                    int pixelCentroY = (int)(coordinataUV.y * textureHeight);
                                     
                                     PitturaPixel(pixelCentroX, pixelCentroY);
                                 }
@@ -495,18 +497,28 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
     {
         bool textureModificata = false;
 
-        for (int x = -rangePaintbrush; x <= rangePaintbrush; x++)
+        // Calcola il raggio in spazio UV normalizzato (usando 1024 come riferimento per mantenere le dimensioni dell'Inspector)
+        float uvRadius = (float)rangePaintbrush / 1024f;
+        float uvRadiusSqr = uvRadius * uvRadius;
+
+        int rangeX = Mathf.Max(1, (int)(uvRadius * textureWidth));
+        int rangeY = Mathf.Max(1, (int)(uvRadius * textureHeight));
+
+        for (int x = -rangeX; x <= rangeX; x++)
         {
-            for (int y = -rangePaintbrush; y <= rangePaintbrush; y++)
+            for (int y = -rangeY; y <= rangeY; y++)
             {
-                if (x * x + y * y <= rangePaintbrush * rangePaintbrush)
+                float normX = (float)x / textureWidth;
+                float normY = (float)y / textureHeight;
+
+                if (normX * normX + normY * normY <= uvRadiusSqr)
                 {
                     int targetX = centroX + x;
                     int targetY = centroY + y;
 
-                    if (targetX >= 0 && targetX < textureRes && targetY >= 0 && targetY < textureRes)
+                    if (targetX >= 0 && targetX < textureWidth && targetY >= 0 && targetY < textureHeight)
                     {
-                        int indice = targetY * textureRes + targetX;
+                        int indice = targetY * textureWidth + targetX;
                         Color32 p = texture32[indice];
 
                         // Pulizia del pixel se il colore supera la soglia minima di tolleranza dello sporco

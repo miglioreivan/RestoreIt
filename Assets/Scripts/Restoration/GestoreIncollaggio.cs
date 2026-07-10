@@ -464,11 +464,21 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
 
         bool textureModificata = false;
 
-        for (int x = -rangePennelloColla; x <= rangePennelloColla; x++)
+        // Calcola il raggio in spazio UV normalizzato (usando 1024 come riferimento per mantenere le dimensioni dell'Inspector)
+        float uvRadius = (float)rangePennelloColla / 1024f;
+        float uvRadiusSqr = uvRadius * uvRadius;
+
+        int rangeX = Mathf.Max(1, (int)(uvRadius * width));
+        int rangeY = Mathf.Max(1, (int)(uvRadius * height));
+
+        for (int x = -rangeX; x <= rangeX; x++)
         {
-            for (int y = -rangePennelloColla; y <= rangePennelloColla; y++)
+            for (int y = -rangeY; y <= rangeY; y++)
             {
-                if (x * x + y * y <= rangePennelloColla * rangePennelloColla)
+                float normX = (float)x / width;
+                float normY = (float)y / height;
+
+                if (normX * normX + normY * normY <= uvRadiusSqr)
                 {
                     int targetX = pixelX + x;
                     int targetY = pixelY + y;
