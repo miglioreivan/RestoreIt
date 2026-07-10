@@ -16,6 +16,11 @@ public class OggettoCaricaScenaInteractable : MonoBehaviour, IInteractable
     public void StartInteraction()
     {
         Debug.Log($"[OggettoCaricaScenaInteractable] Caricamento della scena con indice {indiceScena}...");
+        
+        // Sblocca e mostra il cursore prima di caricare la scena
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        
         SceneManager.LoadScene(indiceScena);
     }
 

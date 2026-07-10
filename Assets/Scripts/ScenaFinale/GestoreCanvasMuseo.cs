@@ -1,18 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
+using UnityEngine.InputSystem;
 
 public class GestoreCanvasMuseo : MonoBehaviour
 {
     [Header("Componenti UI")]
     [Tooltip("Il pannello principale del canvas da mostrare/nascondere")]
     [SerializeField] private GameObject pannelloCanvas;
-
-    [Tooltip("Testo per il nome dell'oggetto")]
-    [SerializeField] private TextMeshProUGUI testoTitolo;
-
-    [Tooltip("Testo per la descrizione storica")]
-    [SerializeField] private TextMeshProUGUI testoDescrizione;
 
     [Tooltip("Immagine di visualizzazione dell'oggetto")]
     [SerializeField] private Image immagineOggetto;
@@ -43,10 +37,10 @@ public class GestoreCanvasMuseo : MonoBehaviour
 
     private void Update()
     {
-        // Consente di chiudere il canvas premendo Escape o E
+        // Consente di chiudere il canvas premendo Escape o E con il nuovo Input System
         if (IsCanvasAttivo)
         {
-            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.E))
+            if (Keyboard.current != null && (Keyboard.current.escapeKey.wasPressedThisFrame || Keyboard.current.eKey.wasPressedThisFrame))
             {
                 ChiudiCanvas();
             }
@@ -69,17 +63,6 @@ public class GestoreCanvasMuseo : MonoBehaviour
         if (pannelloCanvas != null)
         {
             pannelloCanvas.SetActive(true);
-        }
-
-        // Imposta i testi
-        if (testoTitolo != null)
-        {
-            testoTitolo.text = dati.nomeOggetto;
-        }
-
-        if (testoDescrizione != null)
-        {
-            testoDescrizione.text = dati.descrizione;
         }
 
         // Imposta e mostra l'immagine solo se presente
