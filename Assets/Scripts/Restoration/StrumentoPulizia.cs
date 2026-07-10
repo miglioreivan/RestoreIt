@@ -494,7 +494,6 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
     private void PitturaPixel(int centroX, int centroY)
     {
         bool textureModificata = false;
-        int pixelCancellatiInQuestoColpo = 0;
 
         for (int x = -rangePaintbrush; x <= rangePaintbrush; x++)
         {
@@ -515,7 +514,6 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
                         {
                             texture32[indice] = new Color32(0, 0, 0, 255);
                             pixelPainted++;
-                            pixelCancellatiInQuestoColpo++;
                             textureModificata = true;
                         }
                     }
@@ -579,11 +577,6 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
         Debug.Log("Minigioco di pulizia attivato.");
     }
 
-    public void TerminaMinigame()
-    {
-        minigiocoFinito = true;
-        Debug.Log("Minigioco di pulizia disattivato.");
-    }
 
     private int GetSubMeshIndex(MeshCollider meshCollider, int triangleIndex)
     {

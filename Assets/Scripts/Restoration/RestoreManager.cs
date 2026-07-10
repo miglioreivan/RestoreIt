@@ -34,6 +34,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
     private FaseMapping    faseMappingCorrente;
     private Coroutine      activeTransitionCoroutine;
     private SuggerimentoMano suggerimentoMano;
+    private FaseRestauroSO ultimaFaseAttiva;
 
     // Unity Lifecycle
 
@@ -177,6 +178,9 @@ public class RestoreManager : MonoBehaviour, IInteractable
     private void OnFaseCambiata(FaseRestauroSO fase)
     {
         Debug.Log($"Fase del tavolo modificata in {(fase != null ? fase.name : "nessuna")}.");
+        
+        ultimaFaseAttiva = fase;
+
         AttivaFase(fase);
     }
 
@@ -284,6 +288,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
         }
 
         DisattivaFasi();
+        ultimaFaseAttiva = null;
         StartCameraTransition(startCameraPosition, startCameraRotation, startCameraParent, restorePlayer: true);
     }
 
@@ -437,11 +442,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
         }
     }
 
-    private Collider TrovaCollider()
-    {
-        if (TryGetComponent<Collider>(out var col)) return col;
-        return null;
-    }
+    private Collider TrovaCollider() => GetComponent<Collider>();
 
     // Debug
 

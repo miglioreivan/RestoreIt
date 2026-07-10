@@ -23,11 +23,7 @@ public class InventarioManoSO : ScriptableObject
     {
         oggettoCorrente = dati;
         currentGO = go;
-        isRestored = go != null && (
-            go.GetComponent<OggettoRestaurato>() != null ||
-            go.GetComponentInParent<OggettoRestaurato>() != null ||
-            go.GetComponentInChildren<OggettoRestaurato>() != null
-        );
+        isRestored = RestorationUtils.IsOggettoRestaurato(go);
         
         int count = OnInventarioAggiornato != null ? OnInventarioAggiornato.GetInvocationList().Length : 0;
         Debug.Log($"[ManoSO] ImpostaOggetto chiamato. Oggetto: {(dati != null ? dati.nomeOggetto : "null")}, GO: {(go != null ? go.name : "null")}. Notifica a {count} ascoltatori.");

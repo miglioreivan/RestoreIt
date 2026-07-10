@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public struct SoundEffect
@@ -14,6 +15,14 @@ public class AudioManager : MonoBehaviour
     public static AudioManager Instance { get; private set; }
 
     [SerializeField, Range(0f, 1f)] private float sfxVolumeMultiplier = 1f;
+
+    [Header("Configurazione Audio Globale")]
+    [SerializeField] private SoundEffect musicaMenu;
+    [SerializeField] private SoundEffect musicaGameplay;
+    [SerializeField] private SoundEffect suonoFineFase;
+
+    private const string MENU_MUSIC_ID = "MenuMusic";
+    private const string GAMEPLAY_MUSIC_ID = "GameplayMusic";
 
     public float SFXVolumeMultiplier
     {
@@ -48,6 +57,52 @@ public class AudioManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         Debug.Log($"[AudioManager] Inizializzato su {gameObject.name}. SFX Volume Multiplier: {sfxVolumeMultiplier}.");
     }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Debug.Log($"[AudioManager] Scena caricata: {scene.name} (Build Index: {scene.buildIndex})");
+
+        if (scene.buildIndex == 0)
+        {
+            // Ferma musica gameplay se attiva, avvia musica menu
+            StopLoop(GAMEPLAY_MUSIC_ID, fadeTime: 0.5f);
+            if (musicaMenu.clip != null)
+            {
+                StartLoop(musicaMenu, MENU_MUSIC_ID, fadeTime: 1.0f);
+            }
+        }
+        else if (scene.buildIndex == 1 || scene.buildIndex == 2)
+        {
+            // Ferma musica menu se attiva, avvia musica gameplay
+            StopLoop(MENU_MUSIC_ID, fadeTime: 0.5f);
+            if (musicaGameplay.clip != null)
+            {
+                StartLoop(musicaGameplay, GAMEPLAY_MUSIC_ID, fadeTime: 1.0f);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Riproduce il suono di completamento fase.
+    /// </summary>
+    public void PlayFineFase()
+    {
+        if (suonoFineFase.clip != null)
+        {
+            Play2D(suonoFineFase);
+        }
+    }
+
 
     private void UpdateActiveLoopsVolume()
     {

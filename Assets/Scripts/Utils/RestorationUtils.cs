@@ -91,6 +91,8 @@ public static class RestorationUtils
     {
         if (target == null) yield break;
 
+        AudioManager.Instance?.PlayFineFase();
+
         Vector3 originalPos = target.transform.position;
         float elapsed = 0f;
 

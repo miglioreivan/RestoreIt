@@ -173,7 +173,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager
             {
                 if (goPezzo == null) continue;
 
-                Transform targetTransform = TrovaFiglioNelPrefab(prefabPezzi, goPezzo.name);
+                Transform targetTransform = TrovaFiglioNelPrefab(prefabPezzi.transform, goPezzo.name);
                 if (targetTransform != null)
                 {
                     PezzoInfo pezzo = new PezzoInfo
@@ -489,17 +489,12 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager
         Debug.Log("Transizione telecamera completata. Trascinamento abilitato.");
     }
 
-    private Transform TrovaFiglioNelPrefab(GameObject prefab, string nomeFiglio)
-    {
-        return CercaFiglioRicorsivo(prefab.transform, nomeFiglio);
-    }
-
-    private Transform CercaFiglioRicorsivo(Transform parent, string name)
+    private Transform TrovaFiglioNelPrefab(Transform parent, string name)
     {
         if (parent.name == name) return parent;
         for (int i = 0; i < parent.childCount; i++)
         {
-            Transform result = CercaFiglioRicorsivo(parent.GetChild(i), name);
+            Transform result = TrovaFiglioNelPrefab(parent.GetChild(i), name);
             if (result != null) return result;
         }
         return null;

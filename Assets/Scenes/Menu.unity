@@ -659,6 +659,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf074801eccba924e86226daf5445dc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  sfxVolumeMultiplier: 1
+  musicaMenu:
+    clip: {fileID: 8300000, guid: 1ea4fff7d91c73a46a47a50d2a7b87a6, type: 3}
+    volume: 0.15
+  musicaGameplay:
+    clip: {fileID: 8300000, guid: ab8f76b489d7a634dac502cd7b08872a, type: 3}
+    volume: 0.15
+  suonoFineFase:
+    clip: {fileID: 8300000, guid: e11ae828695d6304fa8783cc808880d7, type: 3}
+    volume: 0.15
 --- !u!4 &181991388
 Transform:
   m_ObjectHideFlags: 0
