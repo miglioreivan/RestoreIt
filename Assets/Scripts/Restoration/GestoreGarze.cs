@@ -3,7 +3,7 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System.Collections;
 
-public class GestoreGarze : MonoBehaviour
+public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager
 {
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -24,6 +24,10 @@ public class GestoreGarze : MonoBehaviour
     [Header("Grafica Cursore")]
     [SerializeField] private Texture2D cursorDragTexture;
     [SerializeField] private Vector2 cursorDragHotspot = Vector2.zero;
+
+    [Header("Audio")]
+    [SerializeField] private SoundEffect gauzeSound;
+    [SerializeField] private SoundEffect aerolamSound;
 
     [Header("Eventi")]
     [SerializeField] private UnityEvent onGarzaApplicata;
@@ -283,13 +287,32 @@ public class GestoreGarze : MonoBehaviour
             Debug.Log("Garza posizionata correttamente sul mosaico.");
             onGarzaApplicata?.Invoke();
 
+            SoundEffect effectToPlay = usaAerolam ? aerolamSound : gauzeSound;
+            if (AudioManager.Instance == null)
+            {
+                Debug.LogWarning($"[GestoreGarze] '{gameObject.name}': AudioManager.Instance è null! Impossibile riprodurre il suono garza.");
+            }
+            else if (effectToPlay.clip == null)
+            {
+                string nomeClip = usaAerolam ? "aerolamSound" : "gauzeSound";
+                Debug.LogWarning($"[GestoreGarze] '{gameObject.name}': {nomeClip}.clip non è assegnato nell'Inspector. Nessun suono verrà riprodotto.");
+            }
+            else
+            {
+                AudioManager.Instance.Play3D(effectToPlay, garzaIstanza.transform.position);
+            }
+
             StartCoroutine(SequenzaCompletamento());
         }
     }
 
     private IEnumerator SequenzaCompletamento()
     {
-        yield return new WaitForSeconds(1.0f);
+        if (tavoloCorrente != null && tavoloCorrente.vaschettaGameObject != null)
+        {
+            yield return RestorationUtils.VibraOggetto(tavoloCorrente.vaschettaGameObject, 0.6f, 0.012f);
+        }
+        yield return new WaitForSeconds(0.4f);
 
         // Disattivazione della visualizzazione della colla nei renderer del mosaico
         if (tavoloCorrente != null && tavoloCorrente.vaschettaGameObject != null)

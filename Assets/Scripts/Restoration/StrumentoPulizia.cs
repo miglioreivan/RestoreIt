@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using Vector2 = UnityEngine.Vector2;
 
-public class StrumentoPulizia : MonoBehaviour
+public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
 {
     [Header("Impostazioni Telecamera e Raggio")]
     [SerializeField] private Camera cameraRestauro;
@@ -15,6 +15,8 @@ public class StrumentoPulizia : MonoBehaviour
     [SerializeField] private int rangePaintbrush = 30;
     [SerializeField] private Texture2D cursorTexture;
     [SerializeField] private Vector2 cursorHotspot = Vector2.zero;
+    [SerializeField] private SoundEffect cleaningSound;
+    private bool wasBrushingLastFrame = false;
 
     [Header("Progressione Restauro")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -77,7 +79,7 @@ public class StrumentoPulizia : MonoBehaviour
 
             // Crea una copia virtuale non compressa a runtime usando RenderTexture e Graphics.Blit
             // per generare una copia perfettamente leggibile e scrivibile.
-            textureInstance = CopiaTextureInRGBA32(mascheraSporcoOriginale);
+            textureInstance = RestorationUtils.CopiaTextureInRGBA32(mascheraSporcoOriginale);
             
             if (textureInstance != null)
             {
@@ -92,37 +94,12 @@ public class StrumentoPulizia : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Crea una copia virtuale non compressa a runtime (textureInstance) usando
-    /// RenderTexture e Graphics.Blit per generare una copia perfettamente leggibile e scrivibile.
-    /// </summary>
-    private Texture2D CopiaTextureInRGBA32(Texture2D sorgente)
+    public void CameraTransitionCompleted()
     {
-        if (sorgente == null) return null;
-
-        RenderTexture rt = RenderTexture.GetTemporary(
-            sorgente.width, 
-            sorgente.height, 
-            0, 
-            RenderTextureFormat.Default, 
-            RenderTextureReadWrite.Linear
-        );
-
-        Graphics.Blit(sorgente, rt);
-
-        RenderTexture precedenteActive = RenderTexture.active;
-        RenderTexture.active = rt;
-
-        Texture2D nuovaTexture = new Texture2D(sorgente.width, sorgente.height, TextureFormat.RGBA32, false);
-        nuovaTexture.name = sorgente.name + "_Leggibile";
-        
-        nuovaTexture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-        nuovaTexture.Apply();
-
-        RenderTexture.active = precedenteActive;
-        RenderTexture.ReleaseTemporary(rt);
-
-        return nuovaTexture;
+        Debug.Log($"Avvio del minigioco di pulizia su {gameObject.name}.");
+        CountVisiblePixel();
+        SetMouseCursor();
+        IniziaMinigame();
     }
 
     public void CountVisiblePixel()
@@ -174,7 +151,7 @@ public class StrumentoPulizia : MonoBehaviour
                                     bool daModificare = hitMat.HasProperty(idMascheraSporco);
                                     if (daModificare)
                                     {
-                                        Vector2 uv = WrapUV(hit.textureCoord);
+                                        Vector2 uv = RestorationUtils.WrapUV(hit.textureCoord);
                                         int pixelX = (int)(uv.x * textureRes);
                                         int pixelY = (int)(uv.y * textureRes);
                                         SegnaAreaVisibile(pixelX, pixelY, pixelRaggiungibili, raggioPrecisioneTelecamera);
@@ -385,12 +362,65 @@ public class StrumentoPulizia : MonoBehaviour
 
     private void Update()
     {
-        if (minigiocoFinito) return;
+        if (minigiocoFinito)
+        {
+            if (wasBrushingLastFrame)
+            {
+                StopCleaningSound();
+            }
+            return;
+        }
         if (Mouse.current == null) return;
 
-        if (Mouse.current.leftButton.isPressed)
+        bool isPressing = Mouse.current.leftButton.isPressed;
+        bool hasHit = false;
+
+        if (isPressing)
+        {
+            Vector2 posizioneMouse = Mouse.current.position.ReadValue();
+            Ray raggio = cameraRestauro.ScreenPointToRay(posizioneMouse);
+            if (Physics.Raycast(raggio, out RaycastHit hitInfo, Mathf.Infinity, layerRestauro))
+            {
+                hasHit = true;
+            }
+        }
+
+        if (isPressing && hasHit)
         {
             UseBrush();
+            StartCleaningSound();
+        }
+        else
+        {
+            StopCleaningSound();
+        }
+    }
+
+    private void StartCleaningSound()
+    {
+        if (wasBrushingLastFrame) return;
+        wasBrushingLastFrame = true;
+        if (AudioManager.Instance == null)
+        {
+            Debug.LogWarning($"[StrumentoPulizia] '{gameObject.name}': AudioManager.Instance è null! Impossibile avviare il loop di pulizia.");
+        }
+        else if (cleaningSound.clip == null)
+        {
+            Debug.LogWarning($"[StrumentoPulizia] '{gameObject.name}': cleaningSound.clip non è assegnato nell'Inspector. Nessun suono verrà riprodotto.");
+        }
+        else
+        {
+            AudioManager.Instance.StartLoop(cleaningSound, "CleaningLoop");
+        }
+    }
+
+    private void StopCleaningSound()
+    {
+        if (!wasBrushingLastFrame) return;
+        wasBrushingLastFrame = false;
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopLoop("CleaningLoop", 0.15f);
         }
     }
     private void UseBrush()
@@ -439,7 +469,7 @@ public class StrumentoPulizia : MonoBehaviour
                                         rend.materials = mats;
                                     }
 
-                                    Vector2 coordinataUV = WrapUV(hitInfo.textureCoord);
+                                    Vector2 coordinataUV = RestorationUtils.WrapUV(hitInfo.textureCoord);
                                     int pixelCentroX = (int)(coordinataUV.x * textureRes);
                                     int pixelCentroY = (int)(coordinataUV.y * textureRes);
                                     
@@ -514,11 +544,21 @@ public class StrumentoPulizia : MonoBehaviour
 
                 ConfiguraCollidersMosaico(false);
 
-                tavoloCorrente?.AvanzaFase(faseSuccessiva);
-                eventoPuliziaCompletata?.Invoke(tavoloCorrente?.vaschettaCorrente);
-                eventoRestauroCompletato?.Invoke(tavoloCorrente?.oggettoCorrente);
+                StartCoroutine(SequenzaCompletamentoPulizia());
             }
         }
+    }
+
+    private System.Collections.IEnumerator SequenzaCompletamentoPulizia()
+    {
+        if (tavoloCorrente != null && tavoloCorrente.vaschettaGameObject != null)
+        {
+            yield return RestorationUtils.VibraOggetto(tavoloCorrente.vaschettaGameObject, 0.6f, 0.012f);
+        }
+
+        tavoloCorrente?.AvanzaFase(faseSuccessiva);
+        eventoPuliziaCompletata?.Invoke(tavoloCorrente?.vaschettaCorrente);
+        eventoRestauroCompletato?.Invoke(tavoloCorrente?.oggettoCorrente);
     }
 
     public void SetMouseCursor()
@@ -612,10 +652,5 @@ public class StrumentoPulizia : MonoBehaviour
         }
     }
     
-    private Vector2 WrapUV(Vector2 uv)
-    {
-        uv.x = uv.x - Mathf.Floor(uv.x);
-        uv.y = uv.y - Mathf.Floor(uv.y);
-        return uv;
-    }
+
 }

@@ -3,7 +3,7 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
-public class GestoreAssemblaggio : MonoBehaviour
+public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager
 {
     [System.Serializable]
     public class PezzoInfo
@@ -37,6 +37,9 @@ public class GestoreAssemblaggio : MonoBehaviour
     [Header("Grafica Cursore Drag & Drop")]
     [SerializeField] private Texture2D cursorDragTexture;
     [SerializeField] private Vector2 cursorDragHotspot = Vector2.zero;
+
+    [Header("Audio")]
+    [SerializeField] private SoundEffect snapSound;
 
     private GameObject ghostAnfora;
     private List<PezzoInfo> listaPezzi = new List<PezzoInfo>();
@@ -283,7 +286,7 @@ public class GestoreAssemblaggio : MonoBehaviour
                         if (!pezzo.isSnapped && (hit.collider.gameObject == pezzo.gameObject || hit.collider.transform.IsChildOf(pezzo.gameObject.transform)))
                         {
                             pezzoTrascinato = pezzo;
-                                                    // Memorizzazione dello stato di trasformazione iniziale per consentire il riposizionamento in caso di rilascio non valido
+                                                     // Memorizzazione dello stato di trasformazione iniziale per consentire il riposizionamento in caso di rilascio non valido
                             positionBeforeDrag = pezzoTrascinato.gameObject.transform.position;
                             rotationBeforeDrag = pezzoTrascinato.gameObject.transform.localRotation;
                             scaleBeforeDrag = pezzoTrascinato.gameObject.transform.localScale;
@@ -409,6 +412,19 @@ public class GestoreAssemblaggio : MonoBehaviour
             Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             Debug.Log($"Pezzo {pezzo.gameObject.name} posizionato correttamente.");
 
+            if (AudioManager.Instance == null)
+            {
+                Debug.LogWarning($"[GestoreAssemblaggio] '{gameObject.name}': AudioManager.Instance è null! Assicurati che un GameObject con AudioManager esista nella scena.");
+            }
+            else if (snapSound.clip == null)
+            {
+                Debug.LogWarning($"[GestoreAssemblaggio] '{gameObject.name}': snapSound.clip non è assegnato nell'Inspector. Nessun suono verrà riprodotto.");
+            }
+            else
+            {
+                AudioManager.Instance.Play3D(snapSound, pezzo.gameObject.transform.position);
+            }
+
             // Verifica del completamento del posizionamento di tutti i pezzi
             bool tuttiPosizionati = true;
             foreach (var p in listaPezzi)
@@ -429,6 +445,11 @@ public class GestoreAssemblaggio : MonoBehaviour
 
     private void CompletaFaseAssemblaggio()
     {
+        StartCoroutine(SequenzaCompletamentoAssemblaggio());
+    }
+
+    private System.Collections.IEnumerator SequenzaCompletamentoAssemblaggio()
+    {
         isAssemblaggioActive = false;
         Debug.Log("Tutti i pezzi sono stati posizionati con successo.");
         onAssemblaggioCompletato?.Invoke();
@@ -443,6 +464,8 @@ public class GestoreAssemblaggio : MonoBehaviour
                 tavoloCorrente.anforaAssemblata = ghostAnfora;
                 Debug.Log("Riferimento all'anfora assemblata memorizzato nel tavolo di lavoro.");
             }
+
+            yield return RestorationUtils.VibraOggetto(ghostAnfora, 0.6f, 0.012f);
         }
         else
         {

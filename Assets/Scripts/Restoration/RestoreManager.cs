@@ -398,65 +398,16 @@ public class RestoreManager : MonoBehaviour, IInteractable
         GameObject faseGO = faseMappingCorrente.faseGameObject;
         if (faseGO == null) yield break;
 
-        StrumentoPulizia strumento = faseGO.GetComponentInChildren<StrumentoPulizia>(true);
-        if (strumento != null)
+        IRestorationPhaseManager phaseManager = faseGO.GetComponentInChildren<IRestorationPhaseManager>(true);
+        if (phaseManager != null)
         {
-            Debug.Log($"Avvio del minigioco di pulizia su {strumento.gameObject.name}.");
-            strumento.CountVisiblePixel();
-            strumento.SetMouseCursor();
-            strumento.IniziaMinigame();
-            yield break;
+            Debug.Log($"Notifica di transizione completata inviata a {phaseManager.GetType().Name} su {faseGO.name}.");
+            phaseManager.CameraTransitionCompleted();
         }
-
-        GestoreAssemblaggio gestore = faseGO.GetComponentInChildren<GestoreAssemblaggio>(true);
-        if (gestore != null)
+        else
         {
-            Debug.Log("Notifica di transizione completata inviata a GestoreAssemblaggio.");
-            gestore.CameraTransitionCompleted();
-            yield break;
+            Debug.LogWarning($"Nessun gestore compatibile trovato per la fase {faseMappingCorrente.faseSO?.name} in {faseGO.name}.");
         }
-
-        GestoreIncollaggio gestoreIncollaggio = faseGO.GetComponentInChildren<GestoreIncollaggio>(true);
-        if (gestoreIncollaggio != null)
-        {
-            Debug.Log("Notifica di transizione completata inviata a GestoreIncollaggio.");
-            gestoreIncollaggio.CameraTransitionCompleted();
-            yield break;
-        }
-
-        GestoreIncollaggioMosaico gestoreIncollaggioMosaico = faseGO.GetComponentInChildren<GestoreIncollaggioMosaico>(true);
-        if (gestoreIncollaggioMosaico != null)
-        {
-            Debug.Log("Notifica di transizione completata inviata a GestoreIncollaggioMosaico.");
-            gestoreIncollaggioMosaico.CameraTransitionCompleted();
-            yield break;
-        }
-
-        GestoreGarze gestoreGarze = faseGO.GetComponentInChildren<GestoreGarze>(true);
-        if (gestoreGarze != null)
-        {
-            Debug.Log("Notifica di transizione completata inviata a GestoreGarze.");
-            gestoreGarze.CameraTransitionCompleted();
-            yield break;
-        }
-
-        GestoreRotazioneMosaico gestoreRotazione = faseGO.GetComponentInChildren<GestoreRotazioneMosaico>(true);
-        if (gestoreRotazione != null)
-        {
-            Debug.Log("Notifica di transizione completata inviata a GestoreRotazioneMosaico.");
-            gestoreRotazione.CameraTransitionCompleted();
-            yield break;
-        }
-
-        GestoreRimozioneGarza gestoreRimozione = faseGO.GetComponentInChildren<GestoreRimozioneGarza>(true);
-        if (gestoreRimozione != null)
-        {
-            Debug.Log("Notifica di transizione completata inviata a GestoreRimozioneGarza.");
-            gestoreRimozione.CameraTransitionCompleted();
-            yield break;
-        }
-
-        Debug.LogWarning($"Nessun gestore compatibile trovato per la fase {faseMappingCorrente.faseSO?.name} in {faseGO.name}.");
     }
 
     // Collider

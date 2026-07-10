@@ -3,7 +3,7 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
-public class GestoreIncollaggio : MonoBehaviour
+public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
 {
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -24,6 +24,10 @@ public class GestoreIncollaggio : MonoBehaviour
     [Header("Configurazioni Pennello")]
     [SerializeField] private int rangePennelloColla = 15;
     [SerializeField] private LayerMask layerRestauro;
+
+    [Header("Audio")]
+    [SerializeField] private SoundEffect glueSound;
+    private bool wasPaintingLastFrame = false;
 
     [Header("Rotazione Anfora")]
     [SerializeField] private float velocitaRotazione = 100f;
@@ -270,7 +274,7 @@ public class GestoreIncollaggio : MonoBehaviour
     {
         if (mascheraCollaUnica == null) return;
 
-        Texture2D mascheraLeggibile = CopiaTextureCompatibile(mascheraCollaUnica);
+        Texture2D mascheraLeggibile = RestorationUtils.CopiaTextureInRGBA32(mascheraCollaUnica);
         if (mascheraLeggibile == null)
         {
             Debug.LogError("Impossibile creare una copia leggibile della maschera colla.");
@@ -322,10 +326,70 @@ public class GestoreIncollaggio : MonoBehaviour
 
     private void Update()
     {
-        if (!isIncollaggioActive || !cameraTransitionFinished) return;
+        if (!isIncollaggioActive || !cameraTransitionFinished)
+        {
+            if (wasPaintingLastFrame)
+            {
+                StopGlueSound();
+            }
+            return;
+        }
 
         GestisciRotazione();
-        GestisciPittura();
+        
+        bool isPressing = Mouse.current != null && Mouse.current.leftButton.isPressed;
+        bool hasHit = false;
+
+        if (isPressing && cameraRestauro != null)
+        {
+            Vector2 mousePos = Mouse.current.position.ReadValue();
+            Ray ray = cameraRestauro.ScreenPointToRay(mousePos);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerRestauro))
+            {
+                if (anforaAssemblata != null && (hit.collider.gameObject == anforaAssemblata || hit.collider.transform.IsChildOf(anforaAssemblata.transform)))
+                {
+                    hasHit = true;
+                }
+            }
+        }
+
+        if (isPressing && hasHit)
+        {
+            GestisciPittura();
+            StartGlueSound();
+        }
+        else
+        {
+            StopGlueSound();
+        }
+    }
+
+    private void StartGlueSound()
+    {
+        if (wasPaintingLastFrame) return;
+        wasPaintingLastFrame = true;
+        if (AudioManager.Instance == null)
+        {
+            Debug.LogWarning($"[GestoreIncollaggio] '{gameObject.name}': AudioManager.Instance è null! Impossibile avviare il loop colla.");
+        }
+        else if (glueSound.clip == null)
+        {
+            Debug.LogWarning($"[GestoreIncollaggio] '{gameObject.name}': glueSound.clip non è assegnato nell'Inspector. Nessun suono verrà riprodotto.");
+        }
+        else
+        {
+            AudioManager.Instance.StartLoop(glueSound, "GlueLoop");
+        }
+    }
+
+    private void StopGlueSound()
+    {
+        if (!wasPaintingLastFrame) return;
+        wasPaintingLastFrame = false;
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopLoop("GlueLoop", 0.15f);
+        }
     }
 
     private void GestisciRotazione()
@@ -453,28 +517,7 @@ public class GestoreIncollaggio : MonoBehaviour
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
 
         // Effetto visivo di vibrazione dell'anfora per simulare il consolidamento
-        float duration = 0.6f;
-        float magnitude = 0.012f;
-        Vector3 originalPos = anforaAssemblata != null ? anforaAssemblata.transform.position : Vector3.zero;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            if (anforaAssemblata != null)
-            {
-                float x = Random.Range(-1f, 1f) * magnitude;
-                float y = Random.Range(-1f, 1f) * magnitude;
-                float z = Random.Range(-1f, 1f) * magnitude;
-                anforaAssemblata.transform.position = originalPos + new Vector3(x, y, z);
-            }
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        if (anforaAssemblata != null)
-        {
-            anforaAssemblata.transform.position = originalPos;
-        }
+        yield return RestorationUtils.VibraOggetto(anforaAssemblata, 0.6f, 0.012f);
 
         // Sostituzione del modello assemblato con il modello intero restaurato
         Debug.Log("Completamento della fase di incollaggio e caricamento del modello intero.");
@@ -654,34 +697,7 @@ public class GestoreIncollaggio : MonoBehaviour
         }
     }
 
-    private Texture2D CopiaTextureCompatibile(Texture2D sorgente)
-    {
-        if (sorgente == null) return null;
 
-        RenderTexture rt = RenderTexture.GetTemporary(
-            sorgente.width, 
-            sorgente.height, 
-            0, 
-            RenderTextureFormat.Default, 
-            RenderTextureReadWrite.Linear
-        );
-
-        Graphics.Blit(sorgente, rt);
-
-        RenderTexture precedenteActive = RenderTexture.active;
-        RenderTexture.active = rt;
-
-        Texture2D nuovaTexture = new Texture2D(sorgente.width, sorgente.height, TextureFormat.RGBA32, false);
-        nuovaTexture.name = sorgente.name + "_Leggibile";
-        
-        nuovaTexture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-        nuovaTexture.Apply();
-
-        RenderTexture.active = precedenteActive;
-        RenderTexture.ReleaseTemporary(rt);
-
-        return nuovaTexture;
-    }
 
     public void CameraTransitionCompleted()
     {

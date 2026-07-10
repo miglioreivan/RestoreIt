@@ -1,2 +1,15 @@
 fileFormatVersion: 2
 guid: 0ceca8c7636624e4899b1b830b2b91c0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - datiOggetto: {instanceID: 0}
+  - manoGiocatore: {instanceID: 0}
+  - tavoloCorrente: {instanceID: 0}
+  - pickupSound: {fileID: 8300000, guid: ff7efbd1c8ca7a1428a89f3899194256, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

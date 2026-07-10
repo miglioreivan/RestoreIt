@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
 
-public class GestoreRimozioneGarza : MonoBehaviour
+public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager
 {
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -178,7 +178,11 @@ public class GestoreRimozioneGarza : MonoBehaviour
 
     private IEnumerator AvanzaFaseRitardato()
     {
-        yield return new WaitForSeconds(0.5f);
+        if (tavoloCorrente != null && tavoloCorrente.vaschettaGameObject != null)
+        {
+            yield return RestorationUtils.VibraOggetto(tavoloCorrente.vaschettaGameObject, 0.5f, 0.01f);
+        }
+        yield return new WaitForSeconds(0.1f);
         
         if (tavoloCorrente != null && faseSuccessiva != null)
         {

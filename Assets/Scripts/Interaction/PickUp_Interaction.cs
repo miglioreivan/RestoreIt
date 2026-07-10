@@ -8,6 +8,9 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
     [Header("Restauro / Tavolo (Opzionale)")]
     [SerializeField] private TavoloSO tavoloCorrente;
 
+    [Header("Audio")]
+    [SerializeField] private SoundEffect pickupSound;
+
     private void Awake()
     {
         if (manoGiocatore == null)
@@ -57,9 +60,7 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
         }
 
         // Se l'oggetto o la sua gerarchia originale è contrassegnata come restaurata, garantisce che il tag sia presente sull'oggetto raccolto
-        bool wasRestored = oggettoDaRaccogliere.GetComponent<OggettoRestaurato>() != null ||
-                           oggettoDaRaccogliere.GetComponentInParent<OggettoRestaurato>() != null ||
-                           oggettoDaRaccogliere.GetComponentInChildren<OggettoRestaurato>() != null;
+        bool wasRestored = RestorationUtils.IsOggettoRestaurato(oggettoDaRaccogliere);
 
         if (wasRestored && oggettoDaRaccogliere.GetComponent<OggettoRestaurato>() == null)
         {
@@ -69,27 +70,7 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
 
         manoGiocatore.ImpostaOggetto(datiOggetto, oggettoDaRaccogliere);
 
-        // Memorizzazione della scala globale per evitare distorsioni dimensionali dopo il reparenting
-        Vector3 targetWorldScale = oggettoDaRaccogliere.transform.lossyScale;
-
-        oggettoDaRaccogliere.transform.SetParent(manoGiocatore.puntoMano, false);
-        oggettoDaRaccogliere.transform.localPosition = Vector3.zero;
-        oggettoDaRaccogliere.transform.localRotation = Quaternion.identity;
-
-        // Compensazione della scala in base alle dimensioni globali del nuovo genitore
-        if (manoGiocatore.puntoMano != null)
-        {
-            Vector3 parentLossyScale = manoGiocatore.puntoMano.lossyScale;
-            oggettoDaRaccogliere.transform.localScale = new Vector3(
-                parentLossyScale.x != 0 ? targetWorldScale.x / parentLossyScale.x : targetWorldScale.x,
-                parentLossyScale.y != 0 ? targetWorldScale.y / parentLossyScale.y : targetWorldScale.y,
-                parentLossyScale.z != 0 ? targetWorldScale.z / parentLossyScale.z : targetWorldScale.z
-            );
-        }
-        else
-        {
-            oggettoDaRaccogliere.transform.localScale = targetWorldScale;
-        }
+        RestorationUtils.ReparentPreservingScale(oggettoDaRaccogliere.transform, manoGiocatore.puntoMano);
 
         foreach (var col in oggettoDaRaccogliere.GetComponentsInChildren<Collider>())
         {
@@ -112,6 +93,19 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
                 tavoloCorrente.anforaAssemblata = null;
             }
             tavoloCorrente.SvuotaTavolo();
+        }
+
+        if (AudioManager.Instance == null)
+        {
+            Debug.LogWarning($"[PickUp_Interaction] '{gameObject.name}': AudioManager.Instance è null! Assicurati che un GameObject con AudioManager esista nella scena.");
+        }
+        else if (pickupSound.clip == null)
+        {
+            Debug.LogWarning($"[PickUp_Interaction] '{gameObject.name}': pickupSound.clip non è assegnato nell'Inspector. Nessun suono verrà riprodotto.");
+        }
+        else
+        {
+            AudioManager.Instance.Play2D(pickupSound);
         }
     }
 }

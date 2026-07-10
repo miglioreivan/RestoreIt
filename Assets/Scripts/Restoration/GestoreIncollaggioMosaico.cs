@@ -3,7 +3,7 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System.Collections;
 
-public class GestoreIncollaggioMosaico : MonoBehaviour
+public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
 {
     [Header("Progressione Restauro")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -25,6 +25,11 @@ public class GestoreIncollaggioMosaico : MonoBehaviour
 
     [Header("Eventi")]
     [SerializeField] private UnityEvent onIncollaggioCompletato;
+
+    [Header("Audio")]
+    [SerializeField] private SoundEffect glueSound;
+    [SerializeField] private SoundEffect resinSound;
+    private bool wasPaintingLastFrame = false;
 
     private MosaicoSO mosaicoCorrente;
     private GameObject mosaicoGO;
@@ -244,7 +249,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour
     {
         if (mascheraCollaUnica == null) return;
 
-        Texture2D mascheraLeggibile = CopiaTextureCompatibile(mascheraCollaUnica);
+        Texture2D mascheraLeggibile = RestorationUtils.CopiaTextureInRGBA32(mascheraCollaUnica);
         if (mascheraLeggibile == null)
         {
             Debug.LogError("Impossibile creare una copia leggibile della maschera colla.");
@@ -280,7 +285,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour
                     {
                         if (mosaicoGO != null && (hit.collider.gameObject == mosaicoGO || hit.collider.transform.IsChildOf(mosaicoGO.transform)))
                         {
-                            Vector2 uv = WrapUV(hit.textureCoord);
+                            Vector2 uv = RestorationUtils.WrapUV(hit.textureCoord);
                             int pixelX = (int)(uv.x * width);
                             int pixelY = (int)(uv.y * height);
 
@@ -328,10 +333,73 @@ public class GestoreIncollaggioMosaico : MonoBehaviour
 
     private void Update()
     {
-        if (!isIncollaggioActive || !cameraTransitionFinished) return;
+        if (!isIncollaggioActive || !cameraTransitionFinished)
+        {
+            if (wasPaintingLastFrame)
+            {
+                StopGlueSound();
+            }
+            return;
+        }
 
         GestisciRotazione();
-        GestisciPittura();
+        
+        bool isPressing = Mouse.current != null && Mouse.current.leftButton.isPressed;
+        bool hasHit = false;
+
+        if (isPressing && cameraRestauro != null)
+        {
+            Vector2 mousePos = Mouse.current.position.ReadValue();
+            Ray ray = cameraRestauro.ScreenPointToRay(mousePos);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerRestauro))
+            {
+                if (mosaicoGO != null && (hit.collider.gameObject == mosaicoGO || hit.collider.transform.IsChildOf(mosaicoGO.transform)))
+                {
+                    hasHit = true;
+                }
+            }
+        }
+
+        if (isPressing && hasHit)
+        {
+            GestisciPittura();
+            StartGlueSound();
+        }
+        else
+        {
+            StopGlueSound();
+        }
+    }
+
+    private void StartGlueSound()
+    {
+        if (wasPaintingLastFrame) return;
+        wasPaintingLastFrame = true;
+        
+        SoundEffect effectToPlay = usaResina ? resinSound : glueSound;
+        if (AudioManager.Instance == null)
+        {
+            Debug.LogWarning($"[GestoreIncollaggioMosaico] '{gameObject.name}': AudioManager.Instance è null! Impossibile avviare il loop colla.");
+        }
+        else if (effectToPlay.clip == null)
+        {
+            string nomeClip = usaResina ? "resinSound" : "glueSound";
+            Debug.LogWarning($"[GestoreIncollaggioMosaico] '{gameObject.name}': {nomeClip}.clip non è assegnato nell'Inspector. Nessun suono verrà riprodotto.");
+        }
+        else
+        {
+            AudioManager.Instance.StartLoop(effectToPlay, "MosaicoGlueLoop");
+        }
+    }
+
+    private void StopGlueSound()
+    {
+        if (!wasPaintingLastFrame) return;
+        wasPaintingLastFrame = false;
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopLoop("MosaicoGlueLoop", 0.15f);
+        }
     }
 
     private void GestisciRotazione()
@@ -396,7 +464,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour
         int width = collaTextureInstance.width;
         int height = collaTextureInstance.height;
 
-        Vector2 wrappedUV = WrapUV(uv);
+        Vector2 wrappedUV = RestorationUtils.WrapUV(uv);
         int pixelX = (int)(wrappedUV.x * width);
         int pixelY = (int)(wrappedUV.y * height);
 
@@ -462,28 +530,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
 
         // Effetto visivo di vibrazione del mosaico per simulare il consolidamento
-        float duration = 0.6f;
-        float magnitude = 0.012f;
-        Vector3 originalPos = mosaicoGO != null ? mosaicoGO.transform.position : Vector3.zero;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            if (mosaicoGO != null)
-            {
-                float x = Random.Range(-1f, 1f) * magnitude;
-                float y = Random.Range(-1f, 1f) * magnitude;
-                float z = Random.Range(-1f, 1f) * magnitude;
-                mosaicoGO.transform.position = originalPos + new Vector3(x, y, z);
-            }
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        if (mosaicoGO != null)
-        {
-            mosaicoGO.transform.position = originalPos;
-        }
+        yield return RestorationUtils.VibraOggetto(mosaicoGO, 0.6f, 0.012f);
 
         Debug.Log("Completamento della fase di incollaggio del mosaico.");
 
@@ -618,34 +665,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour
         }
     }
 
-    private Texture2D CopiaTextureCompatibile(Texture2D sorgente)
-    {
-        if (sorgente == null) return null;
 
-        RenderTexture rt = RenderTexture.GetTemporary(
-            sorgente.width, 
-            sorgente.height, 
-            0, 
-            RenderTextureFormat.Default, 
-            RenderTextureReadWrite.Linear
-        );
-
-        Graphics.Blit(sorgente, rt);
-
-        RenderTexture precedenteActive = RenderTexture.active;
-        RenderTexture.active = rt;
-
-        Texture2D nuovaTexture = new Texture2D(sorgente.width, sorgente.height, TextureFormat.RGBA32, false);
-        nuovaTexture.name = sorgente.name + "_Leggibile";
-        
-        nuovaTexture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-        nuovaTexture.Apply();
-
-        RenderTexture.active = precedenteActive;
-        RenderTexture.ReleaseTemporary(rt);
-
-        return nuovaTexture;
-    }
 
     public void CameraTransitionCompleted()
     {
@@ -653,10 +673,5 @@ public class GestoreIncollaggioMosaico : MonoBehaviour
         Debug.Log("Transizione telecamera completata. Applicazione colla abilitata.");
     }
 
-    private Vector2 WrapUV(Vector2 uv)
-    {
-        uv.x = uv.x - Mathf.Floor(uv.x);
-        uv.y = uv.y - Mathf.Floor(uv.y);
-        return uv;
-    }
+
 }

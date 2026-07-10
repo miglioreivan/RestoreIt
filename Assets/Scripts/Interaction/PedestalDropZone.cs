@@ -17,6 +17,9 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
     [Header("Tipo di Oggetto Accettato")]
     [SerializeField] private TipoOggettoAccettato tipoAccettato = TipoOggettoAccettato.Qualsiasi;
 
+    [Header("Audio")]
+    [SerializeField] private SoundEffect dropSound;
+
     [Header("Eventi")]
     [SerializeField] private VoidEventChannelSO onReleaseEvent;
     [SerializeField] private UnityEventDatiOggetto eventsOnRelease;
@@ -37,10 +40,7 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
         GameObject go = manoGiocatore.currentGO;
 
         // Verifica che l'oggetto in mano sia stato restaurato
-        bool isRestored = go.GetComponent<OggettoRestaurato>() != null ||
-                          go.GetComponentInParent<OggettoRestaurato>() != null ||
-                          go.GetComponentInChildren<OggettoRestaurato>() != null;
-        if (!isRestored)
+        if (!manoGiocatore.isRestored)
             return false;
 
         // Determina se l'oggetto è un'anfora o un mosaico tramite controlli incrociati su tipo, nome dati e nome del GameObject
@@ -103,27 +103,7 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
 
         manoGiocatore.SvuotaMano();
 
-        // Memorizzazione della scala globale per prevenire distorsioni dimensionali dopo il reparenting
-        Vector3 targetWorldScale = go.transform.lossyScale;
-
-        go.transform.SetParent(puntoRelease, false);
-        go.transform.localPosition = Vector3.zero;
-        go.transform.localRotation = Quaternion.identity;
-
-        // Compensazione della scala in base alle dimensioni globali del nuovo genitore
-        if (puntoRelease != null)
-        {
-            Vector3 parentLossyScale = puntoRelease.lossyScale;
-            go.transform.localScale = new Vector3(
-                parentLossyScale.x != 0 ? targetWorldScale.x / parentLossyScale.x : targetWorldScale.x,
-                parentLossyScale.y != 0 ? targetWorldScale.y / parentLossyScale.y : targetWorldScale.y,
-                parentLossyScale.z != 0 ? targetWorldScale.z / parentLossyScale.z : targetWorldScale.z
-            );
-        }
-        else
-        {
-            go.transform.localScale = targetWorldScale;
-        }
+        RestorationUtils.ReparentPreservingScale(go.transform, puntoRelease);
 
         foreach (var col in go.GetComponentsInChildren<Collider>())
         {
@@ -142,6 +122,19 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
         OnObjectPlaced?.Invoke(this);
 
         Debug.Log($"Oggetto {go.name} posizionato sul piedistallo {gameObject.name}.");
+
+        if (AudioManager.Instance == null)
+        {
+            Debug.LogWarning($"[PedestalDropZone] '{gameObject.name}': AudioManager.Instance è null! Assicurati che un GameObject con AudioManager esista nella scena.");
+        }
+        else if (dropSound.clip == null)
+        {
+            Debug.LogWarning($"[PedestalDropZone] '{gameObject.name}': dropSound.clip non è assegnato nell'Inspector. Nessun suono verrà riprodotto.");
+        }
+        else
+        {
+            AudioManager.Instance.Play2D(dropSound);
+        }
     }
 
     public bool HasObject => lastReleasedItem != null;

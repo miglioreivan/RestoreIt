@@ -69,15 +69,12 @@ public class SuggerimentoMano : MonoBehaviour
         }
 
         // Controlla se l'oggetto in mano è già stato restaurato
-        GameObject go = inventario.currentGO;
-        bool isRestored = go.GetComponent<OggettoRestaurato>() != null ||
-                          go.GetComponentInParent<OggettoRestaurato>() != null ||
-                          go.GetComponentInChildren<OggettoRestaurato>() != null;
+        bool isRestored = inventario.isRestored;
 
         string testoScelto = isRestored ? testoOggettoFinito : testoManoPiena;
         testoSuggerimento.text = testoScelto;
         
-        Debug.Log($"[SuggerimentoMano] Oggetto in mano: {go.name}. Restaurato: {isRestored}. Testo UI impostato a: \"{testoScelto}\"");
+        Debug.Log($"[SuggerimentoMano] Oggetto in mano: {inventario.currentGO.name}. Restaurato: {isRestored}. Testo UI impostato a: \"{testoScelto}\"");
     }
 
     public void ApriMuseo()

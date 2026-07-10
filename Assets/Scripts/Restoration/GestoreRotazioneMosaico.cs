@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class GestoreRotazioneMosaico : MonoBehaviour
+public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager
 {
     [Header("Tavolo e Fasi")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -97,9 +97,15 @@ public class GestoreRotazioneMosaico : MonoBehaviour
         }
 
         Debug.Log("Rotazione del mosaico completata.");
+
+        if (targetGO != null)
+        {
+            yield return RestorationUtils.VibraOggetto(targetGO, 0.5f, 0.008f);
+        }
+
         isRotazioneAttiva = false;
         
-        yield return new WaitForSeconds(0.5f); // Pausa per enfasi visiva prima del cambio fase
+        yield return new WaitForSeconds(0.2f);
         AvanzaFase();
     }
 

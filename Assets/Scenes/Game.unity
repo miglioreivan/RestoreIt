@@ -893,6 +893,9 @@ MonoBehaviour:
   puntoRelease: {fileID: 2136070331}
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   tipoAccettato: 2
+  dropSound:
+    clip: {fileID: 8300000, guid: 29ef79676657cb74aaa38ed2388e98a8, type: 3}
+    volume: 1
   onReleaseEvent: {fileID: 11400000, guid: 1370ce1963983b7499a8e47a3b60835a, type: 2}
   eventsOnRelease:
     m_PersistentCalls:
@@ -1172,6 +1175,9 @@ MonoBehaviour:
   datiOggetto: {fileID: 11400000, guid: d6246b06638851c44a724ee8957f722a, type: 2}
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
+  pickupSound:
+    clip: {fileID: 8300000, guid: ff7efbd1c8ca7a1428a89f3899194256, type: 3}
+    volume: 1
 --- !u!65 &112106509
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1580,7 +1586,7 @@ MonoBehaviour:
   restoreManager: {fileID: 1086795824}
   faseSuccessiva: {fileID: 11400000, guid: 6dc237bb2c64d6e4f8b1bd22ac9853ed, type: 2}
   usaResina: 0
-  cursorGlueTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
+  cursorGlueTexture: {fileID: 2800000, guid: b41d9f22b2cf46d4a9a6da29dcb87521, type: 3}
   cursorGlueHotspot: {x: 0, y: 0}
   rangePennelloColla: 40
   layerRestauro:
@@ -1591,6 +1597,12 @@ MonoBehaviour:
   onIncollaggioCompletato:
     m_PersistentCalls:
       m_Calls: []
+  glueSound:
+    clip: {fileID: 8300000, guid: 434fc10d4538d6744badb9af938b36d2, type: 3}
+    volume: 1
+  resinSound:
+    clip: {fileID: 0}
+    volume: 0
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
   progressioneColla: 0
@@ -1693,6 +1705,9 @@ MonoBehaviour:
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   puntoRelease: {fileID: 1076509533}
   tipoAccettato: 2
+  dropSound:
+    clip: {fileID: 8300000, guid: 29ef79676657cb74aaa38ed2388e98a8, type: 3}
+    volume: 1
   onReleaseEvent: {fileID: 11400000, guid: 1370ce1963983b7499a8e47a3b60835a, type: 2}
   eventsOnRelease:
     m_PersistentCalls:
@@ -2267,6 +2282,12 @@ MonoBehaviour:
   snapAngle: 15
   cursorDragTexture: {fileID: 2800000, guid: f95423e72af4bf54790bef78a6b1b659, type: 3}
   cursorDragHotspot: {x: 0, y: 0}
+  gauzeSound:
+    clip: {fileID: 0}
+    volume: 0
+  aerolamSound:
+    clip: {fileID: 8300000, guid: f477636834a52724d91bd31619f4c454, type: 3}
+    volume: 0.7
   onGarzaApplicata:
     m_PersistentCalls:
       m_Calls: []
@@ -3674,6 +3695,9 @@ MonoBehaviour:
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   puntoRelease: {fileID: 1754438654}
   tipoAccettato: 2
+  dropSound:
+    clip: {fileID: 8300000, guid: 29ef79676657cb74aaa38ed2388e98a8, type: 3}
+    volume: 1
   onReleaseEvent: {fileID: 11400000, guid: 1370ce1963983b7499a8e47a3b60835a, type: 2}
   eventsOnRelease:
     m_PersistentCalls:
@@ -4732,6 +4756,7 @@ Transform:
   - {fileID: 278603752}
   - {fileID: 1648648111}
   - {fileID: 846827586}
+  - {fileID: 982992457}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &457675212 stripped
@@ -5158,6 +5183,12 @@ MonoBehaviour:
   onIncollaggioCompletato:
     m_PersistentCalls:
       m_Calls: []
+  glueSound:
+    clip: {fileID: 0}
+    volume: 0
+  resinSound:
+    clip: {fileID: 8300000, guid: 0abb55d09e8844549bd30c97531eac76, type: 3}
+    volume: 0.7
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
   progressioneColla: 0
@@ -5198,6 +5229,9 @@ MonoBehaviour:
   datiOggetto: {fileID: 11400000, guid: 41cd4112fb14c2f4ba20a5ff3e3cd51a, type: 2}
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   tavoloCorrente: {fileID: 0}
+  pickupSound:
+    clip: {fileID: 8300000, guid: ff7efbd1c8ca7a1428a89f3899194256, type: 3}
+    volume: 1
 --- !u!1 &515829424 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8626957303998234696, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -5639,6 +5673,12 @@ MonoBehaviour:
   onIncollaggioCompletato:
     m_PersistentCalls:
       m_Calls: []
+  glueSound:
+    clip: {fileID: 0}
+    volume: 0
+  resinSound:
+    clip: {fileID: 8300000, guid: 0abb55d09e8844549bd30c97531eac76, type: 3}
+    volume: 0.7
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
   progressioneColla: 0
@@ -6494,6 +6534,9 @@ MonoBehaviour:
   layerRestauro:
     serializedVersion: 2
     m_Bits: 64
+  glueSound:
+    clip: {fileID: 8300000, guid: 9569b0ea193e6a74aa75842e9cd30426, type: 3}
+    volume: 1
   velocitaRotazione: 100
   totPixelCollaNecessari: 0
   pixelCollaDipinti: 0
@@ -6822,6 +6865,9 @@ MonoBehaviour:
   datiOggetto: {fileID: 11400000, guid: 427bef7b0a69ba14782011f0ce1f36de, type: 2}
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   tavoloCorrente: {fileID: 0}
+  pickupSound:
+    clip: {fileID: 8300000, guid: ff7efbd1c8ca7a1428a89f3899194256, type: 3}
+    volume: 1
 --- !u!1 &727164962 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5137587094197596933, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -7414,6 +7460,9 @@ MonoBehaviour:
       m_Calls: []
   cursorDragTexture: {fileID: 2800000, guid: f95423e72af4bf54790bef78a6b1b659, type: 3}
   cursorDragHotspot: {x: 0, y: 0}
+  snapSound:
+    clip: {fileID: 8300000, guid: 89fdb60c2bc920b4c88cfb0e5761ae56, type: 3}
+    volume: 0.7
 --- !u!1 &771938090 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2358260544546960407, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -8599,6 +8648,9 @@ MonoBehaviour:
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   puntoRelease: {fileID: 1532976786}
   tipoAccettato: 1
+  dropSound:
+    clip: {fileID: 8300000, guid: 29ef79676657cb74aaa38ed2388e98a8, type: 3}
+    volume: 1
   onReleaseEvent: {fileID: 11400000, guid: 1370ce1963983b7499a8e47a3b60835a, type: 2}
   eventsOnRelease:
     m_PersistentCalls:
@@ -9250,6 +9302,9 @@ MonoBehaviour:
   rangePaintbrush: 15
   cursorTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
   cursorHotspot: {x: 0, y: 0}
+  cleaningSound:
+    clip: {fileID: 8300000, guid: 415f39b1d9e3b1647aad87f0c12c9ea9, type: 3}
+    volume: 1
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   faseSuccessiva: {fileID: 11400000, guid: f83fc0ecedaefa94eac377ab60dd6365, type: 2}
   progression: 0
@@ -9649,8 +9704,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 982992456}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 77.31, y: 0.006000042, z: -7.4880004}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -12.350006, y: -1.4226999, z: 25.007998}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9658,7 +9713,7 @@ Transform:
   - {fileID: 543450652731016217}
   - {fileID: 543450651818219650}
   - {fileID: 543450651621118378}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 457027735}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &1000204085
 BoxCollider:
@@ -10088,6 +10143,9 @@ MonoBehaviour:
   rangePaintbrush: 60
   cursorTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
   cursorHotspot: {x: 0, y: 0}
+  cleaningSound:
+    clip: {fileID: 8300000, guid: 415f39b1d9e3b1647aad87f0c12c9ea9, type: 3}
+    volume: 1
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   faseSuccessiva: {fileID: 11400000, guid: 366c3a8a3c915844ea91737efc8df5b1, type: 2}
   progression: 0
@@ -12812,6 +12870,9 @@ MonoBehaviour:
   puntoRelease: {fileID: 124095479}
   tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
   tipoAccettato: 1
+  dropSound:
+    clip: {fileID: 8300000, guid: 29ef79676657cb74aaa38ed2388e98a8, type: 3}
+    volume: 1
   onReleaseEvent: {fileID: 11400000, guid: 1370ce1963983b7499a8e47a3b60835a, type: 2}
   eventsOnRelease:
     m_PersistentCalls:
@@ -13384,6 +13445,9 @@ MonoBehaviour:
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   puntoRelease: {fileID: 1007320435}
   tipoAccettato: 1
+  dropSound:
+    clip: {fileID: 8300000, guid: 29ef79676657cb74aaa38ed2388e98a8, type: 3}
+    volume: 1
   onReleaseEvent: {fileID: 11400000, guid: 1370ce1963983b7499a8e47a3b60835a, type: 2}
   eventsOnRelease:
     m_PersistentCalls:
@@ -13804,6 +13868,11 @@ MonoBehaviour:
     m_Bits: 8
   inventario: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   handTransform: {fileID: 1764232024}
+  footstepSound:
+    clip: {fileID: 0}
+    volume: 0
+  footstepWalkInterval: 0.6
+  footstepSprintInterval: 0.38
 --- !u!4 &1411768322
 Transform:
   m_ObjectHideFlags: 0
@@ -14950,6 +15019,9 @@ MonoBehaviour:
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   puntoRelease: {fileID: 163297834}
   tipoAccettato: 2
+  dropSound:
+    clip: {fileID: 8300000, guid: 29ef79676657cb74aaa38ed2388e98a8, type: 3}
+    volume: 1
   onReleaseEvent: {fileID: 11400000, guid: 1370ce1963983b7499a8e47a3b60835a, type: 2}
   eventsOnRelease:
     m_PersistentCalls:
@@ -15014,6 +15086,18 @@ MonoBehaviour:
   onEsposizioneCompletata:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 1411768318}
+        m_TargetAssemblyTypeName: FirstPersonController, Assembly-CSharp
+        m_MethodName: RemoveFocus
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
       - m_Target: {fileID: 1411768318}
         m_TargetAssemblyTypeName: FirstPersonController, Assembly-CSharp
         m_MethodName: set_enabled
@@ -15168,6 +15252,9 @@ MonoBehaviour:
   datiOggetto: {fileID: 11400000, guid: 02b8a58a8720d3b40a48d188ed2aa69b, type: 2}
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
+  pickupSound:
+    clip: {fileID: 8300000, guid: ff7efbd1c8ca7a1428a89f3899194256, type: 3}
+    volume: 1
 --- !u!4 &1474157362
 Transform:
   m_ObjectHideFlags: 0
@@ -16320,6 +16407,9 @@ MonoBehaviour:
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   puntoRelease: {fileID: 585153344}
   tipoAccettato: 1
+  dropSound:
+    clip: {fileID: 8300000, guid: 29ef79676657cb74aaa38ed2388e98a8, type: 3}
+    volume: 1
   onReleaseEvent: {fileID: 11400000, guid: 1370ce1963983b7499a8e47a3b60835a, type: 2}
   eventsOnRelease:
     m_PersistentCalls:
@@ -17632,6 +17722,9 @@ MonoBehaviour:
   rangePaintbrush: 25
   cursorTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
   cursorHotspot: {x: 0, y: 100}
+  cleaningSound:
+    clip: {fileID: 8300000, guid: 415f39b1d9e3b1647aad87f0c12c9ea9, type: 3}
+    volume: 1
   tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
   faseSuccessiva: {fileID: 11400000, guid: a24be103dbbd85049820d5279daa7f3d, type: 2}
   progression: 0
@@ -19056,6 +19149,12 @@ MonoBehaviour:
   snapAngle: 15
   cursorDragTexture: {fileID: 2800000, guid: f95423e72af4bf54790bef78a6b1b659, type: 3}
   cursorDragHotspot: {x: 0, y: 0}
+  gauzeSound:
+    clip: {fileID: 8300000, guid: bf501fe374196354b926017049158477, type: 3}
+    volume: 0.7
+  aerolamSound:
+    clip: {fileID: 0}
+    volume: 0
   onGarzaApplicata:
     m_PersistentCalls:
       m_Calls: []
@@ -19742,6 +19841,9 @@ MonoBehaviour:
   datiOggetto: {fileID: 11400000, guid: 9d2cc3573d8d1484d9ab11e3a86cfd69, type: 2}
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   tavoloCorrente: {fileID: 0}
+  pickupSound:
+    clip: {fileID: 8300000, guid: ff7efbd1c8ca7a1428a89f3899194256, type: 3}
+    volume: 1
 --- !u!1 &2039995593 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6423410809379822412, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -20708,6 +20810,9 @@ MonoBehaviour:
   datiOggetto: {fileID: 11400000, guid: 66077fc9af50f8b4bac2eac6fe0d50a9, type: 2}
   manoGiocatore: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
+  pickupSound:
+    clip: {fileID: 8300000, guid: ff7efbd1c8ca7a1428a89f3899194256, type: 3}
+    volume: 1
 --- !u!1 &919132147744053975
 GameObject:
   m_ObjectHideFlags: 0
@@ -23502,7 +23607,6 @@ SceneRoots:
   - {fileID: 543450653014930785}
   - {fileID: 543450653198373069}
   - {fileID: 577984509}
-  - {fileID: 982992457}
   - {fileID: 1449616987}
   - {fileID: 1449880496}
   - {fileID: 543450651932049517}

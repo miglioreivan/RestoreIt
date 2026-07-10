@@ -19,6 +19,9 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private TipoOggettoAccettato tipoAccettato = TipoOggettoAccettato.Qualsiasi;
 
+    [Header("Audio")]
+    [SerializeField] private SoundEffect dropSound;
+
     private void Awake()
     {
         if (manoGiocatore == null)
@@ -61,10 +64,7 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         if (manoGiocatore == null || manoGiocatore.currentGO == null)
             return false;
 
-        bool isRestored = manoGiocatore.currentGO.GetComponent<OggettoRestaurato>() != null ||
-                          manoGiocatore.currentGO.GetComponentInParent<OggettoRestaurato>() != null ||
-                          manoGiocatore.currentGO.GetComponentInChildren<OggettoRestaurato>() != null;
-        if (isRestored)
+        if (manoGiocatore.isRestored)
             return false;
 
         if (tavoloCorrente != null && tavoloCorrente.oggettoCorrente != null)
@@ -91,10 +91,7 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         if (manoGiocatore == null || manoGiocatore.currentGO == null)
             return "Non hai un oggetto da rilasciare.";
 
-        bool isRestored = manoGiocatore.currentGO.GetComponent<OggettoRestaurato>() != null ||
-                          manoGiocatore.currentGO.GetComponentInParent<OggettoRestaurato>() != null ||
-                          manoGiocatore.currentGO.GetComponentInChildren<OggettoRestaurato>() != null;
-        if (isRestored)
+        if (manoGiocatore.isRestored)
             return "Non puoi rimettere sul tavolo un oggetto già restaurato!";
         
         if (tavoloCorrente != null && tavoloCorrente.oggettoCorrente != null)
@@ -134,27 +131,7 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
 
         manoGiocatore.SvuotaMano();
 
-        // Memorizzazione della scala globale per evitare distorsioni dimensionali dopo il reparenting
-        Vector3 targetWorldScale = go.transform.lossyScale;
-
-        go.transform.SetParent(puntoRelease, false);
-        go.transform.localPosition = Vector3.zero;
-        go.transform.localRotation = Quaternion.identity;
-
-        // Compensazione della scala in base alle dimensioni globali del nuovo genitore
-        if (puntoRelease != null)
-        {
-            Vector3 parentLossyScale = puntoRelease.lossyScale;
-            go.transform.localScale = new Vector3(
-                parentLossyScale.x != 0 ? targetWorldScale.x / parentLossyScale.x : targetWorldScale.x,
-                parentLossyScale.y != 0 ? targetWorldScale.y / parentLossyScale.y : targetWorldScale.y,
-                parentLossyScale.z != 0 ? targetWorldScale.z / parentLossyScale.z : targetWorldScale.z
-            );
-        }
-        else
-        {
-            go.transform.localScale = targetWorldScale;
-        }
+        RestorationUtils.ReparentPreservingScale(go.transform, puntoRelease);
 
         foreach (var col in go.GetComponentsInChildren<Collider>())
         {
@@ -168,5 +145,18 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
 
         if (eventsOnRelease != null)
             eventsOnRelease.Invoke(lastReleasedItem);
+
+        if (AudioManager.Instance == null)
+        {
+            Debug.LogWarning($"[DropZone_Interaction] '{gameObject.name}': AudioManager.Instance è null! Assicurati che un GameObject con AudioManager esista nella scena.");
+        }
+        else if (dropSound.clip == null)
+        {
+            Debug.LogWarning($"[DropZone_Interaction] '{gameObject.name}': dropSound.clip non è assegnato nell'Inspector. Nessun suono verrà riprodotto.");
+        }
+        else
+        {
+            AudioManager.Instance.Play2D(dropSound);
+        }
     }
 }

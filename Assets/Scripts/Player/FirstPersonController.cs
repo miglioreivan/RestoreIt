@@ -35,6 +35,12 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private InventarioManoSO inventario;
     [SerializeField] private Transform handTransform;
 
+    [Header("Impostazioni Audio")]
+    [SerializeField] private SoundEffect footstepSound;
+    [SerializeField] private float footstepWalkInterval = 0.6f;
+    [SerializeField] private float footstepSprintInterval = 0.38f;
+    private float footstepTimer = 0f;
+
     public InventarioManoSO Inventario => inventario;
 
     private CharacterController characterController;
@@ -49,6 +55,8 @@ public class FirstPersonController : MonoBehaviour
         if (handTransform == null)
             Debug.LogError("Posizione della mano non trovata.");
         inventario.puntoMano = handTransform;
+        // Inizializza il timer in modo che il primo passo avvenga rapidamente
+        footstepTimer = footstepWalkInterval;
     }
 
     private void Start()
@@ -176,6 +184,27 @@ public class FirstPersonController : MonoBehaviour
         movement.y = verticalVelocity;
 
         characterController.Move(movement * Time.deltaTime);
+
+        // Gestione audio dei passi
+        if (characterController.isGrounded && !isSliding && moveValue.sqrMagnitude > 0.01f)
+        {
+            float interval = sprintAction.IsPressed() ? footstepSprintInterval : footstepWalkInterval;
+            footstepTimer += Time.deltaTime;
+            if (footstepTimer >= interval)
+            {
+                footstepTimer = 0f;
+                if (AudioManager.Instance != null && footstepSound.clip != null)
+                {
+                    AudioManager.Instance.Play2D(footstepSound, 0.9f, 1.1f);
+                }
+            }
+        }
+        else
+        {
+            // Mantiene il timer vicino alla soglia per fare in modo che il primo passo parta subito al movimento
+            float interval = sprintAction.IsPressed() ? footstepSprintInterval : footstepWalkInterval;
+            footstepTimer = interval - 0.05f;
+        }
     }
 
     private void HandleLook()
@@ -206,5 +235,11 @@ public class FirstPersonController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible   = false;
+    }
+
+    public void RemoveFocus()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible   = true;
     }
 }
