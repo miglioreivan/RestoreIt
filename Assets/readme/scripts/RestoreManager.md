@@ -57,3 +57,4 @@ Il canvas dell'interfaccia di restauro **non viene disattivato** all'uscita, per
 - `tavoloCorrente` ([TavoloSO](file:///C:/Users/migli/Documents/Unity%20Projects/RestoreIt/Assets/readme/scripts/TavoloSO.md)): ScriptableObject che persiste lo stato logico e runtime del banco da lavoro.
 - `fasiMappate` (`List<FaseMapping>`): Mappa strutturata nell'Inspector che associa ogni fase al GameObject del minigioco e al target di inquadratura.
 - `transitionDuration` (`float`): Durata in secondi della transizione della telecamera.
+- `testoDaDisattivare` (`GameObject`): Elemento di interfaccia (testo) che viene disattivato all'inizio del restauro e riattivato alla fine.

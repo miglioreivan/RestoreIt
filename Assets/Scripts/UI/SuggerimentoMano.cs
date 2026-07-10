@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // Mostra al giocatore un suggerimento contestuale in base allo stato della sua mano.
 // Reagisce esclusivamente all'evento OnInventarioAggiornato, non in Update.
@@ -77,5 +78,10 @@ public class SuggerimentoMano : MonoBehaviour
         testoSuggerimento.text = testoScelto;
         
         Debug.Log($"[SuggerimentoMano] Oggetto in mano: {go.name}. Restaurato: {isRestored}. Testo UI impostato a: \"{testoScelto}\"");
+    }
+
+    public void ApriMuseo()
+    {
+        SceneManager.LoadScene(2);
     }
 }

@@ -17,6 +17,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
     [SerializeField] private float         transitionDuration = 1.0f;
     [SerializeField] private GameObject    canvas;
     [SerializeField] private TMPro.TextMeshProUGUI istruzioniText;
+    [SerializeField] private GameObject    testoDaDisattivare;
 
     [Header("Stato Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -238,6 +239,11 @@ public class RestoreManager : MonoBehaviour, IInteractable
         player.NascondiTestoInterazione();
         ImpostaCollider(false);
 
+        if (testoDaDisattivare != null)
+        {
+            testoDaDisattivare.SetActive(false);
+        }
+
         startCameraParent   = playerCamera.transform.parent;
         startCameraPosition = playerCamera.transform.position;
         startCameraRotation = playerCamera.transform.rotation;
@@ -262,6 +268,11 @@ public class RestoreManager : MonoBehaviour, IInteractable
         Debug.Log("Interazione di restauro interrotta.");
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible   = false;
+
+        if (testoDaDisattivare != null)
+        {
+            testoDaDisattivare.SetActive(true);
+        }
 
         if (istruzioniText != null)
         {

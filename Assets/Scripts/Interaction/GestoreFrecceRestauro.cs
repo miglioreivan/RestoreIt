@@ -7,8 +7,9 @@ public class GestoreFrecceRestauro : MonoBehaviour
     public struct IndicatoreTavolo
     {
         public DropZone_Interaction dropZone;
-        public GameObject arrowVisual;
-        [HideInInspector] public Vector3 startLocalPosition;
+        public List<GameObject> arrowVisuals;
+        [HideInInspector] public List<Vector3> startLocalPositions;
+        [HideInInspector] public List<Quaternion> startRotations;
     }
 
     [Header("Riferimenti")]
@@ -30,9 +31,24 @@ public class GestoreFrecceRestauro : MonoBehaviour
         for (int i = 0; i < indicatori.Count; i++)
         {
             var ind = indicatori[i];
-            if (ind.arrowVisual != null)
+            ind.startLocalPositions = new List<Vector3>();
+            ind.startRotations = new List<Quaternion>();
+            if (ind.arrowVisuals != null)
             {
-                ind.startLocalPosition = ind.arrowVisual.transform.localPosition;
+                for (int j = 0; j < ind.arrowVisuals.Count; j++)
+                {
+                    var arrow = ind.arrowVisuals[j];
+                    if (arrow != null)
+                    {
+                        ind.startLocalPositions.Add(arrow.transform.localPosition);
+                        ind.startRotations.Add(arrow.transform.rotation);
+                    }
+                    else
+                    {
+                        ind.startLocalPositions.Add(Vector3.zero);
+                        ind.startRotations.Add(Quaternion.identity);
+                    }
+                }
             }
             indicatori[i] = ind;
         }
@@ -58,34 +74,42 @@ public class GestoreFrecceRestauro : MonoBehaviour
         for (int i = 0; i < indicatori.Count; i++)
         {
             var ind = indicatori[i];
-            if (ind.arrowVisual == null || ind.dropZone == null) continue;
+            if (ind.dropZone == null || ind.arrowVisuals == null) continue;
 
             bool shouldShow = ind.dropZone.canInteract();
 
-            if (ind.arrowVisual.activeSelf != shouldShow)
+            for (int j = 0; j < ind.arrowVisuals.Count; j++)
             {
-                ind.arrowVisual.SetActive(shouldShow);
-            }
+                var arrow = ind.arrowVisuals[j];
+                if (arrow == null) continue;
 
-            if (shouldShow)
-            {
-                // Animazione di oscillazione verticale tramite funzione sinusoidale
-                float newY = ind.startLocalPosition.y + Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
-                ind.arrowVisual.transform.localPosition = new Vector3(ind.startLocalPosition.x, newY, ind.startLocalPosition.z);
-
-                // Rotazione dell'indicatore verso la telecamera (billboard)
-                if (lookAtPlayer && mainCameraTransform != null)
+                if (arrow.activeSelf != shouldShow)
                 {
-                    Vector3 targetDir = mainCameraTransform.position - ind.arrowVisual.transform.position;
+                    arrow.SetActive(shouldShow);
+                }
 
-                    if (lookAtPlayerYOnly)
-                    {
-                        targetDir.y = 0;
-                    }
+                if (shouldShow && j < ind.startLocalPositions.Count && j < ind.startRotations.Count)
+                {
+                    // Animazione di oscillazione verticale tramite funzione sinusoidale
+                    Vector3 startPos = ind.startLocalPositions[j];
+                    float newY = startPos.y + Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
+                    arrow.transform.localPosition = new Vector3(startPos.x, newY, startPos.z);
 
-                    if (targetDir != Vector3.zero)
+                    // Rotazione dell'indicatore verso la telecamera (billboard)
+                    if (lookAtPlayer && mainCameraTransform != null)
                     {
-                        ind.arrowVisual.transform.rotation = Quaternion.LookRotation(targetDir.normalized);
+                        Vector3 targetDir = mainCameraTransform.position - arrow.transform.position;
+
+                        if (lookAtPlayerYOnly)
+                        {
+                            targetDir.y = 0;
+                        }
+
+                        if (targetDir != Vector3.zero)
+                        {
+                            Quaternion lookRot = Quaternion.LookRotation(targetDir.normalized, Vector3.up);
+                            arrow.transform.rotation = lookRot * ind.startRotations[j];
+                        }
                     }
                 }
             }
