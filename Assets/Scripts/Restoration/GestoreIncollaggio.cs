@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
     public event System.Action<bool> OnPhaseCompleted;
+    public float Progression => progressioneColla;
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO triggerIncollaggio; // La fase associata a questo script (es. FaseColla)

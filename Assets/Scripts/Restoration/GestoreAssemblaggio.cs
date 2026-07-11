@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
     public event System.Action<bool> OnPhaseCompleted;
+    public float Progression => -1f;
     [System.Serializable]
     public class PezzoInfo
     {

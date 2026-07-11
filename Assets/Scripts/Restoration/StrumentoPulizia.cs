@@ -7,6 +7,7 @@ using Vector2 = UnityEngine.Vector2;
 public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
     public event System.Action<bool> OnPhaseCompleted;
+    public float Progression => progression;
     [Header("Impostazioni Telecamera e Raggio")]
     [SerializeField] private Camera cameraRestauro;
     [SerializeField] private LayerMask layerRestauro;
@@ -23,7 +24,6 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO faseSuccessiva;
     [SerializeField] private float progression = 0f;
-    public float Progression => progression;
     [SerializeField] [Range(0.1f, 1f)] private float sogliaCompletamentoPulizia = 0.95f;
     [SerializeField] private UnityEvent<VaschettaSO> eventoPuliziaCompletata;
 

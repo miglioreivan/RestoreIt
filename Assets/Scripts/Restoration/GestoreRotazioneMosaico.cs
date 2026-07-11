@@ -4,6 +4,7 @@ using System.Collections;
 public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
     public event System.Action<bool> OnPhaseCompleted;
+    public float Progression => -1f;
     [Header("Tavolo e Fasi")]
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO triggerRotazione;
@@ -12,6 +13,7 @@ public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager, 
     [Header("Parametri Rotazione")]
     [SerializeField] private float durataRotazione = 1.5f;
     [SerializeField] private Vector3 angoliRotazione = new Vector3(180f, 0f, 0f);
+    [SerializeField] private SoundEffect rotationSound;
 
     private bool isRotazioneAttiva = false;
 
@@ -73,6 +75,11 @@ public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager, 
     {
         isRotazioneAttiva = true;
         Debug.Log("Avvio della rotazione del mosaico.");
+
+        if (AudioManager.Instance != null && rotationSound.clip != null)
+        {
+            AudioManager.Instance.Play2D(rotationSound);
+        }
 
         Quaternion startRot = targetGO.transform.rotation;
         // Calcolo della rotazione finale sommando la rotazione locale target

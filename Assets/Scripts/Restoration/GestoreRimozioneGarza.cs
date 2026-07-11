@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
     public event System.Action<bool> OnPhaseCompleted;
+    public float Progression => -1f;
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO triggerRimozione;

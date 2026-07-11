@@ -6,6 +6,7 @@ using System.Collections;
 public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
     public event System.Action<bool> OnPhaseCompleted;
+    public float Progression => progressioneColla;
     [Header("Progressione Restauro")]
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO triggerIncollaggio;

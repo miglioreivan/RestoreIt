@@ -18,6 +18,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
     [SerializeField] private GameObject    canvas;
     [SerializeField] private TMPro.TextMeshProUGUI istruzioniText;
     [SerializeField] private GameObject    testoDaDisattivare;
+    [SerializeField] private UnityEngine.UI.Slider progressSlider;
 
     [Header("Stato Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -80,6 +81,41 @@ public class RestoreManager : MonoBehaviour, IInteractable
         tavoloCorrente.OnOggettoPosato  -= OnOggettoPosato;
         tavoloCorrente.OnFaseCambiata   -= OnFaseCambiata;
         tavoloCorrente.OnTavoloSvuotato -= OnTavoloSvuotato;
+    }
+
+    private void Update()
+    {
+        if (isRestoring && faseCorrentePhaseable != null && ultimaFaseAttiva != null)
+        {
+            float prog = faseCorrentePhaseable.Progression;
+            if (prog >= 0f)
+            {
+                // Aggiorna lo Slider (se assegnato)
+                if (progressSlider != null)
+                {
+                    progressSlider.gameObject.SetActive(true);
+                    progressSlider.value = prog;
+                }
+
+                if (istruzioniText != null)
+                {
+                    istruzioniText.text = $"{ultimaFaseAttiva.DescrizioneFase} ({Mathf.RoundToInt(prog * 100f)}%)";
+                }
+            }
+            else
+            {
+                // Nascondi lo Slider se la fase corrente non supporta la percentuale
+                if (progressSlider != null)
+                {
+                    progressSlider.gameObject.SetActive(false);
+                }
+
+                if (istruzioniText != null)
+                {
+                    istruzioniText.text = ultimaFaseAttiva.DescrizioneFase;
+                }
+            }
+        }
     }
 
     // Validazione
@@ -298,6 +334,11 @@ public class RestoreManager : MonoBehaviour, IInteractable
         if (testoDaDisattivare != null)
         {
             testoDaDisattivare.SetActive(true);
+        }
+
+        if (progressSlider != null)
+        {
+            progressSlider.gameObject.SetActive(false);
         }
 
         if (istruzioniText != null)

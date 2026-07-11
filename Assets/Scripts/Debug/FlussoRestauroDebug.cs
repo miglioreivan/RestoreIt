@@ -5,7 +5,6 @@ using UnityEditor;
 
 /// <summary>
 /// Componente di debug per il monitoraggio visivo del flusso delle fasi di restauro.
-/// Attacca questo script allo stesso GameObject del RestoreManager.
 /// Funziona solo nell'Editor Unity e non genera alcun overhead in Build.
 /// </summary>
 [AddComponentMenu("RestoreIt/Debug/Flusso Restauro Debug")]
