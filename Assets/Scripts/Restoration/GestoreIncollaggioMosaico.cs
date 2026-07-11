@@ -84,7 +84,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
         if (layerRestauro.value == 0)
         {
             layerRestauro = LayerMask.GetMask("Restauro");
-            Debug.Log($"Layer di restauro vuoto. Impostato automaticamente a Restauro con valore {layerRestauro.value}.");
+            RestoreLogger.Log($"Layer di restauro vuoto. Impostato automaticamente a Restauro con valore {layerRestauro.value}.");
         }
 
         if (cameraRestauro == null)
@@ -107,7 +107,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
             
             if (tavoloCorrente.faseCorrente == triggerIncollaggio)
             {
-                Debug.Log($"Rilevata fase di incollaggio {triggerIncollaggio.name} all'attivazione.");
+                RestoreLogger.Log($"Rilevata fase di incollaggio {triggerIncollaggio.name} all'attivazione.");
                 IniziaIncollaggio();
             }
         }
@@ -126,7 +126,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
     {
         if (nuovaFase == triggerIncollaggio)
         {
-            Debug.Log($"Rilevata fase di incollaggio {triggerIncollaggio.name}.");
+            RestoreLogger.Log($"Rilevata fase di incollaggio {triggerIncollaggio.name}.");
             IniziaIncollaggio();
         }
         else
@@ -137,7 +137,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
 
     private void IniziaIncollaggio()
     {
-        Debug.Log("Avvio del processo di incollaggio del mosaico.");
+        RestoreLogger.Log("Avvio del processo di incollaggio del mosaico.");
         cameraTransitionFinished = false;
 
         if (tavoloCorrente == null || tavoloCorrente.oggettoCorrente == null)
@@ -167,7 +167,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
         if (pickup != null)
         {
             pickup.enabled = false;
-            Debug.Log("Componente PickUp_Interaction temporaneamente disabilitato sul mosaico.");
+            RestoreLogger.Log("Componente PickUp_Interaction temporaneamente disabilitato sul mosaico.");
         }
 
         // Configurazione dei collider per abilitare solo MeshCollider (necessari per raycast UV)
@@ -188,13 +188,13 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
                 altriColliderDisabilitati++;
             }
         }
-        Debug.Log($"Configurati {meshCollidersAbilitati} MeshCollider e disabilitati {altriColliderDisabilitati} altri collider sul mosaico.");
+        RestoreLogger.Log($"Configurati {meshCollidersAbilitati} MeshCollider e disabilitati {altriColliderDisabilitati} altri collider sul mosaico.");
 
         // Inizializzazione della texture virtuale per la pittura della colla
         mascheraCollaUnica = usaResina ? mosaicoCorrente.MascheraResinaMosaico : mosaicoCorrente.MascheraCollaMosaico;
         if (mascheraCollaUnica == null)
         {
-            Debug.Log("Maschera colla non trovata nel mosaico, tentativo di recupero dal materiale.");
+            RestoreLogger.Log("Maschera colla non trovata nel mosaico, tentativo di recupero dal materiale.");
             foreach (var r in mosaicoGO.GetComponentsInChildren<Renderer>())
             {
                 foreach (var mat in r.sharedMaterials)
@@ -205,7 +205,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
                         if (tex != null)
                         {
                             mascheraCollaUnica = tex;
-                            Debug.Log($"Maschera colla recuperata correttamente dal materiale {mat.name}.");
+                            RestoreLogger.Log($"Maschera colla recuperata correttamente dal materiale {mat.name}.");
                             break;
                         }
                     }
@@ -330,7 +330,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
         }
 
         Destroy(mascheraLeggibile);
-        Debug.Log($"Mappa pixel del mosaico inizializzata con {totPixelCollaNecessari} pixel richiesti.");
+        RestoreLogger.Log($"Mappa pixel del mosaico inizializzata con {totPixelCollaNecessari} pixel richiesti.");
     }
 
     private void TerminaIncollaggio()
@@ -523,7 +523,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
                 progressioneColla = Mathf.Clamp01(rapporto);
 
 #if UNITY_EDITOR
-                Debug.Log($"Progresso colla: {progressioneColla * 100f:F0}%.");
+                RestoreLogger.Log($"Progresso colla: {progressioneColla * 100f:F0}%.");
 #endif
 
                 if (progressioneColla >= SogliaCompletamentoColla)
@@ -550,7 +550,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
         // Effetto visivo di vibrazione del mosaico per simulare il consolidamento
         yield return RestorationUtils.VibraOggetto(mosaicoGO, 0.6f, 0.012f);
 
-        Debug.Log("Completamento della fase di incollaggio del mosaico.");
+        RestoreLogger.Log("Completamento della fase di incollaggio del mosaico.");
 
         Shader.SetGlobalFloat(idMostraTerra, 0f);
         Shader.SetGlobalFloat(idMostraColla, 1f);
@@ -583,12 +583,12 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
 
         if (faseSuccessiva != null)
         {
-            Debug.Log($"Avanzamento alla fase successiva: {faseSuccessiva.name}.");
+            RestoreLogger.Log($"Avanzamento alla fase successiva: {faseSuccessiva.name}.");
             tavoloCorrente?.AvanzaFase(faseSuccessiva);
         }
         else
         {
-            Debug.Log("Nessuna fase successiva configurata. Il completamento del restauro è ora gestito dal RestoreManager tramite l'evento OnPhaseCompleted.");
+            RestoreLogger.Log("Nessuna fase successiva configurata. Il completamento del restauro è ora gestito dal RestoreManager tramite l'evento OnPhaseCompleted.");
         }
 
         onIncollaggioCompletato?.Invoke();
@@ -600,7 +600,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
         // Salvataggio della texture della colla in previsione della fase successiva di applicazione delle garze
         if (tavoloCorrente != null && tavoloCorrente.faseCorrente == faseSuccessiva && faseSuccessiva != null)
         {
-            Debug.Log("Salvataggio della texture della colla per la fase successiva.");
+            RestoreLogger.Log("Salvataggio della texture della colla per la fase successiva.");
             return;
         }
 
@@ -693,7 +693,7 @@ public class GestoreIncollaggioMosaico : MonoBehaviour, IRestorationPhaseManager
     public void CameraTransitionCompleted()
     {
         cameraTransitionFinished = true;
-        Debug.Log("Transizione telecamera completata. Applicazione colla abilitata.");
+        RestoreLogger.Log("Transizione telecamera completata. Applicazione colla abilitata.");
     }
 
 

@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// Rappresenta un piedistallo espositivo all'interno del museo.
+/// Permette al giocatore di esibire un oggetto restaurato se compatibile con il tipo accettato.
+/// </summary>
 public class PedestalDropZone : MonoBehaviour, IInteractable
 {
     public enum TipoOggettoAccettato
@@ -40,7 +44,7 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
         GameObject go = manoGiocatore.currentGO;
 
         // Verifica che l'oggetto in mano sia stato restaurato
-        if (!manoGiocatore.isRestored)
+        if (!manoGiocatore.IsRestored)
             return false;
 
         // Determina se l'oggetto è un'anfora o un mosaico tramite controlli incrociati su tipo, nome dati e nome del GameObject
@@ -121,15 +125,15 @@ public class PedestalDropZone : MonoBehaviour, IInteractable
 
         OnObjectPlaced?.Invoke(this);
 
-        Debug.Log($"Oggetto {go.name} posizionato sul piedistallo {gameObject.name}.");
+        RestoreLogger.Log($"Oggetto {go.name} posizionato sul piedistallo {gameObject.name}.");
 
         if (AudioManager.Instance == null)
         {
-            Debug.LogWarning($"[PedestalDropZone] '{gameObject.name}': AudioManager.Instance è null! Assicurati che un GameObject con AudioManager esista nella scena.");
+            Debug.LogWarning($"[PedestalDropZone] '{gameObject.name}': AudioManager.Instance è null!");
         }
         else if (dropSound.clip == null)
         {
-            Debug.LogWarning($"[PedestalDropZone] '{gameObject.name}': dropSound.clip non è assegnato nell'Inspector. Nessun suono verrà riprodotto.");
+            Debug.LogWarning($"[PedestalDropZone] '{gameObject.name}': dropSound.clip non è assegnato.");
         }
         else
         {

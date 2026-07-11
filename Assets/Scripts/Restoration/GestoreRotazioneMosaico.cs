@@ -52,7 +52,7 @@ public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager, 
     {
         isRotazioneAttiva = false;
         cameraTransitionFinished = false;
-        Debug.Log("Rotazione iniziata. In attesa che la transizione della telecamera si completi.");
+        RestoreLogger.Log("Rotazione iniziata. In attesa che la transizione della telecamera si completi.");
     }
 
     public void CameraTransitionCompleted()
@@ -74,7 +74,7 @@ public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager, 
     private IEnumerator EseguiRotazione(GameObject targetGO)
     {
         isRotazioneAttiva = true;
-        Debug.Log("Avvio della rotazione del mosaico.");
+        RestoreLogger.Log("Avvio della rotazione del mosaico.");
 
         if (AudioManager.Instance != null && rotationSound.clip != null)
         {
@@ -104,7 +104,7 @@ public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager, 
             targetGO.transform.rotation = targetRot;
         }
 
-        Debug.Log("Rotazione del mosaico completata.");
+        RestoreLogger.Log("Rotazione del mosaico completata.");
 
         if (targetGO != null)
         {
@@ -121,7 +121,7 @@ public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager, 
     {
         if (tavoloCorrente != null && faseSuccessiva != null)
         {
-            Debug.Log($"Avanzamento alla fase successiva: {faseSuccessiva.name}.");
+            RestoreLogger.Log($"Avanzamento alla fase successiva: {faseSuccessiva.name}.");
             tavoloCorrente.AvanzaFase(faseSuccessiva);
         }
         else

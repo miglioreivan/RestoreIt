@@ -34,7 +34,7 @@ public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager, IR
         if (layerRestauro.value == 0)
         {
             layerRestauro = LayerMask.GetMask("Restauro");
-            Debug.Log($"Layer di restauro vuoto. Impostato automaticamente a Restauro con valore {layerRestauro.value}.");
+            RestoreLogger.Log($"Layer di restauro vuoto. Impostato automaticamente a Restauro con valore {layerRestauro.value}.");
         }
     }
 
@@ -72,7 +72,7 @@ public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager, IR
     public void CameraTransitionCompleted()
     {
         cameraTransitionFinished = true;
-        Debug.Log($"Transizione telecamera completata. Cliccare su {nomeOggettoDaCercare} per rimuoverlo.");
+        RestoreLogger.Log($"Transizione telecamera completata. Cliccare su {nomeOggettoDaCercare} per rimuoverlo.");
     }
 
     private void IniziaFaseRimozione()
@@ -115,7 +115,7 @@ public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager, IR
             {
                 oggettoDaRimuovere.AddComponent<BoxCollider>();
             }
-            Debug.Log($"Aggiunto collider temporaneo a {oggettoDaRimuovere.name} per consentire il clic.");
+            RestoreLogger.Log($"Aggiunto collider temporaneo a {oggettoDaRimuovere.name} per consentire il clic.");
         }
 
         if (cursorClickTexture != null)
@@ -152,7 +152,7 @@ public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager, IR
 
     private void RimuoviOggetto()
     {
-        Debug.Log($"Rilevato clic su {oggettoDaRimuovere.name}. Rimozione dell'oggetto e avanzamento alla fase successiva.");
+        RestoreLogger.Log($"Rilevato clic su {oggettoDaRimuovere.name}. Rimozione dell'oggetto e avanzamento alla fase successiva.");
         Destroy(oggettoDaRimuovere);
         oggettoDaRimuovere = null;
         
@@ -178,7 +178,7 @@ public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager, IR
                     r.SetPropertyBlock(propBlock);
                 }
             }
-            Debug.Log("Impostata la visualizzazione della pittura a zero su tutti i materiali del mosaico.");
+            RestoreLogger.Log("Impostata la visualizzazione della pittura a zero su tutti i materiali del mosaico.");
         }
 
         StartCoroutine(AvanzaFaseRitardato());
@@ -198,7 +198,7 @@ public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager, IR
         }
         else
         {
-            Debug.Log("Nessuna fase successiva configurata. Il completamento del restauro è ora gestito dal RestoreManager tramite l'evento OnPhaseCompleted.");
+            RestoreLogger.Log("Nessuna fase successiva configurata. Il completamento del restauro è ora gestito dal RestoreManager tramite l'evento OnPhaseCompleted.");
         }
         OnPhaseCompleted?.Invoke(faseSuccessiva != null);
     }

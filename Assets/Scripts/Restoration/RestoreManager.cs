@@ -2,13 +2,24 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// Il manager centrale responsabile del flusso di restauro di un reperto sul banco da lavoro.
+/// Gestisce la macchina a stati delle fasi, i close-up della telecamera e lo sblocco dell'interazione del giocatore.
+/// </summary>
 public class RestoreManager : MonoBehaviour, IInteractable
 {
+    /// <summary>
+    /// Struttura di mappatura che associa una fase di restauro definita tramite ScriptableObject
+    /// al relativo GameObject di gameplay in scena ed all'inquadratura target della telecamera.
+    /// </summary>
     [System.Serializable]
     public struct FaseMapping
     {
+        /// <summary> Lo ScriptableObject di definizione della fase. </summary>
         public FaseRestauroSO faseSO;
+        /// <summary> Il GameObject in scena contenente lo script e gli elementi grafici della fase. </summary>
         public GameObject     faseGameObject;
+        /// <summary> La posizione ed orientamento target della camera durante questa fase. </summary>
         public Transform      targetCamera;
     }
 
@@ -62,7 +73,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
         suggerimentoMano = FindFirstObjectByType<SuggerimentoMano>();
 
         Transform searchRoot = transform.parent != null ? transform.parent : transform;
-        Debug.Log($"Gerarchia di {searchRoot.name}:");
+        RestoreLogger.Log($"Gerarchia di {searchRoot.name}:");
         StampaGerarchiaEComponenti(searchRoot, 1);
     }
 
@@ -72,7 +83,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
         tavoloCorrente.OnOggettoPosato  += OnOggettoPosato;
         tavoloCorrente.OnFaseCambiata   += OnFaseCambiata;
         tavoloCorrente.OnTavoloSvuotato += OnTavoloSvuotato;
-        Debug.Log("Sottoscritto agli eventi del tavolo di lavoro.");
+        RestoreLogger.Log("Sottoscritto agli eventi del tavolo di lavoro.");
     }
 
     private void OnDisable()
@@ -185,7 +196,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
     private void OnOggettoPosato(DatiOggettoSO oggetto)
     {
-        Debug.Log($"Oggetto posato sul tavolo: {(oggetto != null ? oggetto.name : "nessuno")}.");
+        RestoreLogger.Log($"Oggetto posato sul tavolo: {(oggetto != null ? oggetto.name : "nessuno")}.");
         ImpostaCollider(oggetto != null);
         
         if (oggetto != null)
@@ -200,7 +211,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
                 foreach (Transform child in vaschettaGO.transform)
                 {
-                    if (child.name.Contains("(Clone)") || child.name.Contains("Garza") || child.name.Contains("Aerolam"))
+                    if (child.name.Contains("(Clone)") || child.name.Contains("Garza"))
                     {
                         cloniDaDistruggere.Add(child.gameObject);
                     }
@@ -208,7 +219,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
                 foreach (GameObject clone in cloniDaDistruggere)
                 {
-                    Debug.Log($"Rimosso residuo di una sessione precedente {clone.name} su {vaschettaGO.name}.");
+                    RestoreLogger.Log($"Rimosso residuo di una sessione precedente {clone.name} su {vaschettaGO.name}.");
                     Destroy(clone);
                 }
             }
@@ -217,7 +228,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
     private void OnFaseCambiata(FaseRestauroSO fase)
     {
-        Debug.Log($"Fase del tavolo modificata in {(fase != null ? fase.name : "nessuna")}.");
+        RestoreLogger.Log($"Fase del tavolo modificata in {(fase != null ? fase.name : "nessuna")}.");
         
         ultimaFaseAttiva = fase;
 
@@ -248,6 +259,10 @@ public class RestoreManager : MonoBehaviour, IInteractable
         ImpostaCollider(false);
     }
 
+    /// <summary>
+    /// Completa formalmente il processo di restauro del reperto.
+    /// Riabilita i collider fisici sull'oggetto restaurato per consentirne la raccolta ed esegue l'auto-exit.
+    /// </summary>
     public void CompletaRestauro()
     {
         isRestorationComplete = true;
@@ -265,14 +280,14 @@ public class RestoreManager : MonoBehaviour, IInteractable
             if (objRestaurato.GetComponent<OggettoRestaurato>() == null)
             {
                 objRestaurato.AddComponent<OggettoRestaurato>();
-                Debug.Log($"Componente OggettoRestaurato aggiunto a {objRestaurato.name}.");
+                RestoreLogger.Log($"Componente OggettoRestaurato aggiunto a {objRestaurato.name}.");
             }
 
             Collider col = objRestaurato.GetComponent<Collider>();
             if (col != null)
             {
                 col.enabled = true;
-                Debug.Log($"Collider riabilitato su {objRestaurato.name}.");
+                RestoreLogger.Log($"Collider riabilitato su {objRestaurato.name}.");
             }
         }
 
@@ -282,18 +297,28 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
     // IInteractable
 
+    /// <summary>
+    /// Verifica se il giocatore può iniziare l'interazione con la postazione di restauro.
+    /// </summary>
+    /// <returns>True se non è già in corso un restauro.</returns>
     public bool canInteract()
     {
         bool can = !isRestoring;
-        Debug.Log($"Stato interazione impostato a {can}.");
+        RestoreLogger.Log($"Stato interazione impostato a {can}.");
         return can;
     }
 
+    /// <summary>
+    /// Ritorna il testo contestuale da visualizzare nell'HUD dell'interazione del giocatore.
+    /// </summary>
     public string GetInteractionText() => "[E] Usa postazione di restauro";
 
+    /// <summary>
+    /// Avvia la sessione di restauro, disabilita il movimento FPS del player ed effettua il close-up della camera sul tavolo.
+    /// </summary>
     public void StartInteraction()
     {
-        Debug.Log("Interazione di restauro avviata.");
+        RestoreLogger.Log("Interazione di restauro avviata.");
         if (!canInteract()) return;
 
         isRestoring = true;
@@ -322,12 +347,15 @@ public class RestoreManager : MonoBehaviour, IInteractable
         AttivaFase(faseIniziale);
     }
 
+    /// <summary>
+    /// Interrompe o conclude l'interazione, ripristinando il movimento del giocatore e riportando la telecamera in prima persona.
+    /// </summary>
     public void StopInteraction()
     {
         if (!isRestoring) return;
         isRestoring = false;
 
-        Debug.Log("Interazione di restauro interrotta.");
+        RestoreLogger.Log("Interazione di restauro interrotta.");
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible   = false;
 
@@ -360,7 +388,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
     private void AttivaFase(FaseRestauroSO fase)
     {
         if (fase == null) return;
-        Debug.Log($"Attivazione della fase {fase.name}.");
+        RestoreLogger.Log($"Attivazione della fase {fase.name}.");
         ultimaFaseAttiva = fase;
 
         if (!TrovaMappatura(fase, out FaseMapping mapping))
@@ -432,7 +460,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
     private IEnumerator TransitionCamera(Vector3 targetPos, Quaternion targetRot, Transform parent, bool restorePlayer)
     {
-        Debug.Log("Avvio transizione della telecamera.");
+        RestoreLogger.Log("Avvio transizione della telecamera.");
         float      elapsed  = 0f;
         Vector3    startPos = playerCamera.transform.position;
         Quaternion startRot = playerCamera.transform.rotation;
@@ -449,14 +477,14 @@ public class RestoreManager : MonoBehaviour, IInteractable
         playerCamera.transform.SetParent(parent, true);
         playerCamera.transform.position = targetPos;
         playerCamera.transform.rotation = targetRot;
-        Debug.Log("Transizione della telecamera completata.");
+        RestoreLogger.Log("Transizione della telecamera completata.");
 
         if (restorePlayer)
         {
             player.enabled = true;
             if (!isRestorationComplete) ImpostaCollider(true);
             isRestoring = false;
-            Debug.Log("Posizione e controllo del giocatore ripristinati.");
+            RestoreLogger.Log("Posizione e controllo del giocatore ripristinati.");
 
             // Aggiorna il testo del suggerimento mano al termine del restauro/transizione
             if (suggerimentoMano != null)
@@ -473,7 +501,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
         IRestorationPhaseManager phaseManager = faseGO.GetComponentInChildren<IRestorationPhaseManager>(true);
         if (phaseManager != null)
         {
-            Debug.Log($"Notifica di transizione completata inviata a {phaseManager.GetType().Name} su {faseGO.name}.");
+            RestoreLogger.Log($"Notifica di transizione completata inviata a {phaseManager.GetType().Name} su {faseGO.name}.");
             phaseManager.CameraTransitionCompleted();
         }
         else
@@ -506,17 +534,17 @@ public class RestoreManager : MonoBehaviour, IInteractable
         {
             faseCorrentePhaseable = nuovaFase;
             faseCorrentePhaseable.OnPhaseCompleted += OnCurrentPhaseCompleted;
-            Debug.Log($"[RestoreManager] Iscritto a OnPhaseCompleted di {nuovaFase.GetType().Name}.");
+            RestoreLogger.Log($"[RestoreManager] Iscritto a OnPhaseCompleted di {nuovaFase.GetType().Name}.");
         }
     }
 
     private void OnCurrentPhaseCompleted(bool hasNextPhase)
     {
-        Debug.Log($"[RestoreManager] OnPhaseCompleted ricevuto da {faseCorrentePhaseable?.GetType().Name} (hasNextPhase: {hasNextPhase}).");
+        RestoreLogger.Log($"[RestoreManager] OnPhaseCompleted ricevuto da {faseCorrentePhaseable?.GetType().Name} (hasNextPhase: {hasNextPhase}).");
 
         if (!hasNextPhase)
         {
-            Debug.Log("[RestoreManager] Nessuna fase successiva configurata. Completamento del restauro.");
+            RestoreLogger.Log("[RestoreManager] Nessuna fase successiva configurata. Completamento del restauro.");
             CompletaRestauro();
         }
     }
@@ -529,7 +557,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
         if (col != null)
         {
             col.enabled = attivo;
-            Debug.Log($"Collider {(attivo ? "abilitato" : "disabilitato")}.");
+            RestoreLogger.Log($"Collider {(attivo ? "abilitato" : "disabilitato")}.");
         }
     }
 
@@ -540,7 +568,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
         if (col != null)
         {
             col.enabled = haOggetto;
-            Debug.Log($"Stato collider inizializzato a {col.enabled}.");
+            RestoreLogger.Log($"Stato collider inizializzato a {col.enabled}.");
         }
         else
         {
@@ -561,7 +589,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
             string compList = "";
             foreach (var c in components)
                 compList += c == null ? "[null] " : $"[{c.GetType().Name}] ";
-            Debug.Log($"{indent}{child.name} {(child.gameObject.activeSelf ? "attivo" : "inattivo")} con componenti {compList}");
+            RestoreLogger.Log($"{indent}{child.name} {(child.gameObject.activeSelf ? "attivo" : "inattivo")} con componenti {compList}");
             StampaGerarchiaEComponenti(child, livello + 1);
         }
     }

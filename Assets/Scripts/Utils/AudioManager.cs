@@ -10,6 +10,10 @@ public struct SoundEffect
     [Range(0f, 1f)] public float volume;
 }
 
+/// <summary>
+/// Gestore centrale dell'audio del gioco. Realizzato come Singleton per consentire la riproduzione di effetti sonori 2D/3D,
+/// clip in loop per i minigiochi e la gestione della musica di sottofondo tra le varie scene.
+/// </summary>
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
@@ -55,7 +59,7 @@ public class AudioManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        Debug.Log($"[AudioManager] Inizializzato su {gameObject.name}. SFX Volume Multiplier: {sfxVolumeMultiplier}.");
+        RestoreLogger.Log($"[AudioManager] Inizializzato su {gameObject.name}. SFX Volume Multiplier: {sfxVolumeMultiplier}.");
     }
 
     private void OnEnable()
@@ -70,7 +74,7 @@ public class AudioManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"[AudioManager] Scena caricata: {scene.name} (Build Index: {scene.buildIndex})");
+        RestoreLogger.Log($"[AudioManager] Scena caricata: {scene.name} (Build Index: {scene.buildIndex})");
 
         if (scene.buildIndex == 0)
         {
@@ -128,7 +132,7 @@ public class AudioManager : MonoBehaviour
 
         float finalVolume = volume * sfxVolumeMultiplier;
         float pitch = Random.Range(pitchMin, pitchMax);
-        Debug.Log($"[AudioManager] Play2D: clip='{clip.name}', volume={volume}, sfxMultiplier={sfxVolumeMultiplier}, finalVolume={finalVolume}, pitch={pitch:F2}.");
+        RestoreLogger.Log($"[AudioManager] Play2D: clip='{clip.name}', volume={volume}, sfxMultiplier={sfxVolumeMultiplier}, finalVolume={finalVolume}, pitch={pitch:F2}.");
 
         if (finalVolume <= 0f)
         {
@@ -143,7 +147,7 @@ public class AudioManager : MonoBehaviour
         source.spatialBlend = 0f; // 2D
         source.Play();
 
-        Debug.Log($"[AudioManager] Play2D: AudioSource.isPlaying={source.isPlaying} dopo Play() sul clip '{clip.name}'.");
+        RestoreLogger.Log($"[AudioManager] Play2D: AudioSource.isPlaying={source.isPlaying} dopo Play() sul clip '{clip.name}'.");
 
         Destroy(go, clip.length + 0.5f);
     }
@@ -174,7 +178,7 @@ public class AudioManager : MonoBehaviour
 
         float finalVolume = volume * sfxVolumeMultiplier;
         float pitch = Random.Range(pitchMin, pitchMax);
-        Debug.Log($"[AudioManager] Play3D: clip='{clip.name}', position={position}, volume={volume}, sfxMultiplier={sfxVolumeMultiplier}, finalVolume={finalVolume}, minDist={minDistance}, maxDist={maxDistance}.");
+        RestoreLogger.Log($"[AudioManager] Play3D: clip='{clip.name}', position={position}, volume={volume}, sfxMultiplier={sfxVolumeMultiplier}, finalVolume={finalVolume}, minDist={minDistance}, maxDist={maxDistance}.");
 
         if (finalVolume <= 0f)
         {
@@ -193,7 +197,7 @@ public class AudioManager : MonoBehaviour
         source.maxDistance = maxDistance;
         source.Play();
 
-        Debug.Log($"[AudioManager] Play3D: AudioSource.isPlaying={source.isPlaying} dopo Play(). Distanza camera: {(Camera.main != null ? Vector3.Distance(Camera.main.transform.position, position).ToString("F2") : "N/A")}.");
+        RestoreLogger.Log($"[AudioManager] Play3D: AudioSource.isPlaying={source.isPlaying} dopo Play(). Distanza camera: {(Camera.main != null ? Vector3.Distance(Camera.main.transform.position, position).ToString("F2") : "N/A")}.");
 
         Destroy(go, clip.length + 0.5f);
     }
@@ -233,11 +237,11 @@ public class AudioManager : MonoBehaviour
         }
 
         float effectiveFinalVolume = targetVolume * sfxVolumeMultiplier;
-        Debug.Log($"[AudioManager] StartLoop '{loopId}': clip='{clip.name}', targetVolume={targetVolume}, sfxMultiplier={sfxVolumeMultiplier}, volumeFinale={effectiveFinalVolume}.");
+        RestoreLogger.Log($"[AudioManager] StartLoop '{loopId}': clip='{clip.name}', targetVolume={targetVolume}, sfxMultiplier={sfxVolumeMultiplier}, volumeFinale={effectiveFinalVolume}.");
 
         if (activeLoops.TryGetValue(loopId, out ActiveLoop activeLoop))
         {
-            Debug.Log($"[AudioManager] StartLoop '{loopId}': loop già attivo, ripresa con fade-in.");
+            RestoreLogger.Log($"[AudioManager] StartLoop '{loopId}': loop già attivo, ripresa con fade-in.");
             // Already active. If it was fading out, stop fading and fade back in.
             if (activeLoop.fadeCoroutine != null)
             {
@@ -256,7 +260,7 @@ public class AudioManager : MonoBehaviour
         source.volume = 0f;
         source.Play();
 
-        Debug.Log($"[AudioManager] StartLoop '{loopId}': AudioSource.isPlaying={source.isPlaying} dopo Play().");
+        RestoreLogger.Log($"[AudioManager] StartLoop '{loopId}': AudioSource.isPlaying={source.isPlaying} dopo Play().");
 
         ActiveLoop newLoop = new ActiveLoop
         {
@@ -298,7 +302,7 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[AudioManager] StopLoop '{loopId}': avvio fade-out in {fadeTime}s.");
+        RestoreLogger.Log($"[AudioManager] StopLoop '{loopId}': avvio fade-out in {fadeTime}s.");
 
         if (activeLoop.fadeCoroutine != null)
         {

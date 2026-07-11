@@ -4,9 +4,16 @@ using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using Vector2 = UnityEngine.Vector2;
 
+/// <summary>
+/// Minigioco di pulizia del fango basato sulla pittura di una texture di maschera a runtime.
+/// Rileva l'interazione del mouse con raycast ed aggiorna la percentuale dei pixel visibili puliti.
+/// </summary>
 public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
+    /// <summary> Evento sollevato al completamento della fase di pulizia. </summary>
     public event System.Action<bool> OnPhaseCompleted;
+
+    /// <summary> Grado di progressione corrente normalizzato (0.0f a 1.0f). </summary>
     public float Progression => progression;
     [Header("Impostazioni Telecamera e Raggio")]
     [SerializeField] private Camera cameraRestauro;
@@ -57,7 +64,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
         if (layerRestauro.value == 0)
         {
             layerRestauro = LayerMask.GetMask("Restauro");
-            Debug.Log($"Layer di restauro vuoto. Impostato automaticamente a Restauro con valore {layerRestauro.value}.");
+            RestoreLogger.Log($"Layer di restauro vuoto. Impostato automaticamente a Restauro con valore {layerRestauro.value}.");
         }
 
         if (cameraRestauro == null)
@@ -70,6 +77,15 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
         }
 
         InizializzaMascheraSporco();
+    }
+
+    private void OnDestroy()
+    {
+        if (textureInstance != null)
+        {
+            Destroy(textureInstance);
+            textureInstance = null;
+        }
     }
 
     private void InizializzaMascheraSporco()
@@ -92,7 +108,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
                 textureWidth = textureInstance.width;
                 textureHeight = textureInstance.height;
                 texture32 = textureInstance.GetPixels32();
-                Debug.Log("Nuova copia RGBA32 della maschera dello sporco creata correttamente.");
+                RestoreLogger.Log("Nuova copia RGBA32 della maschera dello sporco creata correttamente.");
             }
             else
             {
@@ -103,7 +119,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
 
     public void CameraTransitionCompleted()
     {
-        Debug.Log($"Avvio del minigioco di pulizia su {gameObject.name}.");
+        RestoreLogger.Log($"Avvio del minigioco di pulizia su {gameObject.name}.");
         CountVisiblePixel();
         SetMouseCursor();
         IniziaMinigame();
@@ -111,7 +127,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
 
     public void CountVisiblePixel()
     {
-        Debug.Log("Calcolo dei pixel visibili avviato.");
+        RestoreLogger.Log("Calcolo dei pixel visibili avviato.");
         InizializzaMascheraSporco();
         ConfiguraCollidersMosaico(true);
         SincronizzaRenderers();
@@ -178,11 +194,11 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
                 totPixel++;
         }
 
-        Debug.Log($"Scansione pixel completata. Pixel sporchi visibili rilevati: {totPixel}.");
+        RestoreLogger.Log($"Scansione pixel completata. Pixel sporchi visibili rilevati: {totPixel}.");
     }
     private void SincronizzaRenderers()
     {
-        Debug.Log("Sincronizzazione dei renderer avviata.");
+        RestoreLogger.Log("Sincronizzazione dei renderer avviata.");
         if (tavoloCorrente == null)
         {
             Debug.LogError("Tavolo di lavoro non valido durante la sincronizzazione.");
@@ -195,7 +211,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
         }
 
         GameObject activeObj = tavoloCorrente.vaschettaGameObject;
-        Debug.Log($"Sincronizzazione dell'oggetto attivo {activeObj.name}.");
+        RestoreLogger.Log($"Sincronizzazione dell'oggetto attivo {activeObj.name}.");
 
         List<Renderer> list = new List<Renderer>();
         list.AddRange(activeObj.GetComponentsInChildren<Renderer>(true));
@@ -210,7 +226,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
                 if (r != null)
                 {
                     list.Add(r);
-                    Debug.Log($"Trovato Plane del tavolo {current.name} e aggiunto alla sincronizzazione.");
+                    RestoreLogger.Log($"Trovato Plane del tavolo {current.name} e aggiunto alla sincronizzazione.");
                     break;
                 }
             }
@@ -218,7 +234,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
             current = current.parent;
         }
 
-        Debug.Log($"Trovati {list.Count} renderer da elaborare per la pulizia.");
+        RestoreLogger.Log($"Trovati {list.Count} renderer da elaborare per la pulizia.");
         int renderersModificati = 0;
 
         foreach (Renderer rend in list)
@@ -254,12 +270,12 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
             }
         }
 
-        Debug.Log($"Sincronizzazione completata. Renderer modificati: {renderersModificati}.");
+        RestoreLogger.Log($"Sincronizzazione completata. Renderer modificati: {renderersModificati}.");
     }
 
     private void ImpostaFaseFinePuliziaSuMateriali()
     {
-        Debug.Log("Applicazione dei materiali di fine pulizia.");
+        RestoreLogger.Log("Applicazione dei materiali di fine pulizia.");
         
         if (tavoloCorrente == null || tavoloCorrente.vaschettaGameObject == null)
         {
@@ -268,7 +284,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
         }
 
         GameObject activeObj = tavoloCorrente.vaschettaGameObject;
-        Debug.Log($"Fine pulizia impostata su {activeObj.name}.");
+        RestoreLogger.Log($"Fine pulizia impostata su {activeObj.name}.");
 
         List<Renderer> list = new List<Renderer>();
         list.AddRange(activeObj.GetComponentsInChildren<Renderer>(true));
@@ -283,7 +299,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
                 if (r != null)
                 {
                     list.Add(r);
-                    Debug.Log($"Fine pulizia applicata a Plane di {current.name}.");
+                    RestoreLogger.Log($"Fine pulizia applicata a Plane di {current.name}.");
                     break;
                 }
             }
@@ -321,7 +337,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
                 modificati++;
             }
         }
-        Debug.Log($"Materiali di fine pulizia applicati su {modificati} renderer.");
+        RestoreLogger.Log($"Materiali di fine pulizia applicati su {modificati} renderer.");
     }
 
     private void SegnaAreaVisibile(int centroX, int centroY, bool[] mappa, int raggioCalcolo)
@@ -472,16 +488,15 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
             textureInstance.SetPixels32(texture32);
             textureInstance.Apply();
 
-            if (totPixel > 0)
-                progression = Mathf.Clamp01((float)pixelPainted / totPixel);
+            progression = RestorationUtils.CalcolaProgressione(pixelPainted, totPixel);
 
 #if UNITY_EDITOR
-            Debug.Log($"Progresso pulizia: {progression * 100f:F0}%.");
+            RestoreLogger.Log($"Progresso pulizia: {progression * 100f:F0}%.");
 #endif
 
             if (progression >= sogliaCompletamentoPulizia)
             {
-                Debug.Log("Pulizia completata con successo.");
+                RestoreLogger.Log("Pulizia completata con successo.");
                 minigiocoFinito = true;
                 progression = 1f;
                 ResetMouseCursor();
@@ -523,7 +538,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestor
         pixelPainted = 0;
         progression = 0f;
         minigiocoFinito = false;
-        Debug.Log("Minigioco di pulizia attivato.");
+        RestoreLogger.Log("Minigioco di pulizia attivato.");
     }
 
 

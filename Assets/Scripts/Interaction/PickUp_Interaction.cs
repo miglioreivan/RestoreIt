@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Gestisce la meccanica di raccolta di un oggetto interattivo nel mondo,
+/// inserendolo nell'inventario mano del giocatore e ripulendo lo stato del tavolo se necessario.
+/// </summary>
 public class PickUp_Interaction : MonoBehaviour, IInteractable
 {
     [SerializeField] private DatiOggettoSO datiOggetto;
@@ -65,7 +69,7 @@ public class PickUp_Interaction : MonoBehaviour, IInteractable
         if (wasRestored && oggettoDaRaccogliere.GetComponent<OggettoRestaurato>() == null)
         {
             oggettoDaRaccogliere.AddComponent<OggettoRestaurato>();
-            Debug.Log($"Componente OggettoRestaurato propagato direttamente a {oggettoDaRaccogliere.name} durante la raccolta.");
+            RestoreLogger.Log($"Componente OggettoRestaurato propagato direttamente a {oggettoDaRaccogliere.name} durante la raccolta.");
         }
 
         manoGiocatore.ImpostaOggetto(datiOggetto, oggettoDaRaccogliere);

@@ -3,9 +3,16 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System.Collections;
 
+/// <summary>
+/// Minigioco di posizionamento della garza o del pannello rigido (Aerolam) sul retro/fronte del mosaico.
+/// Rileva l'interazione del mouse con raycast ed esegue lo snap sul mosaico.
+/// </summary>
 public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
+    /// <summary> Evento sollevato al completamento della fase di applicazione garze. </summary>
     public event System.Action<bool> OnPhaseCompleted;
+
+    /// <summary> Grado di progressione (-1 indica progressione percentuale non supportata). </summary>
     public float Progression => -1f;
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -60,7 +67,7 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestoratio
             tavoloCorrente.OnFaseCambiata += OnFaseCambiata;
             if (tavoloCorrente.faseCorrente == triggerGarze)
             {
-                Debug.Log($"Rilevata fase di applicazione garze {triggerGarze.name} all'attivazione.");
+                RestoreLogger.Log($"Rilevata fase di applicazione garze {triggerGarze.name} all'attivazione.");
                 IniziaFaseGarze();
             }
         }
@@ -77,7 +84,7 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestoratio
 
     private void OnFaseCambiata(FaseRestauroSO fase)
     {
-        Debug.Log($"Fase di restauro modificata in {(fase != null ? fase.name : "nessuna")}.");
+        RestoreLogger.Log($"Fase di restauro modificata in {(fase != null ? fase.name : "nessuna")}.");
         if (fase != triggerGarze)
         {
             TerminaFaseGarze();
@@ -90,7 +97,7 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestoratio
     public void CameraTransitionCompleted()
     {
         cameraTransitionFinished = true;
-        Debug.Log("Transizione telecamera completata. Trascinamento garze abilitato.");
+        RestoreLogger.Log("Transizione telecamera completata. Trascinamento garze abilitato.");
     }
 
     private void IniziaFaseGarze()
@@ -144,12 +151,12 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestoratio
         if (garzaCollider == null)
         {
             garzaCollider = garzaIstanza.AddComponent<BoxCollider>();
-            Debug.Log("Aggiunto BoxCollider temporaneo alla garza per il trascinamento.");
+            RestoreLogger.Log("Aggiunto BoxCollider temporaneo alla garza per il trascinamento.");
         }
         garzaCollider.enabled = true;
 
         isGarzeActive = true;
-        Debug.Log($"Garza {garzaIstanza.name} istanziata nel punto di spawn.");
+        RestoreLogger.Log($"Garza {garzaIstanza.name} istanziata nel punto di spawn.");
     }
 
     private void TerminaFaseGarze()
@@ -215,7 +222,7 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestoratio
                             Cursor.SetCursor(cursorDragTexture, cursorDragHotspot, CursorMode.Auto);
                         }
 
-                        Debug.Log("Inizio trascinamento della garza.");
+                        RestoreLogger.Log("Inizio trascinamento della garza.");
                     }
                 }
             }
@@ -246,7 +253,7 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestoratio
                     garzaIstanza.transform.position = positionBeforeDrag;
                     garzaIstanza.transform.localRotation = rotationBeforeDrag;
                     garzaIstanza.transform.localScale = scaleBeforeDrag;
-                    Debug.Log("Rilascio della garza senza snap, riposizionamento al punto di spawn.");
+                    RestoreLogger.Log("Rilascio della garza senza snap, riposizionamento al punto di spawn.");
                 }
             }
         }
@@ -283,7 +290,7 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestoratio
             if (tavoloCorrente != null && tavoloCorrente.vaschettaGameObject != null)
             {
                 garzaIstanza.transform.SetParent(tavoloCorrente.vaschettaGameObject.transform, true);
-                Debug.Log("Garza associata correttamente al mosaico.");
+                RestoreLogger.Log("Garza associata correttamente al mosaico.");
             }
 
             if (garzaCollider != null)
@@ -291,7 +298,7 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestoratio
                 garzaCollider.enabled = false;
             }
 
-            Debug.Log("Garza posizionata correttamente sul mosaico.");
+            RestoreLogger.Log("Garza posizionata correttamente sul mosaico.");
             onGarzaApplicata?.Invoke();
 
             SoundEffect effectToPlay = usaAerolam ? aerolamSound : gauzeSound;
@@ -349,19 +356,19 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestoratio
             {
                 Destroy(tavoloCorrente.collaTextureMosaico);
                 tavoloCorrente.collaTextureMosaico = null;
-                Debug.Log("Texture colla del mosaico rimossa con successo al completamento.");
+                RestoreLogger.Log("Texture colla del mosaico rimossa con successo al completamento.");
             }
         }
 
         // Avanza alla fase successiva o completa
         if (tavoloCorrente != null && faseSuccessiva != null)
         {
-            Debug.Log($"Avanzamento alla fase successiva: {faseSuccessiva.name}.");
+            RestoreLogger.Log($"Avanzamento alla fase successiva: {faseSuccessiva.name}.");
             tavoloCorrente.AvanzaFase(faseSuccessiva);
         }
         else
         {
-            Debug.Log("Nessuna fase successiva configurata. Il completamento del restauro è ora gestito dal RestoreManager tramite l'evento OnPhaseCompleted.");
+            RestoreLogger.Log("Nessuna fase successiva configurata. Il completamento del restauro è ora gestito dal RestoreManager tramite l'evento OnPhaseCompleted.");
         }
         OnPhaseCompleted?.Invoke(faseSuccessiva != null);
     }

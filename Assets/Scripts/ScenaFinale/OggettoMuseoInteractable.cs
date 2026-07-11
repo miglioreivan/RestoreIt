@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Oggetto interattivo esposto nel museo. Quando il giocatore interagisce con esso,
+/// apre il pannello informativo mostrando le informazioni storiche dell'oggetto.
+/// </summary>
 public class OggettoMuseoInteractable : MonoBehaviour, IInteractable
 {
     [Header("Dati Oggetto Esposto")]

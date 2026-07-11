@@ -2,6 +2,10 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Gestisce il movimento del giocatore in prima persona, la rotazione della telecamera,
+/// la gestione del salto, della gravità e dello scivolamento sulle superfici troppo inclinate.
+/// </summary>
 public class FirstPersonController : MonoBehaviour
 {
     private InputAction moveAction;
@@ -22,7 +26,7 @@ public class FirstPersonController : MonoBehaviour
 
     [Header("Impostazioni Telecamera")]
     [SerializeField] private Transform cameraTransform;
-    [SerializeField] private float mouseSensitivity = 0.1f;
+    [SerializeField] private float mouseSensitivity = 1.5f;
     [SerializeField] private float upDownRange = 80f;
     [SerializeField] private GameObject infoCanvas;
 
@@ -63,7 +67,7 @@ public class FirstPersonController : MonoBehaviour
         if (footstepSound.clip == null)
             Debug.LogWarning("[FirstPersonController] footstepSound.clip non è assegnato nell'Inspector! I passi non saranno udibili.");
         else
-            Debug.Log($"[FirstPersonController] footstepSound configurato: clip='{footstepSound.clip.name}', volume={footstepSound.volume}. Walk interval={footstepWalkInterval}s, Sprint interval={footstepSprintInterval}s.");
+            RestoreLogger.Log($"[FirstPersonController] footstepSound configurato: clip='{footstepSound.clip.name}', volume={footstepSound.volume}. Walk interval={footstepWalkInterval}s, Sprint interval={footstepSprintInterval}s.");
 
         if (footstepSound.volume <= 0f)
             Debug.LogWarning($"[FirstPersonController] footstepSound.volume={footstepSound.volume}! Il volume del SoundEffect nell'Inspector è 0 — i passi non saranno udibili anche se il clip è assegnato.");
@@ -73,12 +77,12 @@ public class FirstPersonController : MonoBehaviour
         if (sceneName == "Museo")
         {
             this.enabled = true;
-            Debug.Log("[FirstPersonController] Scena Museo rilevata: FirstPersonController abilitato all'avvio.");
+            RestoreLogger.Log("[FirstPersonController] Scena Museo rilevata: FirstPersonController abilitato all'avvio.");
         }
         else if (sceneName == "Game")
         {
             this.enabled = false;
-            Debug.Log("[FirstPersonController] Scena Game (Restauro) rilevata: FirstPersonController disabilitato all'avvio.");
+            RestoreLogger.Log("[FirstPersonController] Scena Game (Restauro) rilevata: FirstPersonController disabilitato all'avvio.");
         }
     }
 
@@ -124,7 +128,7 @@ public class FirstPersonController : MonoBehaviour
 
             // Disabilita solo questo script, non il GameObject
             this.enabled = false;
-            Debug.Log("InfoCanvas aperto, FirstPersonController disabilitato.");
+            RestoreLogger.Log("InfoCanvas aperto, FirstPersonController disabilitato.");
         }
     }
 
@@ -218,7 +222,7 @@ public class FirstPersonController : MonoBehaviour
             if (_debugMovementLogTimer >= 1f)
             {
                 _debugMovementLogTimer = 0f;
-                Debug.Log($"[FirstPersonController] Diagnostica passi: isGrounded={characterController.isGrounded}, isSliding={isSliding}, sqrMagnitude={moveValue.sqrMagnitude:F3}, isMoving={isMoving}, footstepTimer={footstepTimer:F3}, interval={(sprintAction.IsPressed() ? footstepSprintInterval : footstepWalkInterval):F3}.");
+                RestoreLogger.Log($"[FirstPersonController] Diagnostica passi: isGrounded={characterController.isGrounded}, isSliding={isSliding}, sqrMagnitude={moveValue.sqrMagnitude:F3}, isMoving={isMoving}, footstepTimer={footstepTimer:F3}, interval={(sprintAction.IsPressed() ? footstepSprintInterval : footstepWalkInterval):F3}.");
             }
         }
         else
@@ -237,11 +241,11 @@ public class FirstPersonController : MonoBehaviour
                 // --- DEBUG PASSI ---
                 if (AudioManager.Instance == null)
                 {
-                    Debug.LogWarning("[FirstPersonController] Passo: AudioManager.Instance è null! Il GameObject AudioManager non è presente nella scena o non è ancora inizializzato.");
+                    Debug.LogWarning("[FirstPersonController] Passo: AudioManager.Instance è null.");
                 }
                 else if (footstepSound.clip == null)
                 {
-                    Debug.LogWarning("[FirstPersonController] Passo: footstepSound.clip è null. Assegna un AudioClip nel campo 'Footstep Sound' dell'Inspector.");
+                    Debug.LogWarning("[FirstPersonController] Passo: footstepSound.clip è null.");
                 }
                 else if (footstepSound.volume <= 0f)
                 {
@@ -249,7 +253,7 @@ public class FirstPersonController : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log($"[FirstPersonController] Passo: riproduzione '{footstepSound.clip.name}', vol={footstepSound.volume}, sfxMult={AudioManager.Instance.SFXVolumeMultiplier}, isSprinting={sprintAction.IsPressed()}.");
+                    RestoreLogger.Log($"[FirstPersonController] Passo: riproduzione '{footstepSound.clip.name}', vol={footstepSound.volume}, sfxMult={AudioManager.Instance.SFXVolumeMultiplier}, isSprinting={sprintAction.IsPressed()}.");
                     AudioManager.Instance.Play2D(footstepSound, 0.9f, 1.1f);
                 }
                 // --- FINE DEBUG ---

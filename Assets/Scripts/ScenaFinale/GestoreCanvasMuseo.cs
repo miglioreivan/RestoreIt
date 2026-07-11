@@ -2,6 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Gestisce la visualizzazione del pannello informativo del museo 2D, mostrando
+/// i dettagli del reperto esposto e controllando lo stato del cursore e il movimento del giocatore.
+/// </summary>
 public class GestoreCanvasMuseo : MonoBehaviour
 {
     [Header("Componenti UI")]

@@ -1598,7 +1598,7 @@ MonoBehaviour:
       m_Calls: []
   glueSound:
     clip: {fileID: 8300000, guid: 434fc10d4538d6744badb9af938b36d2, type: 3}
-    volume: 0.4
+    volume: 0.2
   resinSound:
     clip: {fileID: 0}
     volume: 0
@@ -6548,7 +6548,7 @@ MonoBehaviour:
     m_Bits: 64
   glueSound:
     clip: {fileID: 8300000, guid: 9569b0ea193e6a74aa75842e9cd30426, type: 3}
-    volume: 0.7
+    volume: 0.45
   velocitaRotazione: 100
   sogliaCompletamentoOverride: 0.95
   totPixelCollaNecessari: 0
@@ -7463,7 +7463,6 @@ MonoBehaviour:
   triggerAssemblaggio: {fileID: 11400000, guid: a24be103dbbd85049820d5279daa7f3d, type: 2}
   faseSuccessiva: {fileID: 11400000, guid: b2119174edb56d840ac0dfb87d1c984d, type: 2}
   cameraRestauro: {fileID: 330585545}
-  restoreManager: {fileID: 1643050454}
   puntoSpawnAnfora: {fileID: 1030087355}
   snapDistance: 0.08
   snapAngle: 25
@@ -14181,7 +14180,7 @@ MonoBehaviour:
   handTransform: {fileID: 1764232024}
   footstepSound:
     clip: {fileID: 8300000, guid: f26cd371510ebc549b1214abe419da2b, type: 3}
-    volume: 1
+    volume: 0.8
   footstepWalkInterval: 0.6
   footstepSprintInterval: 0.38
 --- !u!4 &1411768322

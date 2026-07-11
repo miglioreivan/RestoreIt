@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fbebfb93a43ebf4bbaa2987f79c4f73, type: 3}
   m_Name: Sansone
   m_EditorClassIdentifier: Assembly-CSharp::DatiOggettoMuseoSO
-  nomeOggetto: Sansone
+  nomeOggetto: Sansone ed il Leone
   descrizione: 
   immagineOggetto: {fileID: 21300000, guid: 98d27146939b12040ad531ff774d64e4, type: 3}

@@ -4,6 +4,10 @@ using UnityEngine.Events;
 [System.Serializable]
 public class UnityEventDatiOggetto : UnityEvent<GameObject> { }
 
+/// <summary>
+/// Rappresenta una zona di posizionamento (es. il tavolo da lavoro) dove il giocatore può depositare
+/// l'oggetto tenuto in mano, aggiornando lo stato del workbench ed istanziando il prefab del minigioco.
+/// </summary>
 public class DropZone_Interaction : MonoBehaviour, IInteractable
 {
     public enum TipoOggettoAccettato
@@ -55,7 +59,7 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         if (TryGetComponent(out Collider dropZoneCollider))
         {
             dropZoneCollider.enabled = true;
-            Debug.Log($"Tavolo svuotato, riabilitato il collider per {gameObject.name}.");
+            RestoreLogger.Log($"Tavolo svuotato, riabilitato il collider per {gameObject.name}.");
         }
     }
 
@@ -64,7 +68,7 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         if (manoGiocatore == null || manoGiocatore.currentGO == null)
             return false;
 
-        if (manoGiocatore.isRestored)
+        if (manoGiocatore.IsRestored)
             return false;
 
         if (tavoloCorrente != null && tavoloCorrente.oggettoCorrente != null)
@@ -91,7 +95,7 @@ public class DropZone_Interaction : MonoBehaviour, IInteractable
         if (manoGiocatore == null || manoGiocatore.currentGO == null)
             return "Non hai un oggetto da rilasciare.";
 
-        if (manoGiocatore.isRestored)
+        if (manoGiocatore.IsRestored)
             return "Non puoi rimettere sul tavolo un oggetto già restaurato!";
         
         if (tavoloCorrente != null && tavoloCorrente.oggettoCorrente != null)

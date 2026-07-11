@@ -1,6 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// Gestisce l'effetto visivo (billboard orientato al giocatore ed oscillazione sinusoidale)
+/// per le frecce 3D di indicazione sopra le postazioni di restauro attive.
+/// </summary>
 public class GestoreFrecceRestauro : MonoBehaviour
 {
     [System.Serializable]

@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fbebfb93a43ebf4bbaa2987f79c4f73, type: 3}
   m_Name: Pan
   m_EditorClassIdentifier: Assembly-CSharp::DatiOggettoMuseoSO
-  nomeOggetto: Pan
+  nomeOggetto: Pan et Ourson
   descrizione: 
   immagineOggetto: {fileID: 21300000, guid: d82db08ee781f914995a315f87c34638, type: 3}

@@ -3,9 +3,16 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
+/// <summary>
+/// Minigioco di stesura colla/resina lungo i giunti dei pezzi dell'anfora.
+/// Rileva l'interazione del mouse con raycast ed aggiorna la percentuale della colla applicata.
+/// </summary>
 public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
+    /// <summary> Evento sollevato al completamento della fase di incollaggio. </summary>
     public event System.Action<bool> OnPhaseCompleted;
+
+    /// <summary> Grado di progressione corrente normalizzato (0.0f a 1.0f). </summary>
     public float Progression => progressioneColla;
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
@@ -91,7 +98,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
         if (layerRestauro.value == 0)
         {
             layerRestauro = LayerMask.GetMask("Restauro");
-            Debug.Log($"Layer di restauro vuoto. Impostato automaticamente a Restauro con valore {layerRestauro.value}.");
+            RestoreLogger.Log($"Layer di restauro vuoto. Impostato automaticamente a Restauro con valore {layerRestauro.value}.");
         }
 
         // Rimossa ricerca legacy del RestoreManager per decoupling
@@ -106,6 +113,11 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
         }
     }
 
+    private void OnDestroy()
+    {
+        RimuoviMappaColla();
+    }
+
     private void OnEnable()
     {
         if (tavoloCorrente != null)
@@ -115,7 +127,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
             // Cattura immediatamente la fase se è già quella corretta all'abilitazione del GameObject
             if (tavoloCorrente.faseCorrente == triggerIncollaggio)
             {
-                Debug.Log($"Rilevata fase di incollaggio {triggerIncollaggio.name} all'attivazione.");
+                RestoreLogger.Log($"Rilevata fase di incollaggio {triggerIncollaggio.name} all'attivazione.");
                 IniziaIncollaggio();
             }
         }
@@ -129,7 +141,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
 
     private void OnFaseCambiata(FaseRestauroSO fase)
     {
-        Debug.Log($"Fase di restauro modificata in {(fase != null ? fase.name : "nessuna")}.");
+        RestoreLogger.Log($"Fase di restauro modificata in {(fase != null ? fase.name : "nessuna")}.");
         if (fase != triggerIncollaggio)
         {
             TerminaIncollaggio();
@@ -141,7 +153,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
 
     private void IniziaIncollaggio()
     {
-        Debug.Log("Avvio del processo di incollaggio.");
+        RestoreLogger.Log("Avvio del processo di incollaggio.");
         cameraTransitionFinished = false;
         if (tavoloCorrente == null || tavoloCorrente.vaschettaCorrente == null)
         {
@@ -165,7 +177,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
             return;
         }
 
-        Debug.Log($"Associazione di {anforaAssemblata.name} al punto di spawn dell'anfora.");
+        RestoreLogger.Log($"Associazione di {anforaAssemblata.name} al punto di spawn dell'anfora.");
         
         // Associazione dell'anfora assemblata alla FaseColla
         anforaAssemblata.transform.SetParent(puntoSpawnAnfora, true);
@@ -188,7 +200,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
         }
 
         List<GameObject> pezziOrdinati = config.pezziOrdinati;
-        Debug.Log($"Configurati collider per i {pezziOrdinati.Count} pezzi ordinati.");
+        RestoreLogger.Log($"Configurati collider per i {pezziOrdinati.Count} pezzi ordinati.");
 
         // Disattivazione dei collider del modello guida (ghost) per evitare conflitti con i pezzi posizionati
         int colliderGhostDisabilitati = 0;
@@ -209,7 +221,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
                 colliderGhostDisabilitati++;
             }
         }
-        Debug.Log($"Disabilitati {colliderGhostDisabilitati} collider originali del ghost.");
+        RestoreLogger.Log($"Disabilitati {colliderGhostDisabilitati} collider originali del ghost.");
 
         // Configurazione dei collider dei pezzi come MeshCollider, necessari per mappare le coordinate UV
         int collidersPezziConfigurati = 0;
@@ -235,7 +247,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
                 collidersPezziConfigurati++;
             }
         }
-        Debug.Log($"Configurati {collidersPezziConfigurati} MeshCollider sui pezzi assemblati.");
+        RestoreLogger.Log($"Configurati {collidersPezziConfigurati} MeshCollider sui pezzi assemblati.");
 
         // Inizializzazione della texture virtuale per la pittura della colla
         mascheraCollaUnica = tavoloCorrente.vaschettaCorrente.mascheraCollaUnica;
@@ -307,7 +319,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
         }
 
         Destroy(mascheraLeggibile);
-        Debug.Log($"Mappa pixel inizializzata con {totPixelCollaNecessari} pixel richiesti.");
+        RestoreLogger.Log($"Mappa pixel inizializzata con {totPixelCollaNecessari} pixel richiesti.");
     }
 
     private void TerminaIncollaggio()
@@ -318,7 +330,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
 
         if (anforaAssemblata != null)
         {
-            Debug.Log($"Rimozione dell'anfora assemblata {anforaAssemblata.name}.");
+            RestoreLogger.Log($"Rimozione dell'anfora assemblata {anforaAssemblata.name}.");
             Destroy(anforaAssemblata);
             anforaAssemblata = null;
             
@@ -500,19 +512,15 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
             collaTextureInstance.SetPixels32(coloreTextureColla);
             collaTextureInstance.Apply();
 
-            if (totPixelCollaNecessari > 0)
-            {
-                float rapporto = (float)pixelCollaDipinti / totPixelCollaNecessari;
-                progressioneColla = Mathf.Clamp01(rapporto);
+            progressioneColla = RestorationUtils.CalcolaProgressione(pixelCollaDipinti, totPixelCollaNecessari);
 
 #if UNITY_EDITOR
-                Debug.Log($"Progresso colla: {progressioneColla * 100f:F0}%.");
+            RestoreLogger.Log($"Progresso colla: {progressioneColla * 100f:F0}%.");
 #endif
 
-                if (progressioneColla >= SogliaCompletamentoColla)
-                {
-                    ControllaCompletamento();
-                }
+            if (totPixelCollaNecessari > 0 && progressioneColla >= SogliaCompletamentoColla)
+            {
+                ControllaCompletamento();
             }
         }
     }
@@ -534,7 +542,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
         yield return RestorationUtils.VibraOggetto(anforaAssemblata, 0.6f, 0.012f);
 
         // Sostituzione del modello assemblato con il modello intero restaurato
-        Debug.Log("Completamento della fase di incollaggio e caricamento del modello intero.");
+        RestoreLogger.Log("Completamento della fase di incollaggio e caricamento del modello intero.");
 
         // Imposta globalmente _mostraColla=0, _mostraTerra=0, _mostraPittura=1
         Shader.SetGlobalFloat(idMostraTerra, 0f);
@@ -576,7 +584,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
                     tavoloCorrente.vaschettaGameObject = null;
                 }
                 tavoloCorrente.anforaAssemblata = anforaIntera;
-                Debug.Log("Vaschetta vuota distrutta e anforaIntera registrata come anforaAssemblata sul tavolo.");
+                RestoreLogger.Log("Vaschetta vuota distrutta e anforaIntera registrata come anforaAssemblata sul tavolo.");
             }
 
         // Configurazione del PickUp_Interaction per gestire il disaccoppiamento dal tavolo di lavoro al ritiro
@@ -665,7 +673,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
     {
         if (anforaAssemblata == null) return;
 
-        Debug.Log("Configurazione dei parametri dei materiali dell'anfora.");
+        RestoreLogger.Log("Configurazione dei parametri dei materiali dell'anfora.");
         Shader.SetGlobalFloat(idMostraTerra,   0f);
         Shader.SetGlobalFloat(idMostraColla,   1f);
         Shader.SetGlobalFloat(idMostraPittura, 1f);
@@ -703,6 +711,6 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRest
     public void CameraTransitionCompleted()
     {
         cameraTransitionFinished = true;
-        Debug.Log("Transizione telecamera completata. Applicazione colla abilitata.");
+        RestoreLogger.Log("Transizione telecamera completata. Applicazione colla abilitata.");
     }
 }

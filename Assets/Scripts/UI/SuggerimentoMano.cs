@@ -3,8 +3,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Mostra al giocatore un suggerimento contestuale in base allo stato della sua mano.
-// Reagisce esclusivamente all'evento OnInventarioAggiornato, non in Update.
+/// <summary>
+/// Componente UI che visualizza suggerimenti contestuali per guidare il giocatore
+/// reagendo reattivamente all'evento OnInventarioAggiornato dell'inventario (senza polling in Update).
+/// </summary>
 public class SuggerimentoMano : MonoBehaviour
 {
     [Header("Riferimenti")]
@@ -18,7 +20,7 @@ public class SuggerimentoMano : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("[SuggerimentoMano] Start chiamato.");
+        RestoreLogger.Log("[SuggerimentoMano] Start chiamato.");
         AggiornaSuggerimento();
     }
 
@@ -27,7 +29,7 @@ public class SuggerimentoMano : MonoBehaviour
         if (inventario != null)
         {
             inventario.OnInventarioAggiornato += AggiornaSuggerimento;
-            Debug.Log("[SuggerimentoMano] Sottoscrizione all'evento OnInventarioAggiornato eseguita.");
+            RestoreLogger.Log("[SuggerimentoMano] Sottoscrizione all'evento OnInventarioAggiornato eseguita.");
         }
         else
         {
@@ -43,7 +45,7 @@ public class SuggerimentoMano : MonoBehaviour
         if (inventario != null)
         {
             inventario.OnInventarioAggiornato -= AggiornaSuggerimento;
-            Debug.Log("[SuggerimentoMano] Annullamento sottoscrizione all'evento OnInventarioAggiornato eseguita.");
+            RestoreLogger.Log("[SuggerimentoMano] Annullamento sottoscrizione all'evento OnInventarioAggiornato eseguita.");
         }
     }
 
@@ -64,17 +66,17 @@ public class SuggerimentoMano : MonoBehaviour
         if (inventario.currentGO == null)
         {
             testoSuggerimento.text = testoManoVuota;
-            Debug.Log($"[SuggerimentoMano] Inventario vuoto. Testo UI impostato a: \"{testoManoVuota}\"");
+            RestoreLogger.Log($"[SuggerimentoMano] Inventario vuoto. Testo UI impostato a: \"{testoManoVuota}\"");
             return;
         }
 
         // Controlla se l'oggetto in mano è già stato restaurato
-        bool isRestored = inventario.isRestored;
+        bool IsRestored = inventario.IsRestored;
 
-        string testoScelto = isRestored ? testoOggettoFinito : testoManoPiena;
+        string testoScelto = IsRestored ? testoOggettoFinito : testoManoPiena;
         testoSuggerimento.text = testoScelto;
         
-        Debug.Log($"[SuggerimentoMano] Oggetto in mano: {inventario.currentGO.name}. Restaurato: {isRestored}. Testo UI impostato a: \"{testoScelto}\"");
+        RestoreLogger.Log($"[SuggerimentoMano] Oggetto in mano: {inventario.currentGO.name}. Restaurato: {IsRestored}. Testo UI impostato a: \"{testoScelto}\"");
     }
 
     public void ApriMuseo()

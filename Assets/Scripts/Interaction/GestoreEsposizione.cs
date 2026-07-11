@@ -2,6 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// Monitora un insieme di piedistalli espositivi nel museo per rilevare quando tutti gli oggetti
+/// sono stati posizionati e attivare gli eventi di completamento livello.
+/// </summary>
 public class GestoreEsposizione : MonoBehaviour
 {
     [Header("Piedistalli")]
@@ -59,7 +63,7 @@ public class GestoreEsposizione : MonoBehaviour
         }
 
         completato = true;
-        Debug.Log("Tutti i piedistalli sono stati occupati. Avvio eventi di completamento.");
+        RestoreLogger.Log("Tutti i piedistalli sono stati occupati. Avvio eventi di completamento.");
         
         onEsposizioneCompletata?.Invoke();
 

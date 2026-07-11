@@ -114,4 +114,16 @@ public static class RestorationUtils
             target.transform.position = originalPos;
         }
     }
+
+    /// <summary>
+    /// Calcola la progressione normalizzata tra 0 e 1, prevenendo divisioni per zero.
+    /// </summary>
+    /// <param name="dipinti">Il numero di elementi o pixel completati.</param>
+    /// <param name="totale">Il numero totale di elementi o pixel richiesti.</param>
+    /// <returns>Percentuale normalizzata come float tra 0.0f e 1.0f.</returns>
+    public static float CalcolaProgressione(int dipinti, int totale)
+    {
+        if (totale <= 0) return 0f;
+        return Mathf.Clamp01((float)dipinti / totale);
+    }
 }

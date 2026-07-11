@@ -66,7 +66,7 @@ public class FlussoRestauroDebug : MonoBehaviour
         ultimaFaseRegistrata = nomeFase;
         storicoFasi.Add($"[{System.DateTime.Now:HH:mm:ss}] Fase → {nomeFase}");
         if (storicoFasi.Count > 20) storicoFasi.RemoveAt(0);
-        Debug.Log($"[FlussoRestauroDebug] Fase cambiata → {nomeFase}");
+        RestoreLogger.Log($"[FlussoRestauroDebug] Fase cambiata → {nomeFase}");
     }
 
     private void OnOggettoPosato(DatiOggettoSO oggetto)
@@ -74,7 +74,7 @@ public class FlussoRestauroDebug : MonoBehaviour
         string nome = oggetto != null ? oggetto.name : "null";
         storicoFasi.Add($"[{System.DateTime.Now:HH:mm:ss}] Oggetto posato: {nome}");
         if (storicoFasi.Count > 20) storicoFasi.RemoveAt(0);
-        Debug.Log($"[FlussoRestauroDebug] Oggetto posato → {nome}");
+        RestoreLogger.Log($"[FlussoRestauroDebug] Oggetto posato → {nome}");
     }
 
     private void OnTavoloSvuotato()
@@ -82,7 +82,7 @@ public class FlussoRestauroDebug : MonoBehaviour
         storicoFasi.Add($"[{System.DateTime.Now:HH:mm:ss}] Tavolo svuotato");
         if (storicoFasi.Count > 20) storicoFasi.RemoveAt(0);
         ultimaFaseRegistrata = null;
-        Debug.Log("[FlussoRestauroDebug] Tavolo svuotato.");
+        RestoreLogger.Log("[FlussoRestauroDebug] Tavolo svuotato.");
     }
 
     private void OnGUI()

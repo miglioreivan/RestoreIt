@@ -3,9 +3,16 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
+/// <summary>
+/// Minigioco di assemblaggio frammenti dell'anfora in 3D.
+/// Permette al giocatore di selezionare e trascinare i pezzi nel mondo, snappandoli in base a tolleranze definite.
+/// </summary>
 public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
+    /// <summary> Evento sollevato al completamento della fase di assemblaggio. </summary>
     public event System.Action<bool> OnPhaseCompleted;
+
+    /// <summary> Grado di progressione (-1 indica progressione percentuale non supportata). </summary>
     public float Progression => -1f;
     [System.Serializable]
     public class PezzoInfo
@@ -21,9 +28,8 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO triggerAssemblaggio;
-    [SerializeField] private FaseRestauroSO faseSuccessiva; // Fase successiva per l'incollaggio (es. FaseColla)
+    [SerializeField] private FaseRestauroSO faseSuccessiva;
     [SerializeField] private Camera cameraRestauro;
-    [SerializeField] private RestoreManager restoreManager;
 
     [Header("Spawn Anfora Centrale")]
     [SerializeField] private Transform puntoSpawnAnfora;
@@ -59,15 +65,6 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
 
     private void Awake()
     {
-        if (restoreManager == null)
-        {
-            restoreManager = GetComponentInParent<RestoreManager>(true);
-            if (restoreManager == null && transform.parent != null)
-            {
-                restoreManager = transform.parent.GetComponentInChildren<RestoreManager>(true);
-            }
-        }
-
         if (cameraRestauro == null)
         {
             cameraRestauro = GetComponentInChildren<Camera>(true);
@@ -87,7 +84,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
             // Cattura immediatamente la fase se è già quella corretta all'abilitazione del GameObject
             if (tavoloCorrente.faseCorrente == triggerAssemblaggio)
             {
-                Debug.Log($"Rilevata fase di assemblaggio {triggerAssemblaggio.name} all'attivazione.");
+                RestoreLogger.Log($"Rilevata fase di assemblaggio {triggerAssemblaggio.name} all'attivazione.");
                 IniziaAssemblaggio();
             }
         }
@@ -101,7 +98,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
 
     private void OnFaseCambiata(FaseRestauroSO fase)
     {
-        Debug.Log($"Fase di restauro modificata in {(fase != null ? fase.name : "nessuna")}.");
+        RestoreLogger.Log($"Fase di restauro modificata in {(fase != null ? fase.name : "nessuna")}.");
         if (fase != triggerAssemblaggio)
         {
             TerminaAssemblaggio();
@@ -113,7 +110,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
 
     private void IniziaAssemblaggio()
     {
-        Debug.Log("Avvio del processo di assemblaggio dei pezzi.");
+        RestoreLogger.Log("Avvio del processo di assemblaggio dei pezzi.");
         cameraTransitionFinished = false;
         if (tavoloCorrente.vaschettaCorrente == null || tavoloCorrente.vaschettaGameObject == null) return;
 
@@ -156,7 +153,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
         if (prefabPezzi == null)
         {
             prefabPezzi = tavoloCorrente.vaschettaCorrente.prefabAnfora;
-            Debug.Log($"Utilizzo del prefab dell'anfora come fallback per i pezzi di {tavoloCorrente.vaschettaCorrente.name}.");
+            RestoreLogger.Log($"Utilizzo del prefab dell'anfora come fallback per i pezzi di {tavoloCorrente.vaschettaCorrente.name}.");
         }
         GameObject vaschettaGO = tavoloCorrente.vaschettaGameObject;
 
@@ -169,7 +166,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
                 return;
             }
 
-            Debug.Log($"Configurazione vaschetta caricata. Pezzi da posizionare: {config.pezziOrdinati.Count}.");
+            RestoreLogger.Log($"Configurazione vaschetta caricata. Pezzi da posizionare: {config.pezziOrdinati.Count}.");
 
             foreach (var goPezzo in config.pezziOrdinati)
             {
@@ -191,12 +188,12 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
                     if (col == null)
                     {
                         col = goPezzo.AddComponent<MeshCollider>();
-                        Debug.Log($"Aggiunto MeshCollider all'oggetto {goPezzo.name}.");
+                        RestoreLogger.Log($"Aggiunto MeshCollider all'oggetto {goPezzo.name}.");
                     }
                     pezzo.collider = col;
 
                     listaPezzi.Add(pezzo);
-                    Debug.Log($"Pezzo {goPezzo.name} caricato con successo.");
+                    RestoreLogger.Log($"Pezzo {goPezzo.name} caricato con successo.");
                 }
                 else
                 {
@@ -215,7 +212,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
     private void TerminaAssemblaggio()
     {
         isAssemblaggioActive = false;
-        Debug.Log("Termine dell'assemblaggio ed esecuzione della pulizia.");
+        RestoreLogger.Log("Termine dell'assemblaggio ed esecuzione della pulizia.");
         if (pezzoTrascinato != null)
         {
             Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
@@ -226,12 +223,12 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
         {
             if (tavoloCorrente != null && tavoloCorrente.anforaAssemblata == ghostAnfora)
             {
-                Debug.Log("L'anfora ghost è persistente e non viene distrutta.");
+                RestoreLogger.Log("L'anfora ghost è persistente e non viene distrutta.");
                 ghostAnfora = null;
             }
             else
             {
-                Debug.Log("Rimozione dell'anfora ghost locale.");
+                RestoreLogger.Log("Rimozione dell'anfora ghost locale.");
                 Destroy(ghostAnfora);
                 ghostAnfora = null;
             }
@@ -281,7 +278,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
                 Ray ray = cameraRestauro.ScreenPointToRay(mousePos);
                 if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
                 {
-                    Debug.Log($"Selezionato l'elemento {hit.collider.gameObject.name}.");
+                    RestoreLogger.Log($"Selezionato l'elemento {hit.collider.gameObject.name}.");
                     bool trovato = false;
                     foreach (var pezzo in listaPezzi)
                     {
@@ -327,7 +324,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
 
                             dragOffset = Vector3.zero;
 
-                            Debug.Log($"Inizio trascinamento del pezzo {pezzoTrascinato.gameObject.name}.");
+                            RestoreLogger.Log($"Inizio trascinamento del pezzo {pezzoTrascinato.gameObject.name}.");
                             
                             if (cursorDragTexture != null)
                             {
@@ -369,7 +366,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
                     pezzoTrascinato.gameObject.transform.position = positionBeforeDrag;
                     pezzoTrascinato.gameObject.transform.localRotation = rotationBeforeDrag;
                     pezzoTrascinato.gameObject.transform.localScale = scaleBeforeDrag;
-                    Debug.Log($"Pezzo {pezzoTrascinato.gameObject.name} rilasciato senza snap, ritorno alla vaschetta.");
+                    RestoreLogger.Log($"Pezzo {pezzoTrascinato.gameObject.name} rilasciato senza snap, ritorno alla vaschetta.");
                 }
                 pezzoTrascinato = null;
                 Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
@@ -412,7 +409,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
 
             pezzoTrascinato = null;
             Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
-            Debug.Log($"Pezzo {pezzo.gameObject.name} posizionato correttamente.");
+            RestoreLogger.Log($"Pezzo {pezzo.gameObject.name} posizionato correttamente.");
 
             if (AudioManager.Instance == null)
             {
@@ -453,18 +450,18 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
     private System.Collections.IEnumerator SequenzaCompletamentoAssemblaggio()
     {
         isAssemblaggioActive = false;
-        Debug.Log("Tutti i pezzi sono stati posizionati con successo.");
+        RestoreLogger.Log("Tutti i pezzi sono stati posizionati con successo.");
         onAssemblaggioCompletato?.Invoke();
 
         if (ghostAnfora != null)
         {
-            Debug.Log($"Modifica parent di {ghostAnfora.name} a null per preservarlo nella transizione.");
+            RestoreLogger.Log($"Modifica parent di {ghostAnfora.name} a null per preservarlo nella transizione.");
             ghostAnfora.transform.SetParent(null, true);
             
             if (tavoloCorrente != null)
             {
                 tavoloCorrente.anforaAssemblata = ghostAnfora;
-                Debug.Log("Riferimento all'anfora assemblata memorizzato nel tavolo di lavoro.");
+                RestoreLogger.Log("Riferimento all'anfora assemblata memorizzato nel tavolo di lavoro.");
             }
 
             yield return RestorationUtils.VibraOggetto(ghostAnfora, 0.6f, 0.012f);
@@ -476,7 +473,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
 
         if (tavoloCorrente != null && faseSuccessiva != null)
         {
-            Debug.Log($"Avanzamento alla fase successiva: {faseSuccessiva.name}.");
+            RestoreLogger.Log($"Avanzamento alla fase successiva: {faseSuccessiva.name}.");
             tavoloCorrente.AvanzaFase(faseSuccessiva);
         }
         else
@@ -489,7 +486,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRes
     public void CameraTransitionCompleted()
     {
         cameraTransitionFinished = true;
-        Debug.Log("Transizione telecamera completata. Trascinamento abilitato.");
+        RestoreLogger.Log("Transizione telecamera completata. Trascinamento abilitato.");
     }
 
     private Transform TrovaFiglioNelPrefab(Transform parent, string name)

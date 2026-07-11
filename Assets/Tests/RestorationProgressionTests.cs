@@ -16,7 +16,7 @@ public class RestorationProgressionTests
     {
         int dipinti    = 0;
         int totale     = 100;
-        float progresso = totale > 0 ? Mathf.Clamp01((float)dipinti / totale) : 0f;
+        float progresso = RestorationUtils.CalcolaProgressione(dipinti, totale);
 
         Assert.AreEqual(0f, progresso);
     }
@@ -26,7 +26,7 @@ public class RestorationProgressionTests
     {
         int dipinti    = 100;
         int totale     = 100;
-        float progresso = totale > 0 ? Mathf.Clamp01((float)dipinti / totale) : 0f;
+        float progresso = RestorationUtils.CalcolaProgressione(dipinti, totale);
 
         Assert.AreEqual(1f, progresso);
     }
@@ -36,7 +36,7 @@ public class RestorationProgressionTests
     {
         int dipinti    = 50;
         int totale     = 100;
-        float progresso = totale > 0 ? Mathf.Clamp01((float)dipinti / totale) : 0f;
+        float progresso = RestorationUtils.CalcolaProgressione(dipinti, totale);
 
         Assert.AreEqual(0.5f, progresso, 0.001f);
     }
@@ -46,7 +46,7 @@ public class RestorationProgressionTests
     {
         int dipinti    = 0;
         int totale     = 0;
-        float progresso = totale > 0 ? Mathf.Clamp01((float)dipinti / totale) : 0f;
+        float progresso = RestorationUtils.CalcolaProgressione(dipinti, totale);
 
         Assert.AreEqual(0f, progresso, "Con totale pari a zero la progressione deve essere 0 per evitare divisioni per zero.");
     }
@@ -56,7 +56,7 @@ public class RestorationProgressionTests
     {
         int dipinti    = 150; // più del totale (caso anomalo)
         int totale     = 100;
-        float progresso = totale > 0 ? Mathf.Clamp01((float)dipinti / totale) : 0f;
+        float progresso = RestorationUtils.CalcolaProgressione(dipinti, totale);
 
         Assert.LessOrEqual(progresso, 1f, "La progressione non deve mai superare 1.");
     }
@@ -103,9 +103,8 @@ public class RestorationProgressionTests
     public void WrapUV_ValoreNormale_Invariato()
     {
         Vector2 uv = new Vector2(0.5f, 0.5f);
-        Vector2 wrapped = WrapUV(uv);
+        Vector2 wrapped = RestorationUtils.WrapUV(uv);
     
-        // The third parameter is the 'delta' (allowed tolerance)
         Assert.AreEqual(0.5f, wrapped.x, 0.001f);
         Assert.AreEqual(0.5f, wrapped.y, 0.001f);
     }
@@ -114,7 +113,7 @@ public class RestorationProgressionTests
     public void WrapUV_ValoreSupera1_TornaInRange()
     {
         Vector2 uv = new Vector2(1.3f, 0.8f);
-        Vector2 wrapped = WrapUV(uv);
+        Vector2 wrapped = RestorationUtils.WrapUV(uv);
 
         Assert.GreaterOrEqual(wrapped.x, 0f);
         Assert.Less(wrapped.x, 1f);
@@ -124,15 +123,9 @@ public class RestorationProgressionTests
     public void WrapUV_ValoreNegativo_TornaInRange()
     {
         Vector2 uv = new Vector2(-0.2f, 0.5f);
-        Vector2 wrapped = WrapUV(uv);
+        Vector2 wrapped = RestorationUtils.WrapUV(uv);
 
         Assert.GreaterOrEqual(wrapped.x, 0f);
         Assert.Less(wrapped.x, 1f);
-    }
-
-    // Replica locale della funzione da testare (la logica pura, non il MonoBehaviour)
-    private Vector2 WrapUV(Vector2 uv)
-    {
-        return new Vector2(uv.x - Mathf.Floor(uv.x), uv.y - Mathf.Floor(uv.y));
     }
 }
