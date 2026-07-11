@@ -3,13 +3,13 @@ using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
 
-public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager
+public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
+    public event System.Action<bool> OnPhaseCompleted;
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO triggerRimozione;
     [SerializeField] private Camera cameraRestauro;
-    [SerializeField] private RestoreManager restoreManager;
     [SerializeField] private FaseRestauroSO faseSuccessiva;
 
     [Header("Cerca Oggetto")]
@@ -24,9 +24,12 @@ public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager
     private bool isActive = false;
     private bool cameraTransitionFinished = false;
     private GameObject oggettoDaRimuovere;
+    private MaterialPropertyBlock propBlock;
 
     private void Awake()
     {
+        propBlock = new MaterialPropertyBlock();
+
         if (layerRestauro.value == 0)
         {
             layerRestauro = LayerMask.GetMask("Restauro");
@@ -157,18 +160,22 @@ public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager
             int idMostraPittura = Shader.PropertyToID("_mostraPittura");
             foreach (var r in tavoloCorrente.vaschettaGameObject.GetComponentsInChildren<Renderer>())
             {
-                Material[] mats = r.materials;
-                bool modified = false;
-                for (int i = 0; i < mats.Length; i++)
+                bool daModificare = false;
+                foreach (var mat in r.sharedMaterials)
                 {
-                    if (mats[i] != null && mats[i].HasProperty(idMostraPittura))
+                    if (mat != null && mat.HasProperty(idMostraPittura))
                     {
-                        mats[i].SetFloat(idMostraPittura, 0f);
-                        modified = true;
+                        daModificare = true;
+                        break;
                     }
                 }
-                if (modified)
-                    r.materials = mats;
+
+                if (daModificare)
+                {
+                    r.GetPropertyBlock(propBlock);
+                    propBlock.SetFloat(idMostraPittura, 0f);
+                    r.SetPropertyBlock(propBlock);
+                }
             }
             Debug.Log("Impostata la visualizzazione della pittura a zero su tutti i materiali del mosaico.");
         }
@@ -188,9 +195,10 @@ public class GestoreRimozioneGarza : MonoBehaviour, IRestorationPhaseManager
         {
             tavoloCorrente.AvanzaFase(faseSuccessiva);
         }
-        else if (restoreManager != null)
+        else
         {
-            restoreManager.CompletaRestauro();
+            Debug.Log("Nessuna fase successiva configurata. Il completamento del restauro è ora gestito dal RestoreManager tramite l'evento OnPhaseCompleted.");
         }
+        OnPhaseCompleted?.Invoke(faseSuccessiva != null);
     }
 }

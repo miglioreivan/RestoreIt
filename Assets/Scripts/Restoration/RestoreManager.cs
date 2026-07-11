@@ -21,6 +21,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
     [Header("Stato Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
+    public TavoloSO TavoloCorrente => tavoloCorrente;
 
     [Header("Fasi del Restauro")]
     [SerializeField] private List<FaseMapping> fasiMappate = new List<FaseMapping>();
@@ -35,6 +36,9 @@ public class RestoreManager : MonoBehaviour, IInteractable
     private Coroutine      activeTransitionCoroutine;
     private SuggerimentoMano suggerimentoMano;
     private FaseRestauroSO ultimaFaseAttiva;
+
+    // Riferimento al gestore di fase corrente che implementa IRestorationPhase
+    private IRestorationPhase faseCorrentePhaseable;
 
     // Unity Lifecycle
 
@@ -186,6 +190,24 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
     private void OnTavoloSvuotato()
     {
+        // Pulizia dei GameObject e delle texture di runtime prima che il SO nulli i riferimenti.
+        // Il SO emette questo evento PRIMA di nullare, quindi qui i valori sono ancora validi.
+        if (tavoloCorrente != null)
+        {
+            if (tavoloCorrente.vaschettaGameObject != null)
+            {
+                Destroy(tavoloCorrente.vaschettaGameObject);
+            }
+            if (tavoloCorrente.anforaAssemblata != null)
+            {
+                Destroy(tavoloCorrente.anforaAssemblata);
+            }
+            if (tavoloCorrente.collaTextureMosaico != null)
+            {
+                Destroy(tavoloCorrente.collaTextureMosaico);
+            }
+        }
+
         isRestorationComplete = false;
         ImpostaCollider(false);
     }
@@ -298,6 +320,7 @@ public class RestoreManager : MonoBehaviour, IInteractable
     {
         if (fase == null) return;
         Debug.Log($"Attivazione della fase {fase.name}.");
+        ultimaFaseAttiva = fase;
 
         if (!TrovaMappatura(fase, out FaseMapping mapping))
         {
@@ -345,6 +368,9 @@ public class RestoreManager : MonoBehaviour, IInteractable
 
     private void DisattivaFasi()
     {
+        // Disiscrizione dall'evento della fase corrente prima di disattivare tutto
+        SottoscriviOnPhaseCompleted(null);
+
         foreach (var m in fasiMappate)
         {
             if (m.faseGameObject != null)
@@ -412,6 +438,45 @@ public class RestoreManager : MonoBehaviour, IInteractable
         else
         {
             Debug.LogWarning($"Nessun gestore compatibile trovato per la fase {faseMappingCorrente.faseSO?.name} in {faseGO.name}.");
+        }
+
+        // Sottoscrizione all'evento IRestorationPhase (parallelo al sistema legacy)
+        SottoscriviOnPhaseCompleted(faseGO);
+    }
+
+    /// <summary>
+    /// Sottoscrive o disiscrisce dal gestore di fase che implementa IRestorationPhase.
+    /// Passare null per disiscriversi senza sottoscrivere a una nuova fase.
+    /// </summary>
+    private void SottoscriviOnPhaseCompleted(GameObject nuovaFaseGO)
+    {
+        // Disiscrizione dalla fase precedente
+        if (faseCorrentePhaseable != null)
+        {
+            faseCorrentePhaseable.OnPhaseCompleted -= OnCurrentPhaseCompleted;
+            faseCorrentePhaseable = null;
+        }
+
+        if (nuovaFaseGO == null) return;
+
+        // Iscrizione alla nuova fase (se implementa IRestorationPhase)
+        IRestorationPhase nuovaFase = nuovaFaseGO.GetComponentInChildren<IRestorationPhase>(true);
+        if (nuovaFase != null)
+        {
+            faseCorrentePhaseable = nuovaFase;
+            faseCorrentePhaseable.OnPhaseCompleted += OnCurrentPhaseCompleted;
+            Debug.Log($"[RestoreManager] Iscritto a OnPhaseCompleted di {nuovaFase.GetType().Name}.");
+        }
+    }
+
+    private void OnCurrentPhaseCompleted(bool hasNextPhase)
+    {
+        Debug.Log($"[RestoreManager] OnPhaseCompleted ricevuto da {faseCorrentePhaseable?.GetType().Name} (hasNextPhase: {hasNextPhase}).");
+
+        if (!hasNextPhase)
+        {
+            Debug.Log("[RestoreManager] Nessuna fase successiva configurata. Completamento del restauro.");
+            CompletaRestauro();
         }
     }
 

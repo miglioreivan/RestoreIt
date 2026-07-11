@@ -12,6 +12,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Black Concrete Wall.001
+    second: {fileID: 2100000, guid: c630d2a02472f17448ace1e2992b7575, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: MosaicoMinerva
     second: {fileID: 2100000, guid: 243fe6b675510504daff1850fabdb186, type: 2}
   - first:

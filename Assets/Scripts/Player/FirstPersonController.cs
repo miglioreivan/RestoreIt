@@ -67,6 +67,19 @@ public class FirstPersonController : MonoBehaviour
 
         if (footstepSound.volume <= 0f)
             Debug.LogWarning($"[FirstPersonController] footstepSound.volume={footstepSound.volume}! Il volume del SoundEffect nell'Inspector è 0 — i passi non saranno udibili anche se il clip è assegnato.");
+
+        // Gestione automatica dello stato attivo/disattivo in base alla scena
+        string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        if (sceneName == "Museo")
+        {
+            this.enabled = true;
+            Debug.Log("[FirstPersonController] Scena Museo rilevata: FirstPersonController abilitato all'avvio.");
+        }
+        else if (sceneName == "Game")
+        {
+            this.enabled = false;
+            Debug.Log("[FirstPersonController] Scena Game (Restauro) rilevata: FirstPersonController disabilitato all'avvio.");
+        }
     }
 
     private void Start()

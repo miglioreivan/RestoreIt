@@ -3,8 +3,9 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
-public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager
+public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
+    public event System.Action<bool> OnPhaseCompleted;
     [System.Serializable]
     public class PezzoInfo
     {
@@ -481,6 +482,7 @@ public class GestoreAssemblaggio : MonoBehaviour, IRestorationPhaseManager
         {
             Debug.LogError("Impostazioni incomplete per avanzare alla fase successiva.");
         }
+        OnPhaseCompleted?.Invoke(faseSuccessiva != null);
     }
 
     public void CameraTransitionCompleted()

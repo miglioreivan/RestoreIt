@@ -3,13 +3,13 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
-public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
+public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
+    public event System.Action<bool> OnPhaseCompleted;
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO triggerIncollaggio; // La fase associata a questo script (es. FaseColla)
     [SerializeField] private Camera cameraRestauro;
-    [SerializeField] private RestoreManager restoreManager;
 
     [Header("Spawn Anfora Centrale")]
     [SerializeField] private Transform puntoSpawnAnfora;
@@ -75,8 +75,12 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
     private int idMostraColla;
     private int idMostraPittura;
 
+    private MaterialPropertyBlock propBlock;
+
     private void Awake()
     {
+        propBlock = new MaterialPropertyBlock();
+
         idProprietaMascheraColla    = Shader.PropertyToID(nomeProprietaMascheraColla);
         idProprietaCollaDipingibile = Shader.PropertyToID(nomeProprietaCollaDipingibile);
         idMostraTerra    = Shader.PropertyToID("_mostraTerra");
@@ -89,14 +93,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
             Debug.Log($"Layer di restauro vuoto. Impostato automaticamente a Restauro con valore {layerRestauro.value}.");
         }
 
-        if (restoreManager == null)
-        {
-            restoreManager = GetComponentInParent<RestoreManager>(true);
-            if (restoreManager == null && transform.parent != null)
-            {
-                restoreManager = transform.parent.GetComponentInChildren<RestoreManager>(true);
-            }
-        }
+        // Rimossa ricerca legacy del RestoreManager per decoupling
 
         if (cameraRestauro == null)
         {
@@ -333,7 +330,7 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
 
     private void Update()
     {
-        if (!isIncollaggioActive || !cameraTransitionFinished)
+        if (!isIncollaggioActive || !cameraTransitionFinished || collaTextureInstance == null)
         {
             if (wasPaintingLastFrame)
             {
@@ -464,21 +461,19 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
 
         bool textureModificata = false;
 
-        // Calcola il raggio in spazio UV normalizzato (usando 1024 come riferimento per mantenere le dimensioni dell'Inspector)
-        float uvRadius = (float)rangePennelloColla / 1024f;
-        float uvRadiusSqr = uvRadius * uvRadius;
+        // Calcola il raggio in pixel basato su una dimensione di riferimento di 1024
+        // per mantenere la dimensione coerente visivamente e indipendente dalla risoluzione della texture.
+        float scala = (float)Mathf.Max(width, height) / 1024f;
+        float raggioPixel = rangePennelloColla * scala;
+        float raggioPixelSqr = raggioPixel * raggioPixel;
 
-        int rangeX = Mathf.Max(1, (int)(uvRadius * width));
-        int rangeY = Mathf.Max(1, (int)(uvRadius * height));
+        int rangeLimit = Mathf.Max(1, Mathf.CeilToInt(raggioPixel));
 
-        for (int x = -rangeX; x <= rangeX; x++)
+        for (int x = -rangeLimit; x <= rangeLimit; x++)
         {
-            for (int y = -rangeY; y <= rangeY; y++)
+            for (int y = -rangeLimit; y <= rangeLimit; y++)
             {
-                float normX = (float)x / width;
-                float normY = (float)y / height;
-
-                if (normX * normX + normY * normY <= uvRadiusSqr)
+                if (x * x + y * y <= raggioPixelSqr)
                 {
                     int targetX = pixelX + x;
                     int targetY = pixelY + y;
@@ -503,14 +498,15 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
         {
             collaTextureInstance.SetPixels32(coloreTextureColla);
             collaTextureInstance.Apply();
-            SincronizzaTextureColla(collaTextureInstance);
 
             if (totPixelCollaNecessari > 0)
             {
                 float rapporto = (float)pixelCollaDipinti / totPixelCollaNecessari;
                 progressioneColla = Mathf.Clamp01(rapporto);
 
+#if UNITY_EDITOR
                 Debug.Log($"Progresso colla: {progressioneColla * 100f:F0}%.");
+#endif
 
                 if (progressioneColla >= SogliaCompletamentoColla)
                 {
@@ -599,33 +595,11 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
         // Configurazione finale dei parametri degli shader sul modello intero
         foreach (var r in anforaIntera.GetComponentsInChildren<Renderer>())
             {
-                Material[] mats = r.materials;
-                bool modified = false;
-                for (int i = 0; i < mats.Length; i++)
-                {
-                    if (mats[i] != null)
-                    {
-                        if (mats[i].HasProperty(idMostraTerra))
-                        {
-                            mats[i].SetFloat(idMostraTerra, 0f);
-                            modified = true;
-                        }
-                        if (mats[i].HasProperty(idMostraColla))
-                        {
-                            mats[i].SetFloat(idMostraColla, 0f);
-                            modified = true;
-                        }
-                        if (mats[i].HasProperty(idMostraPittura))
-                        {
-                            mats[i].SetFloat(idMostraPittura, 1f);
-                            modified = true;
-                        }
-                    }
-                }
-                if (modified)
-                {
-                    r.materials = mats;
-                }
+                r.GetPropertyBlock(propBlock);
+                propBlock.SetFloat(idMostraTerra, 0f);
+                propBlock.SetFloat(idMostraColla, 0f);
+                propBlock.SetFloat(idMostraPittura, 1f);
+                r.SetPropertyBlock(propBlock);
             }
         }
         else
@@ -636,17 +610,10 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
         // Attesa finale per dare feedback visivo
         yield return new WaitForSeconds(0.4f);
 
-        // Ripristino del controllo del giocatore e posizionamento originale della telecamera
-        if (restoreManager != null)
-        {
-            restoreManager.CompletaRestauro();
-        }
-        else
-        {
-            Debug.LogWarning("Componente RestoreManager non trovato.");
-        }
+        // Il completamento del restauro è ora gestito dall'evento OnPhaseCompleted nel RestoreManager
 
         onIncollaggioCompletato?.Invoke();
+        OnPhaseCompleted?.Invoke(false);
     }
 
     private void RimuoviMappaColla()
@@ -656,7 +623,16 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
             Destroy(collaTextureInstance);
             collaTextureInstance = null;
         }
-        SincronizzaTextureColla(null);
+        
+        if (anforaAssemblata != null)
+        {
+            foreach (var r in anforaAssemblata.GetComponentsInChildren<Renderer>())
+            {
+                r.GetPropertyBlock(propBlock);
+                propBlock.SetTexture(idProprietaCollaDipingibile, Texture2D.blackTexture);
+                r.SetPropertyBlock(propBlock);
+            }
+        }
     }
 
     private void SincronizzaTextureColla(Texture2D texture)
@@ -665,19 +641,21 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
 
         foreach (var r in anforaAssemblata.GetComponentsInChildren<Renderer>())
         {
-            Material[] mats = r.materials;
-            bool modified = false;
-            for (int i = 0; i < mats.Length; i++)
+            bool daModificare = false;
+            foreach (var mat in r.sharedMaterials)
             {
-                if (mats[i] != null && mats[i].HasProperty(idProprietaCollaDipingibile))
+                if (mat != null && mat.HasProperty(idProprietaCollaDipingibile))
                 {
-                    mats[i].SetTexture(idProprietaCollaDipingibile, texture);
-                    modified = true;
+                    daModificare = true;
+                    break;
                 }
             }
-            if (modified)
+
+            if (daModificare)
             {
-                r.materials = mats;
+                r.GetPropertyBlock(propBlock);
+                propBlock.SetTexture(idProprietaCollaDipingibile, texture != null ? texture : Texture2D.blackTexture);
+                r.SetPropertyBlock(propBlock);
             }
         }
     }
@@ -691,26 +669,31 @@ public class GestoreIncollaggio : MonoBehaviour, IRestorationPhaseManager
         Shader.SetGlobalFloat(idMostraColla,   1f);
         Shader.SetGlobalFloat(idMostraPittura, 1f);
 
-        if (mascheraCollaUnica == null)
-        {
-            Debug.LogWarning("Maschera colla non trovata durante la configurazione dei materiali.");
-            return;
-        }
-
         foreach (var r in anforaAssemblata.GetComponentsInChildren<Renderer>())
         {
-            Material[] mats = r.materials;
-            bool modified = false;
-            for (int i = 0; i < mats.Length; i++)
+            bool daModificare = false;
+            foreach (var mat in r.sharedMaterials)
             {
-                if (mats[i] != null && mats[i].HasProperty(idProprietaMascheraColla))
+                if (mat != null && (mat.HasProperty(idProprietaMascheraColla) || mat.HasProperty(idProprietaCollaDipingibile)))
                 {
-                    mats[i].SetTexture(idProprietaMascheraColla, mascheraCollaUnica);
-                    modified = true;
+                    daModificare = true;
+                    break;
                 }
             }
-            if (modified)
-                r.materials = mats;
+
+            if (daModificare)
+            {
+                r.GetPropertyBlock(propBlock);
+                if (mascheraCollaUnica != null)
+                {
+                    propBlock.SetTexture(idProprietaMascheraColla, mascheraCollaUnica);
+                }
+                if (collaTextureInstance != null)
+                {
+                    propBlock.SetTexture(idProprietaCollaDipingibile, collaTextureInstance);
+                }
+                r.SetPropertyBlock(propBlock);
+            }
         }
     }
 

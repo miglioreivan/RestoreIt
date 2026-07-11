@@ -4,8 +4,9 @@ using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using Vector2 = UnityEngine.Vector2;
 
-public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
+public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
+    public event System.Action<bool> OnPhaseCompleted;
     [Header("Impostazioni Telecamera e Raggio")]
     [SerializeField] private Camera cameraRestauro;
     [SerializeField] private LayerMask layerRestauro;
@@ -47,8 +48,12 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
     private readonly int idMostraColla   = Shader.PropertyToID("_mostraColla");
     private readonly int idMostraPittura = Shader.PropertyToID("_mostraPittura");
 
+    private MaterialPropertyBlock propBlock;
+
     private void Awake()
     {
+        propBlock = new MaterialPropertyBlock();
+
         if (layerRestauro.value == 0)
         {
             layerRestauro = LayerMask.GetMask("Restauro");
@@ -224,40 +229,27 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
 
             if (!layerMatches) continue;
 
-            Material[] sharedMats = rend.sharedMaterials;
-            Material[] instanceMats = null;
-            bool modified = false;
-
-            for (int i = 0; i < sharedMats.Length; i++)
+            bool daModificare = false;
+            foreach (var mat in rend.sharedMaterials)
             {
-                if (sharedMats[i] != null)
+                if (mat != null && mat.HasProperty(idMascheraSporco))
                 {
-                    bool daModificare = sharedMats[i].HasProperty(idMascheraSporco);
-
-                    if (daModificare)
-                    {
-                        if (instanceMats == null) instanceMats = rend.materials;
-                        instanceMats[i].SetTexture(idMascheraSporco, textureInstance);
-
-                        bool haMostraTerra = instanceMats[i].HasProperty(idMostraTerra);
-                        bool haMostraColla = instanceMats[i].HasProperty(idMostraColla);
-                        bool haMostraPittura = instanceMats[i].HasProperty(idMostraPittura);
-
-                        if (haMostraTerra)
-                            instanceMats[i].SetFloat(idMostraTerra, 1f);
-                        if (haMostraColla)
-                            instanceMats[i].SetFloat(idMostraColla, 0f);
-                        if (haMostraPittura)
-                            instanceMats[i].SetFloat(idMostraPittura, 0f);
-
-                        modified = true;
-                    }
+                    daModificare = true;
+                    break;
                 }
             }
 
-            if (modified && instanceMats != null)
+            if (daModificare)
             {
-                rend.materials = instanceMats;
+                rend.GetPropertyBlock(propBlock);
+                if (textureInstance != null)
+                {
+                    propBlock.SetTexture(idMascheraSporco, textureInstance);
+                }
+                propBlock.SetFloat(idMostraTerra, 1f);
+                propBlock.SetFloat(idMostraColla, 0f);
+                propBlock.SetFloat(idMostraPittura, 0f);
+                rend.SetPropertyBlock(propBlock);
                 renderersModificati++;
             }
         }
@@ -309,38 +301,23 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
 
             if (!layerMatches) continue;
 
-            Material[] sharedMats = rend.sharedMaterials;
-            Material[] instanceMats = null;
-            bool modified = false;
-
-            for (int i = 0; i < sharedMats.Length; i++)
+            bool daModificare = false;
+            foreach (var mat in rend.sharedMaterials)
             {
-                if (sharedMats[i] != null)
+                if (mat != null && mat.HasProperty(idMascheraSporco))
                 {
-                    bool daModificare = sharedMats[i].HasProperty(idMascheraSporco);
-                    if (daModificare)
-                    {
-                        if (instanceMats == null) instanceMats = rend.materials;
-
-                        bool haMostraTerra = instanceMats[i].HasProperty(idMostraTerra);
-                        bool haMostraColla = instanceMats[i].HasProperty(idMostraColla);
-                        bool haMostraPittura = instanceMats[i].HasProperty(idMostraPittura);
-
-                        if (haMostraTerra)
-                            instanceMats[i].SetFloat(idMostraTerra, 0f);
-                        if (haMostraColla)
-                            instanceMats[i].SetFloat(idMostraColla, 1f);
-                        if (haMostraPittura)
-                            instanceMats[i].SetFloat(idMostraPittura, 1f);
-
-                        modified = true;
-                    }
+                    daModificare = true;
+                    break;
                 }
             }
 
-            if (modified && instanceMats != null)
+            if (daModificare)
             {
-                rend.materials = instanceMats;
+                rend.GetPropertyBlock(propBlock);
+                propBlock.SetFloat(idMostraTerra, 0f);
+                propBlock.SetFloat(idMostraColla, 1f);
+                propBlock.SetFloat(idMostraPittura, 1f);
+                rend.SetPropertyBlock(propBlock);
                 modificati++;
             }
         }
@@ -427,9 +404,8 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
     }
     private void UseBrush()
     {
-        if (cameraRestauro == null)
+        if (cameraRestauro == null || textureInstance == null)
         {
-            Debug.LogError("Impossibile utilizzare il pennello perché la telecamera di restauro non è valida.");
             return;
         }
 
@@ -438,57 +414,17 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
         
         if (Physics.Raycast(raggio, out RaycastHit hitInfo, Mathf.Infinity, layerRestauro))
         {
-            if (!(hitInfo.collider is MeshCollider))
+            if (hitInfo.collider is MeshCollider mc)
             {
-                Debug.LogWarning($"Il collider {hitInfo.collider.name} non è un MeshCollider. Coordinate UV non disponibili.");
-            }
-
-            if (hitInfo.collider.TryGetComponent(out Renderer rend))
-            {
-                if (hitInfo.collider is MeshCollider mc)
-                {
-                    int submeshIndex = GetSubMeshIndex(mc, hitInfo.triangleIndex);
-                    Material[] sharedMats = rend.sharedMaterials;
-                    
-                    if (submeshIndex >= 0 && submeshIndex < sharedMats.Length)
-                    {
-                        Material sharedMat = sharedMats[submeshIndex];
-                        if (sharedMat != null)
-                        {
-                            bool daModificare = sharedMat.HasProperty(idMascheraSporco);
-
-                            if (daModificare)
-                            {
-                                Material[] mats = rend.materials;
-                                Material targetMat = mats[submeshIndex];
-                                if (targetMat != null)
-                                {
-                                    Texture currentTex = targetMat.GetTexture(idMascheraSporco);
-                                    if (currentTex != textureInstance)
-                                    {
-                                        Debug.LogWarning($"Discrepanza texture corretta su {rend.name}.");
-                                        targetMat.SetTexture(idMascheraSporco, textureInstance);
-                                        rend.materials = mats;
-                                    }
-
-                                    Vector2 coordinataUV = RestorationUtils.WrapUV(hitInfo.textureCoord);
-                                    int pixelCentroX = (int)(coordinataUV.x * textureWidth);
-                                    int pixelCentroY = (int)(coordinataUV.y * textureHeight);
-                                    
-                                    PitturaPixel(pixelCentroX, pixelCentroY);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError($"Indice submesh {submeshIndex} fuori intervallo per {rend.name}.");
-                    }
-                }
+                Vector2 coordinataUV = RestorationUtils.WrapUV(hitInfo.textureCoord);
+                int pixelCentroX = (int)(coordinataUV.x * textureWidth);
+                int pixelCentroY = (int)(coordinataUV.y * textureHeight);
+                
+                PitturaPixel(pixelCentroX, pixelCentroY);
             }
             else
             {
-                Debug.LogWarning($"Renderer non trovato su {hitInfo.collider.name}.");
+                Debug.LogWarning($"Il collider {hitInfo.collider.name} non è un MeshCollider. Coordinate UV non disponibili.");
             }
         }
     }
@@ -497,21 +433,19 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
     {
         bool textureModificata = false;
 
-        // Calcola il raggio in spazio UV normalizzato (usando 1024 come riferimento per mantenere le dimensioni dell'Inspector)
-        float uvRadius = (float)rangePaintbrush / 1024f;
-        float uvRadiusSqr = uvRadius * uvRadius;
+        // Calcola il raggio in pixel basato su una dimensione di riferimento di 1024
+        // per mantenere la dimensione coerente visivamente e indipendente dalla risoluzione della texture.
+        float scala = (float)Mathf.Max(textureWidth, textureHeight) / 1024f;
+        float raggioPixel = rangePaintbrush * scala;
+        float raggioPixelSqr = raggioPixel * raggioPixel;
 
-        int rangeX = Mathf.Max(1, (int)(uvRadius * textureWidth));
-        int rangeY = Mathf.Max(1, (int)(uvRadius * textureHeight));
+        int rangeLimit = Mathf.Max(1, Mathf.CeilToInt(raggioPixel));
 
-        for (int x = -rangeX; x <= rangeX; x++)
+        for (int x = -rangeLimit; x <= rangeLimit; x++)
         {
-            for (int y = -rangeY; y <= rangeY; y++)
+            for (int y = -rangeLimit; y <= rangeLimit; y++)
             {
-                float normX = (float)x / textureWidth;
-                float normY = (float)y / textureHeight;
-
-                if (normX * normX + normY * normY <= uvRadiusSqr)
+                if (x * x + y * y <= raggioPixelSqr)
                 {
                     int targetX = centroX + x;
                     int targetY = centroY + y;
@@ -541,7 +475,9 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
             if (totPixel > 0)
                 progression = Mathf.Clamp01((float)pixelPainted / totPixel);
 
+#if UNITY_EDITOR
             Debug.Log($"Progresso pulizia: {progression * 100f:F0}%.");
+#endif
 
             if (progression >= sogliaCompletamentoPulizia)
             {
@@ -569,6 +505,7 @@ public class StrumentoPulizia : MonoBehaviour, IRestorationPhaseManager
         tavoloCorrente?.AvanzaFase(faseSuccessiva);
         eventoPuliziaCompletata?.Invoke(tavoloCorrente?.vaschettaCorrente);
         eventoRestauroCompletato?.Invoke(tavoloCorrente?.oggettoCorrente);
+        OnPhaseCompleted?.Invoke(faseSuccessiva != null);
     }
 
     public void SetMouseCursor()

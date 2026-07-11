@@ -15,6 +15,11 @@ ModelImporter:
       name: Material
     second: {fileID: 2100000, guid: 9d627004e9735b04d9d016b9605fc5eb, type: 2}
   - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.002
+    second: {fileID: 2100000, guid: 9d627004e9735b04d9d016b9605fc5eb, type: 2}
+  - first:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: MosaicoApollo

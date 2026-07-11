@@ -1,8 +1,9 @@
 using UnityEngine;
 using System.Collections;
 
-public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager
+public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
+    public event System.Action<bool> OnPhaseCompleted;
     [Header("Tavolo e Fasi")]
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO triggerRotazione;
@@ -120,5 +121,6 @@ public class GestoreRotazioneMosaico : MonoBehaviour, IRestorationPhaseManager
         {
             Debug.LogWarning("Nessuna fase successiva configurata per il mosaico.");
         }
+        OnPhaseCompleted?.Invoke(faseSuccessiva != null);
     }
 }

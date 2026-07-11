@@ -17,16 +17,14 @@ public class TavoloSO : ScriptableObject
 
     private void OnEnable()
     {
+        // Reset dei dati runtime ad ogni avvio di Play Mode.
+        // La distruzione di eventuali texture precedenti è delegata agli ascoltatori di OnTavoloSvuotato.
         oggettoCorrente = null;
         vaschettaCorrente = null;
         vaschettaGameObject = null;
         faseCorrente = null;
         anforaAssemblata = null;
-        if (collaTextureMosaico != null)
-        {
-            Destroy(collaTextureMosaico);
-            collaTextureMosaico = null;
-        }
+        collaTextureMosaico = null;
     }
 
     public void PosaOggetto(DatiOggettoSO oggetto)
@@ -44,24 +42,16 @@ public class TavoloSO : ScriptableObject
 
     public void SvuotaTavolo()
     {
-        if (vaschettaGameObject != null)
-        {
-            Destroy(vaschettaGameObject);
-            vaschettaGameObject = null;
-        }
-        if (anforaAssemblata != null)
-        {
-            Destroy(anforaAssemblata);
-            anforaAssemblata = null;
-        }
-        if (collaTextureMosaico != null)
-        {
-            Destroy(collaTextureMosaico);
-            collaTextureMosaico = null;
-        }
+        // L'evento viene emesso PRIMA di nullare i riferimenti, in modo che
+        // gli ascoltatori (es. RestoreManager) possano leggere i valori correnti
+        // e chiamare Destroy() sugli oggetti di scena che devono essere rimossi.
+        OnTavoloSvuotato?.Invoke();
+
+        vaschettaGameObject = null;
+        anforaAssemblata = null;
+        collaTextureMosaico = null;
         oggettoCorrente = null;
         vaschettaCorrente = null;
         faseCorrente = null;
-        OnTavoloSvuotato?.Invoke();
     }
 }

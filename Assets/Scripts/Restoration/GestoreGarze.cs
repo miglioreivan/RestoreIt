@@ -3,13 +3,13 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System.Collections;
 
-public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager
+public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager, IRestorationPhase
 {
+    public event System.Action<bool> OnPhaseCompleted;
     [Header("Tavolo")]
     [SerializeField] private TavoloSO tavoloCorrente;
     [SerializeField] private FaseRestauroSO triggerGarze;
     [SerializeField] private Camera cameraRestauro;
-    [SerializeField] private RestoreManager restoreManager;
     [SerializeField] private FaseRestauroSO faseSuccessiva;
     [SerializeField] private bool usaAerolam = false;
 
@@ -45,6 +45,12 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager
     private Vector3 scaleBeforeDrag;
     private Collider garzaCollider;
     private bool isSnapped = false;
+    private MaterialPropertyBlock propBlock;
+
+    private void Awake()
+    {
+        propBlock = new MaterialPropertyBlock();
+    }
 
     private void OnEnable()
     {
@@ -314,24 +320,28 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager
         }
         yield return new WaitForSeconds(0.4f);
 
-        // Disattivazione della visualizzazione della colla nei renderer del mosaico
+        // Disattivazione della visualizzazione della colla nei renderer del mosaico usando MaterialPropertyBlock
         if (tavoloCorrente != null && tavoloCorrente.vaschettaGameObject != null)
         {
             int idMostraColla = Shader.PropertyToID("_mostraColla");
             foreach (var r in tavoloCorrente.vaschettaGameObject.GetComponentsInChildren<Renderer>())
             {
-                Material[] mats = r.materials;
-                bool modified = false;
-                for (int i = 0; i < mats.Length; i++)
+                bool daModificare = false;
+                foreach (var mat in r.sharedMaterials)
                 {
-                    if (mats[i] != null && mats[i].HasProperty(idMostraColla))
+                    if (mat != null && mat.HasProperty(idMostraColla))
                     {
-                        mats[i].SetFloat(idMostraColla, 0f);
-                        modified = true;
+                        daModificare = true;
+                        break;
                     }
                 }
-                if (modified)
-                    r.materials = mats;
+
+                if (daModificare)
+                {
+                    r.GetPropertyBlock(propBlock);
+                    propBlock.SetFloat(idMostraColla, 0f);
+                    r.SetPropertyBlock(propBlock);
+                }
             }
 
             if (tavoloCorrente.collaTextureMosaico != null)
@@ -348,10 +358,10 @@ public class GestoreGarze : MonoBehaviour, IRestorationPhaseManager
             Debug.Log($"Avanzamento alla fase successiva: {faseSuccessiva.name}.");
             tavoloCorrente.AvanzaFase(faseSuccessiva);
         }
-        else if (restoreManager != null)
+        else
         {
-            Debug.Log("Nessuna fase successiva configurata. Restauro completato.");
-            restoreManager.CompletaRestauro();
+            Debug.Log("Nessuna fase successiva configurata. Il completamento del restauro è ora gestito dal RestoreManager tramite l'evento OnPhaseCompleted.");
         }
+        OnPhaseCompleted?.Invoke(faseSuccessiva != null);
     }
 }

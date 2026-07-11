@@ -9508,6 +9508,11 @@ MonoBehaviour:
     m_Bits: 8
   inventario: {fileID: 11400000, guid: 16928f30196c93b4e9ad63713ca6d173, type: 2}
   handTransform: {fileID: 1764232024}
+  footstepSound:
+    clip: {fileID: 8300000, guid: f26cd371510ebc549b1214abe419da2b, type: 3}
+    volume: 0
+  footstepWalkInterval: 0.6
+  footstepSprintInterval: 0.38
 --- !u!4 &1411768322
 Transform:
   m_ObjectHideFlags: 0

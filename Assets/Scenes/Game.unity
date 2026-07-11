@@ -1583,12 +1583,11 @@ MonoBehaviour:
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   triggerIncollaggio: {fileID: 11400000, guid: 2ac24b17fa334254fbfbce5f7b884ab2, type: 2}
   cameraRestauro: {fileID: 330585545}
-  restoreManager: {fileID: 1086795824}
   faseSuccessiva: {fileID: 11400000, guid: 6dc237bb2c64d6e4f8b1bd22ac9853ed, type: 2}
   usaResina: 0
   cursorGlueTexture: {fileID: 2800000, guid: b41d9f22b2cf46d4a9a6da29dcb87521, type: 3}
   cursorGlueHotspot: {x: 0, y: 0}
-  rangePennelloColla: 50
+  rangePennelloColla: 60
   layerRestauro:
     serializedVersion: 2
     m_Bits: 0
@@ -2274,7 +2273,6 @@ MonoBehaviour:
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   triggerGarze: {fileID: 11400000, guid: a3d379032b324314eab038abac405a51, type: 2}
   cameraRestauro: {fileID: 330585545}
-  restoreManager: {fileID: 1086795824}
   faseSuccessiva: {fileID: 11400000, guid: 20a064464b9948c49bf72e4ecb1cb4f0, type: 2}
   usaAerolam: 1
   puntoSpawnGarza: {fileID: 1593515660}
@@ -5007,7 +5005,6 @@ MonoBehaviour:
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   triggerRimozione: {fileID: 11400000, guid: 6dc237bb2c64d6e4f8b1bd22ac9853ed, type: 2}
   cameraRestauro: {fileID: 330585545}
-  restoreManager: {fileID: 1086795824}
   faseSuccessiva: {fileID: 0}
   nomeOggettoDaCercare: Garza
   layerRestauro:
@@ -5170,12 +5167,11 @@ MonoBehaviour:
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   triggerIncollaggio: {fileID: 11400000, guid: 366c3a8a3c915844ea91737efc8df5b1, type: 2}
   cameraRestauro: {fileID: 330585545}
-  restoreManager: {fileID: 1086795824}
   faseSuccessiva: {fileID: 11400000, guid: e279e21ca18ec574bb1688d99b29b501, type: 2}
   usaResina: 0
   cursorGlueTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
   cursorGlueHotspot: {x: 0, y: 0}
-  rangePennelloColla: 50
+  rangePennelloColla: 60
   layerRestauro:
     serializedVersion: 2
     m_Bits: 64
@@ -5661,12 +5657,11 @@ MonoBehaviour:
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   triggerIncollaggio: {fileID: 11400000, guid: f83fc0ecedaefa94eac377ab60dd6365, type: 2}
   cameraRestauro: {fileID: 330585545}
-  restoreManager: {fileID: 1086795824}
   faseSuccessiva: {fileID: 11400000, guid: a3d379032b324314eab038abac405a51, type: 2}
   usaResina: 1
   cursorGlueTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
   cursorGlueHotspot: {x: 0, y: 0}
-  rangePennelloColla: 40
+  rangePennelloColla: 60
   layerRestauro:
     serializedVersion: 2
     m_Bits: 64
@@ -6526,7 +6521,6 @@ MonoBehaviour:
   tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
   triggerIncollaggio: {fileID: 11400000, guid: b2119174edb56d840ac0dfb87d1c984d, type: 2}
   cameraRestauro: {fileID: 330585545}
-  restoreManager: {fileID: 1643050454}
   puntoSpawnAnfora: {fileID: 1030087355}
   onIncollaggioCompletato:
     m_PersistentCalls:
@@ -9303,7 +9297,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   mascheraSporcoOriginale: {fileID: 2800000, guid: 6cb36b1a7f36ef247ae47625cb032ac5, type: 3}
-  rangePaintbrush: 40
+  rangePaintbrush: 60
   cursorTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
   cursorHotspot: {x: 0, y: 0}
   cleaningSound:
@@ -10144,7 +10138,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   mascheraSporcoOriginale: {fileID: 2800000, guid: f0642b4ccc4d3af4a9b257f8433a68b7, type: 3}
-  rangePaintbrush: 50
+  rangePaintbrush: 60
   cursorTexture: {fileID: 2800000, guid: 565be1070c4609f45844dda33c34a9bd, type: 3}
   cursorHotspot: {x: 0, y: 0}
   cleaningSound:
@@ -10480,6 +10474,7 @@ GameObject:
   - component: {fileID: 1086795822}
   - component: {fileID: 1086795823}
   - component: {fileID: 1086795824}
+  - component: {fileID: 1086795825}
   m_Layer: 3
   m_Name: RestoreManager
   m_TagString: Untagged
@@ -10572,6 +10567,22 @@ MonoBehaviour:
   - faseSO: {fileID: 11400000, guid: 6dc237bb2c64d6e4f8b1bd22ac9853ed, type: 2}
     faseGameObject: {fileID: 474629110}
     targetCamera: {fileID: 1334171904}
+--- !u!114 &1086795825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1086795821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2315422fb07aeb045ad3185be8d27f97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RestoreIt.Runtime::FlussoRestauroDebug
+  tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
+  mostraInSceneView: 1
+  coloreAttivo: {r: 0.2, g: 1, b: 0.4, a: 1}
+  coloreInattivo: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
 --- !u!1 &1096930128 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3658213235432489231, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -10918,7 +10929,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a0115036bd8ad174097557206cea679b, type: 3}
   m_PrefabInstance: {fileID: 1235724357}
   m_PrefabAsset: {fileID: 0}
---- !u!64 &1144661766
+--- !u!64 &1144661769
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10939,7 +10950,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 4493585093827132993, guid: a0115036bd8ad174097557206cea679b, type: 3}
+  m_Mesh: {fileID: -8678823145569952518, guid: a0115036bd8ad174097557206cea679b, type: 3}
 --- !u!1001 &1148025859
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12100,7 +12111,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a0115036bd8ad174097557206cea679b, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1144661766}
+      addedObject: {fileID: 1144661769}
   m_SourcePrefab: {fileID: 100100000, guid: a0115036bd8ad174097557206cea679b, type: 3}
 --- !u!1 &1236949536 stripped
 GameObject:
@@ -16510,14 +16521,14 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 273546ac37ab0794fb70203482fd029f, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1629101686}
+      addedObject: {fileID: 1629101689}
   m_SourcePrefab: {fileID: 100100000, guid: 273546ac37ab0794fb70203482fd029f, type: 3}
 --- !u!4 &1629101683 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 273546ac37ab0794fb70203482fd029f, type: 3}
   m_PrefabInstance: {fileID: 1629101682}
   m_PrefabAsset: {fileID: 0}
---- !u!64 &1629101686
+--- !u!64 &1629101689
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -16538,7 +16549,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 4493585093827132993, guid: 273546ac37ab0794fb70203482fd029f, type: 3}
+  m_Mesh: {fileID: -1550514412580984892, guid: 273546ac37ab0794fb70203482fd029f, type: 3}
 --- !u!1 &1631226995 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8332663625193173749, guid: d9fe60bae5d0c214ab5aaf09d4d17f2b, type: 3}
@@ -16700,6 +16711,7 @@ GameObject:
   - component: {fileID: 1643050453}
   - component: {fileID: 1643050455}
   - component: {fileID: 1643050454}
+  - component: {fileID: 1643050456}
   m_Layer: 3
   m_Name: RestoreManager
   m_TagString: Untagged
@@ -16771,6 +16783,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.13, y: 1.03, z: 1.42}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1643050456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1643050452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2315422fb07aeb045ad3185be8d27f97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RestoreIt.Runtime::FlussoRestauroDebug
+  tavoloCorrente: {fileID: 11400000, guid: ced5da319a730f44c8c17d7ee9f4f2fe, type: 2}
+  mostraInSceneView: 1
+  coloreAttivo: {r: 0.2, g: 1, b: 0.4, a: 1}
+  coloreInattivo: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
 --- !u!1001 &1648648110
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19144,7 +19172,6 @@ MonoBehaviour:
   tavoloCorrente: {fileID: 11400000, guid: 44f03d2689de9f242977f5ed7758d1fd, type: 2}
   triggerGarze: {fileID: 11400000, guid: e279e21ca18ec574bb1688d99b29b501, type: 2}
   cameraRestauro: {fileID: 330585545}
-  restoreManager: {fileID: 1086795824}
   faseSuccessiva: {fileID: 11400000, guid: 9c028a2a0d8d82b479ccd595bb94198a, type: 2}
   usaAerolam: 0
   puntoSpawnGarza: {fileID: 1593515660}
