@@ -118,8 +118,13 @@ public class FirstPersonController : MonoBehaviour
 
         if (restoreAction.WasPressedThisFrame())
         {
-            if (infoCanvas != null)
-                infoCanvas.SetActive(true);
+            if (infoCanvas == null)
+            {
+                RestoreLogger.LogWarning("[FirstPersonController] restoreAction premuto, ma 'infoCanvas' non è assegnato nell'Inspector! Interazione annullata per prevenire il blocco del gioco.");
+                return;
+            }
+
+            infoCanvas.SetActive(true);
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible   = true;
